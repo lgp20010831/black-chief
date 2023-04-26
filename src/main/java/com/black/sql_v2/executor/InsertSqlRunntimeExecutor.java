@@ -1,7 +1,5 @@
 package com.black.sql_v2.executor;
 
-import com.alibaba.fastjson.JSONObject;
-import com.black.core.json.JsonUtils;
 import com.black.core.log.IoLog;
 import com.black.core.sql.code.AliasColumnConvertHandler;
 import com.black.core.sql.code.StatementWrapper;
@@ -18,6 +16,7 @@ import com.black.sql_v2.Environment;
 import com.black.sql_v2.JDBCEnvironmentLocal;
 import com.black.sql_v2.SqlExecutor;
 import com.black.sql_v2.callback.InsertCallBack;
+import com.black.sql_v2.serialize.SerializeUtils;
 import com.black.sql_v2.utils.SqlV2Utils;
 import com.black.table.ColumnMetadata;
 import com.black.table.TableMetadata;
@@ -28,6 +27,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 import java.util.StringJoiner;
 
 public class InsertSqlRunntimeExecutor implements SqlRunntimeExecutor{
@@ -69,7 +69,7 @@ public class InsertSqlRunntimeExecutor implements SqlRunntimeExecutor{
                 insertCallBack.callback(object);
             }
             addDataSize++;
-            JSONObject map = JsonUtils.toJson(object);
+            Map<String, Object> map = SerializeUtils.serialize(object);
             StringJoiner joiner = deepDebug ? new StringJoiner(",", addDataSize + " ==> ", ";") : null;
             for (SqlVariable variable : variables) {
                 int index = variable.getIndex();

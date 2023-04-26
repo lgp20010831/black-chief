@@ -8,10 +8,11 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class InstanceBeanManager {
 
-    private static Collection<InstanceBeanResolver> resolvers = new LinkedBlockingQueue<>();
+    private static final Collection<InstanceBeanResolver> resolvers = new LinkedBlockingQueue<>();
 
     static {
         resolvers.add(new BeanFactoryInstanceResolver());
+        resolvers.add(new BeanFactorySingleInstanceResolver());
         resolvers.add(new ReflexAndBeanFactoryInstanceResolver());
         resolvers.add(new ReflexInstanceResolver());
         resolvers.add(new InstanceResolver());

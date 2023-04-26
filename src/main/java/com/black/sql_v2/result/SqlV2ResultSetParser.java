@@ -3,10 +3,12 @@ package com.black.sql_v2.result;
 import com.alibaba.fastjson.JSONObject;
 import com.black.core.sql.SQLSException;
 import com.black.core.sql.code.util.SQLUtils;
+import com.black.core.util.StreamUtils;
 import com.black.sql.QueryResultSetParser;
 import com.black.sql.SqlOutStatement;
 import com.black.sql_v2.SqlExecutor;
 import com.black.sql_v2.SqlV2Pack;
+import com.black.sql_v2.serialize.SerializeUtils;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -51,6 +53,12 @@ public class SqlV2ResultSetParser extends QueryResultSetParser {
         } finally {
             end();
         }
+    }
+
+    @Override
+    public <T> List<T> javaList(Class<T> type) {
+        List<JSONObject> list = jsonList();
+        return StreamUtils.mapList(list, json -> SerializeUtils.deserialize(json, type));
     }
 
     protected <T extends Map<String, Object>> void handlerResult(List<T> resultList){

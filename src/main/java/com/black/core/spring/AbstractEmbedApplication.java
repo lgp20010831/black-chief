@@ -29,7 +29,7 @@ import java.lang.annotation.Annotation;
 import java.util.*;
 
 
-@Log4j2
+@Log4j2 @SuppressWarnings("all")
 public abstract class AbstractEmbedApplication implements ChiefExpansivelyApplication{
 
     protected boolean isRunning;
@@ -454,12 +454,16 @@ public abstract class AbstractEmbedApplication implements ChiefExpansivelyApplic
      * @return bean
      */
     public <T> T createInstance(@NotNull Class<T> beanClass){
-        InstanceType type = InstanceType.INSTANCE;
+        InstanceType type = selectInstanceType();
         InstanceShape annotation = beanClass.getAnnotation(InstanceShape.class);
         if (annotation != null){
             type = annotation.value();
         }
         return InstanceBeanManager.instance(beanClass, type);
+    }
+
+    protected InstanceType selectInstanceType(){
+        return InstanceType.INSTANCE;
     }
 
     protected void initFactory(){

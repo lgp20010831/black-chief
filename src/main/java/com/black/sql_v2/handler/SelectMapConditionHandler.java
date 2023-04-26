@@ -1,13 +1,12 @@
 package com.black.sql_v2.handler;
 
-import com.alibaba.fastjson.JSONObject;
 import com.black.core.bean.TrustBeanCollector;
-import com.black.core.json.JsonUtils;
 import com.black.core.json.Trust;
 import com.black.core.tools.BeanUtil;
 import com.black.core.util.AnnotationUtils;
 import com.black.sql.SqlOutStatement;
 import com.black.sql_v2.JDBCEnvironmentLocal;
+import com.black.sql_v2.serialize.SerializeUtils;
 import com.black.sql_v2.utils.SqlV2Utils;
 import com.black.utils.ServiceUtils;
 
@@ -19,7 +18,8 @@ public class SelectMapConditionHandler extends AbstractWhereConditionHandler {
     @Override
     public SqlOutStatement handleStatement(SqlOutStatement statement, Object param) {
         boolean entity = !(param instanceof Map);
-        JSONObject conditionMap = JsonUtils.letJson(param);
+        //JSONObject conditionMap = JsonUtils.letJson(param);
+        Map<String, Object> conditionMap = SerializeUtils.serialize(param);
         if (entity){
             ServiceUtils.filterNullValueMap(conditionMap);
         }

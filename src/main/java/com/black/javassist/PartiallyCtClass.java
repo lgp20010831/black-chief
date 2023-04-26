@@ -1,22 +1,24 @@
 package com.black.javassist;
 
-import com.black.function.Consumer;
-import com.black.scan.ChiefScanner;
-import com.black.scan.ScannerManager;
 import com.black.core.log.IoLog;
 import com.black.core.log.LogFactory;
 import com.black.core.util.Assert;
 import com.black.core.util.StreamUtils;
+import com.black.function.Consumer;
+import com.black.scan.ChiefScanner;
+import com.black.scan.ScannerManager;
+import com.black.throwable.IOSException;
 import com.black.utils.ServiceUtils;
 import javassist.*;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 
 import java.lang.annotation.Annotation;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Getter
+@Getter @Setter
 //半成品的虚拟类
 public class PartiallyCtClass {
 
@@ -24,7 +26,10 @@ public class PartiallyCtClass {
 
     private final ClassPool pool;
 
-    private final CtClass ctClass;
+    private CtClass ctClass;
+
+    private CtClass parent;
+
 
     private final Collection<CtField> fields = new ArrayList<>();
 
@@ -35,6 +40,14 @@ public class PartiallyCtClass {
     private final Map<String, Class<?>> dependencies = new ConcurrentHashMap<>();
 
     private final Set<Class<?>> interfaceSet = new HashSet<>();
+
+    public static PartiallyCtClass load(String classPath){
+        return new PartiallyCtClass(Utils.getClass(classPath));
+    }
+
+    public static PartiallyCtClass load(Class<?> type){
+        return new PartiallyCtClass(Utils.getClass(type.getName()));
+    }
 
     public static PartiallyCtClass make(String className){
         return make(className, Utils.FICTITIOUS_PATH);
@@ -48,6 +61,19 @@ public class PartiallyCtClass {
     public PartiallyCtClass(CtClass ctClass) {
         this.ctClass = ctClass;
         pool = Utils.getPool();
+    }
+
+
+    private void rewriteCtClass(){
+
+    }
+
+    public CtMethod getLoadMethod(String name, Class<?>... types){
+        try {
+            return ctClass.getDeclaredMethod(name, Utils.castJavaToCtClassArray(types));
+        } catch (NotFoundException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     public void setSuperClass(Class<?> type){
@@ -97,6 +123,21 @@ public class PartiallyCtClass {
         }
     }
 
+    public void writeFile(){
+        try {
+            ctClass.writeFile();
+        } catch (Throwable e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    public byte[] toByteArray(){
+        try {
+            return ctClass.toBytecode();
+        } catch (Throwable e) {
+            throw new IOSException(e);
+        }
+    }
 
     public void tranforClass(Class<?> type){
         Collection<CtField> tempFields = new ArrayList<>();

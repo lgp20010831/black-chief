@@ -179,6 +179,13 @@ public class Utils {
 
         }
 
+    public static CtClass getClass(String path){
+        try {
+            return getPool().get(path);
+        } catch (NotFoundException e) {
+            throw new IllegalStateException(e);
+        }
+    }
     public static CtClass createClass(String path){
         return createClass(path, null);
     }
@@ -365,7 +372,7 @@ public class Utils {
     }
 
 
-    public static CtClass  getAndCreateClass(Class clazz){
+    public static CtClass getAndCreateClass(Class clazz){
         try {
             return pool.get(clazz.getName());
         } catch (NotFoundException e) {
@@ -471,4 +478,16 @@ public class Utils {
         return memberValue;
     }
 
+
+
+    public static CtClass[] castJavaToCtClassArray(Class<?>... javaClasses){
+
+        CtClass[] ctClasses = new CtClass[javaClasses.length];
+        for (int i = 0; i < javaClasses.length; i++) {
+            Class<?> clazz = javaClasses[i];
+            CtClass ctClass = getAndCreateClass(clazz);
+            ctClasses[i] = ctClass;
+        }
+        return ctClasses;
+    }
 }

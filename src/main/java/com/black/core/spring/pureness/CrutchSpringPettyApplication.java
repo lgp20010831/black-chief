@@ -1,5 +1,6 @@
 package com.black.core.spring.pureness;
 
+import com.black.bin.InstanceType;
 import com.black.core.aop.listener.GlobalAopRunnerListener;
 import com.black.core.factory.manager.FactoryManager;
 import com.black.core.spring.ApplicationHolder;
@@ -61,6 +62,11 @@ public class CrutchSpringPettyApplication extends PettySpringApplication impleme
             return FactoryManager.getBeanFactory().getSingleBean(DefaultListableBeanFactory.class);
         }
         return beanFactory;
+    }
+
+    @Override
+    protected InstanceType selectInstanceType() {
+        return InstanceType.BEAN_FACTORY_SINGLE;
     }
 
     @Override

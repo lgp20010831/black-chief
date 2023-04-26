@@ -20,7 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 
 
-@Log4j2
+@Log4j2 @SuppressWarnings("all")
 public class PettySpringApplication extends AbstractDriverCache {
 
     /***

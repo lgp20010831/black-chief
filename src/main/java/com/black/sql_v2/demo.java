@@ -71,7 +71,7 @@ public class demo {
     public static void main(String[] args) {
         ApplicationUtil.programRunMills(() ->{
             prepare();
-            query();
+            query2();
         });
 
         //Sql.opt().save(new Ayc());

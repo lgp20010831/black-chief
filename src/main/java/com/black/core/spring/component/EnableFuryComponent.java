@@ -30,6 +30,9 @@ public class EnableFuryComponent implements PostComponentInstance, FilterCompone
                 furyAnnotation = furyAdoptCache.get(openComponentClass);
             }else {
                 Class<? extends Annotation> annotation = controlRisePotential.registerEnableAnnotation();
+                if (annotation == null){
+                    throw new IllegalStateException("EnabledControlRisePotential component point anntotation is null, component is :" + controlRisePotential);
+                }
                 furyAnnotation = hasFuryAnnotation(annotation, expansivelyApplication);
             }
             if (furyAnnotation == null){

@@ -1,8 +1,6 @@
 package com.black.sql_v2;
 
 import com.alibaba.fastjson.JSONObject;
-import com.black.json.JsonParser;
-import com.black.core.json.JsonUtils;
 import com.black.core.log.IoLog;
 import com.black.core.sql.SQLSException;
 import com.black.core.sql.code.AliasColumnConvertHandler;
@@ -15,6 +13,7 @@ import com.black.core.tools.BeanUtil;
 import com.black.core.util.Assert;
 import com.black.core.util.Av0;
 import com.black.core.util.StreamUtils;
+import com.black.json.JsonParser;
 import com.black.sql.NativeSqlAdapter;
 import com.black.sql.QueryResultSetParser;
 import com.black.sql.SqlOutStatement;
@@ -24,6 +23,7 @@ import com.black.sql_v2.handler.SqlStatementHandler;
 import com.black.sql_v2.listener.SqlListener;
 import com.black.sql_v2.result.ResultSetParserCreator;
 import com.black.sql_v2.result.SqlResultHandler;
+import com.black.sql_v2.serialize.SerializeUtils;
 import com.black.sql_v2.sql_statement.JavaSqlStatementHandler;
 import com.black.sql_v2.statement.SqlStatementBuilder;
 import com.black.sql_v2.transaction.NestedTransactionControlManager;
@@ -215,7 +215,8 @@ public class SqlExecutor implements NativeSqlAdapter {
 
     public <T> void saveAndEffect(String tableName, T param, boolean effect, Object... params){
         List<String> primaryKeyAliasNames = findPrimaryKeyAliasNames(tableName);
-        JSONObject json = JsonUtils.letJson(param);
+        //JSONObject json = JsonUtils.letJson(param);
+        Map<String, Object> json = SerializeUtils.serialize(param);
         if (ServiceUtils.containKeys(json, primaryKeyAliasNames.toArray(new String[0]))){
             Map<String, Object> effectCondition = createEffectCondition(json, primaryKeyAliasNames);
             if (effect){
@@ -264,7 +265,8 @@ public class SqlExecutor implements NativeSqlAdapter {
         if (updateCallBack != null){
             updateCallBack.callback(setMap);
         }
-        JSONObject json = JsonUtils.letJson(setMap);
+        //JSONObject json = JsonUtils.letJson(setMap);
+        Map<String, Object> json = SerializeUtils.serialize(setMap);
         //处理 setMap 里的值
         Connection connection = getConnection();
         TableMetadata tableMetadata = TableUtils.getTableMetadata(tableName, connection);
@@ -288,7 +290,8 @@ public class SqlExecutor implements NativeSqlAdapter {
 
     public QueryResultSetParser queryPrimary(String tableName, Object target, Object... params){
         List<String> aliasNames = findPrimaryKeyAliasNames(tableName);
-        JSONObject json = JsonUtils.letJson(target);
+        //JSONObject json = JsonUtils.letJson(target);
+        Map<String, Object> json = SerializeUtils.serialize(target);
         Map<String, Object> condition = createEffectCondition(json, aliasNames);
         params = SqlV2Utils.addParams(params, condition);
         return query(tableName, params);

@@ -5,5 +5,6 @@ public enum InstanceType {
     BEAN_FACTORY,
     REFLEX,
     REFLEX_AND_BEAN_FACTORY,
-    INSTANCE;
+    INSTANCE,
+    BEAN_FACTORY_SINGLE;
 }
