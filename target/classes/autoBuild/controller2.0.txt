@@ -1,0 +1,179 @@
+package [(${c.scannerPath})];
+
+
+import com.black.core.autoTree.builder.ApiHelper;
+import com.black.core.autoTree.builder.ApiRemark;
+import [(${c.sd.daoData.pojoData.scannerPath})].[(${c.sd.daoData.pojoData.javaPojoClassName})];
+import [(${c.sd.scannerPath})].[(${c.sd.daoData.pojoData.javaPojoClassName})]Service;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+import com.black.core.response.ListResultResMessage;
+import com.black.core.response.ResMessage;
+import com.black.core.json.JSONConvert;
+
+import java.util.List;
+
+@Log4j2
+@CrossOrigin
+@RestController
+@RequestMapping
+@SuppressWarnings("all")
+@ApiHelper(value = [(${c.sd.daoData.pojoData.javaPojoClassName})].class, remark = @ApiRemark("  "))
+public class [(${c.sd.daoData.pojoData.javaPojoClassName})]Controller extends JSONConvert {
+
+
+    @Autowired
+    [(${c.sd.daoData.pojoData.javaPojoClassName})]Service service;
+
+    /***
+     * 查询  [(${c.sd.daoData.pojoData.javaPojoClassName})] 数据
+     * @param body json 格式,请求体, 如果需要分页, 则指定 pageNum, pageSize
+     * @return 返回 json 格式响应体
+     */
+    @PostMapping("query[(${c.sd.daoData.pojoData.javaPojoClassName})]")
+    @ApiHelper(returnClazz = ListResultResMessage.class, remark = @ApiRemark("查询数据接口"), responseEntry = {"totalCount:xxx"})
+    Object query[(${c.sd.daoData.pojoData.javaPojoClassName})](@RequestBody String body){
+        return toJsonString(
+            service.query[(${c.sd.daoData.pojoData.javaPojoClassName})](body)
+        );
+    }
+
+
+    /***
+     * 添加 [(${c.sd.daoData.pojoData.javaPojoClassName})] 数据
+     * @param body  json 格式,请求体
+     * @return  json 格式响应体
+     */
+    @PostMapping("insert[(${c.sd.daoData.pojoData.javaPojoClassName})]")
+    @ApiHelper(returnClazz = ResMessage.class, remark = @ApiRemark("添加数据接口"))
+    Object insert[(${c.sd.daoData.pojoData.javaPojoClassName})](@RequestBody String body){
+        return toJsonString(
+            service.insert[(${c.sd.daoData.pojoData.javaPojoClassName})](body)
+        );
+    }
+
+    /***
+     * 添加多条 [(${c.sd.daoData.pojoData.javaPojoClassName})] 数据
+     * @param body  json 格式,请求体
+     * @return  json 格式响应体
+     */
+    @PostMapping("insert[(${c.sd.daoData.pojoData.javaPojoClassName})]List")
+    @ApiHelper(returnClazz = ResMessage.class, remark = @ApiRemark("添加多条数据接口"))
+    Object insert[(${c.sd.daoData.pojoData.javaPojoClassName})]List(@RequestBody String body){
+        return toJsonString(
+                    service.insert[(${c.sd.daoData.pojoData.javaPojoClassName})]s(body)
+        );
+    }
+
+    /***
+     * 添加 [(${c.sd.daoData.pojoData.javaPojoClassName})] 数据
+     * @param body  json 格式,请求体
+     * @return  json 格式响应体
+     */
+    @ApiHelper(returnClazz = ResMessage.class, remark = @ApiRemark("更新数据接口"))
+    @PostMapping("update[(${c.sd.daoData.pojoData.javaPojoClassName})]")
+    Object update[(${c.sd.daoData.pojoData.javaPojoClassName})](@RequestBody String body){
+        return toJsonString(
+            service.update[(${c.sd.daoData.pojoData.javaPojoClassName})](body)
+        );
+    }
+
+    /***
+     * 删除 [(${c.sd.daoData.pojoData.javaPojoClassName})] 数据
+     * @param body  json 格式,请求体
+     * @return  json 格式响应体
+     */
+    @ApiHelper(returnClazz = ResMessage.class, remark = @ApiRemark("删除数据接口"))
+    @PostMapping("delete[(${c.sd.daoData.pojoData.javaPojoClassName})]")
+    Object delete[(${c.sd.daoData.pojoData.javaPojoClassName})](@RequestBody String body){
+        return toJsonString(
+            service.delete[(${c.sd.daoData.pojoData.javaPojoClassName})](body)
+        );
+    }
+
+    /***
+     * 删除多条 [(${c.sd.daoData.pojoData.javaPojoClassName})] 数据
+     * @param body  json 格式,请求体，格式为 id数组
+     *              示例 : [xx,xx,...]
+     * @return  json 格式响应体
+     */
+    @ApiHelper(returnClazz = ResMessage.class, remark = @ApiRemark("删除数据接口"))
+    @PostMapping("delete[(${c.sd.daoData.pojoData.javaPojoClassName})]List")
+    Object delete[(${c.sd.daoData.pojoData.javaPojoClassName})]List(List<[(${c.sd.daoData.pojoData.javaPojoClassName})]> body){
+        return toJsonString(
+            service.delete[(${c.sd.daoData.pojoData.javaPojoClassName})]List(body)
+           );
+    }
+
+    //****************** form data *******************
+
+    /***
+     * 查询  [(${c.sd.daoData.pojoData.javaPojoClassName})] 数据
+     * @param body json 格式,请求体, 如果需要分页, 则指定 pageNum, pageSize
+     * @return 返回 json 格式响应体
+     */
+    @PostMapping("query[(${c.sd.daoData.pojoData.javaPojoClassName})]FormatData")
+    @ApiHelper(returnClazz = ListResultResMessage.class, remark = @ApiRemark("查询数据接口"), responseEntry = {"totalCount:xxx"})
+    Object query[(${c.sd.daoData.pojoData.javaPojoClassName})]([(${c.sd.daoData.pojoData.javaPojoClassName})] body,
+                                                                   @RequestParam(required = false) Integer pageNum,
+                                                                   @RequestParam(required = false) Integer pageSize){
+        return toJsonString(
+            service.query[(${c.sd.daoData.pojoData.javaPojoClassName})](body, pageNum, pageSize)
+            );
+    }
+
+
+    /***
+     * 添加 [(${c.sd.daoData.pojoData.javaPojoClassName})] 数据
+     * @param body  json 格式,请求体
+     * @return  json 格式响应体
+     */
+    @PostMapping("insert[(${c.sd.daoData.pojoData.javaPojoClassName})]FormatData")
+    @ApiHelper(returnClazz = ResMessage.class, remark = @ApiRemark("添加数据接口"))
+    Object insert[(${c.sd.daoData.pojoData.javaPojoClassName})]([(${c.sd.daoData.pojoData.javaPojoClassName})] body){
+        return toJsonString(
+            service.insert[(${c.sd.daoData.pojoData.javaPojoClassName})](body)
+            );
+    }
+
+    /***
+     * 添加多条 [(${c.sd.daoData.pojoData.javaPojoClassName})] 数据
+     * @param body  json 格式,请求体
+     * @return  json 格式响应体
+     */
+    @PostMapping("insert[(${c.sd.daoData.pojoData.javaPojoClassName})]ListFormatData")
+    @ApiHelper(returnClazz = ResMessage.class, remark = @ApiRemark("添加多条数据接口"))
+    Object insert[(${c.sd.daoData.pojoData.javaPojoClassName})]List(List<[(${c.sd.daoData.pojoData.javaPojoClassName})]> body){
+        return toJsonString(
+            service.insert[(${c.sd.daoData.pojoData.javaPojoClassName})]s(body)
+            );
+    }
+
+    /***
+     * 添加 [(${c.sd.daoData.pojoData.javaPojoClassName})] 数据
+     * @param body  json 格式,请求体
+     * @return  json 格式响应体
+     */
+    @ApiHelper(returnClazz = ResMessage.class, remark = @ApiRemark("更新数据接口"))
+    @PostMapping("update[(${c.sd.daoData.pojoData.javaPojoClassName})]FormatData")
+    Object update[(${c.sd.daoData.pojoData.javaPojoClassName})]([(${c.sd.daoData.pojoData.javaPojoClassName})] body){
+        return toJsonString(
+            service.update[(${c.sd.daoData.pojoData.javaPojoClassName})](body)
+            );
+    }
+
+    /***
+     * 删除 [(${c.sd.daoData.pojoData.javaPojoClassName})] 数据
+     * @param body  json 格式,请求体
+     * @return  json 格式响应体
+     */
+    @ApiHelper(returnClazz = ResMessage.class, remark = @ApiRemark("删除数据接口"))
+    @PostMapping("delete[(${c.sd.daoData.pojoData.javaPojoClassName})]FormatData")
+    Object delete[(${c.sd.daoData.pojoData.javaPojoClassName})]([(${c.sd.daoData.pojoData.javaPojoClassName})] body){
+        return toJsonString(
+            service.delete[(${c.sd.daoData.pojoData.javaPojoClassName})](body)
+            );
+    }
+
+}

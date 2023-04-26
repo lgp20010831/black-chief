@@ -1,0 +1,88 @@
+package [(${source.servicePath})];
+
+
+import [(${source.pojoPath})].[(${source.className})];
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSONArray;
+import com.black.core.mvc.response.ResponseUtil;
+
+import java.util.Collections;
+import java.util.List;
+import lombok.NonNull;
+
+
+public interface [(${source.className})]Service {
+
+    /***
+     * 查询数据接口,只不过传递 json 格式数据,需要解析
+     * @param json json 数据
+     * @return 返回结果集合
+     */
+    Object query[(${source.className})](JSONObject json);
+
+    /***
+     * 查询数据接口
+     * @param condition 实体类作为查询条件
+     * @return 返回结果集合
+     */
+    Object query[(${source.className})]([(${source.className})] condition);
+
+    /***
+     * 根据查询条件,能够保证查询到的结果只有一个
+     * @param condition 条件
+     * @return 返回原始的实体类对象,不会被封账,也不会被转成 json 格式
+     */
+    [(${source.className})] queryOnlyResult(JSONObject condition);
+
+    /***
+     * 插入多条数据, 集合形式
+     * @param dataGroup 条目数量
+     * @return 返回json响应结果
+     */
+    Object insert[(${source.className})]s(List<JSONObject> dataGroup);
+
+
+    /***
+     * 添加一条数据
+     * @param json json 格式数据,需要解析
+     * @return 返回是否添加成功
+     */
+    default Object insert[(${source.className})](JSONObject json){
+        return insert[(${source.className})]s(Collections.singletonList(json));
+    }
+
+
+    /***
+     * 更新一组数据
+     * @param condition 封装条件,更新数据,根据 mapper 来自由定义
+     * @return 是否更新成功
+     */
+    Object update[(${source.className})](JSONObject condition);
+
+    /***
+     * 删除多组数据
+     * @param condition 条件集合
+     * @return 响应结果
+     */
+    Object delete[(${source.className})](@NonNull JSONObject condition);
+
+    /***
+     * 删除一组数据,参数可能传数组,需要解析
+     * @param json 删除条件 json
+     * @return 返回是否删除成功,封装成响应结果
+     */
+    Object delete[(${source.className})]List(JSONArray json);
+
+    /***
+     * 删除多组数据
+     * @param dataGroup 条件集合
+     * @return 响应结果
+     */
+    default Object delete[(${source.className})]List(List<JSONObject> dataGroup){
+        if (!dataGroup.isEmpty()){
+                   dataGroup.forEach(this::delete[(${source.className})]);
+                }
+        return ResponseUtil.ok();
+    }
+
+}

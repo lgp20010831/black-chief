@@ -1,0 +1,147 @@
+package [(${c.scannerPath})];
+
+import [(${c.daoData.pojoData.scannerPath})].[(${c.daoData.pojoData.javaPojoClassName})];
+import [(${c.daoData.scannerPath})].[(${c.daoData.pojoData.javaPojoClassName})]Mapper;
+import com.alibaba.fastjson.JSONObject;
+import com.black.core.json.JSONConvert;
+import com.black.core.processor.infantryChoice.AnnotationHandler;
+import com.black.core.query.SecurityPageInfo;
+import com.black.core.response.ConstantPool;
+import com.black.core.response.VariablePool;
+import com.black.core.response.Code;
+import com.black.core.response.ListResultResMessage;
+import com.black.core.response.ResMessage;
+import com.black.core.builder.ArrayBuilder;
+import com.black.core.builder.MapBuilder;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@Log4j2
+@CrossOrigin
+@RestController
+@RequestMapping()
+@SuppressWarnings("all")
+public class [(${c.daoData.pojoData.javaPojoClassName})]Controller extends JSONConvert {
+
+    @Autowired
+    SecurityPageInfo pageInfo;
+
+    /**          当前页数               每页大小                 总页数   */
+    final String PAGE_NUM = "pageNum", PAGE_SIZE = "pageSize", TOTAL_COUNT = "totalCount";
+
+    @Autowired
+    [(${c.daoData.pojoData.javaPojoClassName})]Mapper   [(${c.daoData.pojoData.headLowercaseJavaClassName})]Mapper;
+
+    /***
+     * 查询  [(${c.daoData.pojoData.javaPojoClassName})] 数据
+     * @param body json 格式,请求体, 如果需要分页, 则指定 pageNum, pageSize
+     * @return 返回 json 格式响应体
+     */
+    @PostMapping("query[(${c.daoData.pojoData.javaPojoClassName})]")
+    JSONObject query[(${c.daoData.pojoData.javaPojoClassName})](@RequestBody String body){
+
+        JSONObject json;
+        [(${c.daoData.pojoData.javaPojoClassName})] pojo = convertPojo(json = buildJSON(body), new [(${c.daoData.pojoData.javaPojoClassName})]());
+
+        log.info("json convert [(${c.daoData.pojoData.javaPojoClassName})]: {}", pojo);
+        //查询
+        List<[(${c.daoData.pojoData.javaPojoClassName})]> results = [(${c.daoData.pojoData.headLowercaseJavaClassName})]Mapper.queryElements(pojo);
+
+        log.info("query dataBase result: {}", results);
+        if (!(json.containsKey(PAGE_NUM) && json.containsKey(PAGE_SIZE)))
+                return getResponseJson(
+                        new ListResultResMessage<[(${c.daoData.pojoData.javaPojoClassName})]>(Code.SUCCESS.value(), true, VariablePool.WORK_SUCCESSFUL, results),
+                                true, true, AnnotationHandler.class);
+
+        //分页查询
+        SecurityPageInfo.AicEntry<[(${c.daoData.pojoData.javaPojoClassName})]> entry = pageInfo.pag((Integer) json.get(PAGE_NUM), (Integer) json.get(PAGE_SIZE), results);
+
+        return new JSONObject(MapBuilder.machining(
+                getResponseJson(
+                        new ListResultResMessage<[(${c.daoData.pojoData.javaPojoClassName})]>(Code.SUCCESS.value(), true, VariablePool.WORK_SUCCESSFUL, entry.getAicResult()),
+                        true, true, AnnotationHandler.class)
+        ).put(TOTAL_COUNT, entry.getTotal()).build());
+    }
+
+   /***
+    * 添加 [(${c.daoData.pojoData.javaPojoClassName})] 数据
+    * @param body  json 格式,请求体
+    * @return  json 格式响应体
+    */
+    @PostMapping("insert[(${c.daoData.pojoData.javaPojoClassName})]")
+    @Transactional(propagation = Propagation.REQUIRED)
+    ResMessage<?> insert[(${c.daoData.pojoData.javaPojoClassName})](@RequestBody String body){
+
+       [(${c.daoData.pojoData.javaPojoClassName})] [(${c.daoData.pojoData.headLowercaseJavaClassName})];
+         judgeNotNull([(${c.daoData.pojoData.headLowercaseJavaClassName})] = convertPojo(buildJSON(body), new [(${c.daoData.pojoData.javaPojoClassName})]()).complete());
+
+         /* 如果一切正常 ,没有抛出异常 */
+         return insert[(${c.daoData.pojoData.javaPojoClassName})]([(${c.daoData.pojoData.headLowercaseJavaClassName})]);
+    }
+
+  /***
+    * 添加 [(${c.daoData.pojoData.javaPojoClassName})] 数据
+    * @param pojo  实体类数据
+    * @return  json 格式响应体
+    */
+    ResMessage<?> insert[(${c.daoData.pojoData.javaPojoClassName})]([(${c.daoData.pojoData.javaPojoClassName})] pojo){
+
+          /* 转成实体类, 插入到表中 */
+          [(${c.daoData.pojoData.headLowercaseJavaClassName})]Mapper.insertElements(pojo);
+
+          /* 如果一切正常 ,没有抛出异常 */
+          return new ResMessage<>(Code.SUCCESS.value(), true, VariablePool.WORK_SUCCESSFUL);
+    }
+
+
+    /***
+     * 添加 [(${c.daoData.pojoData.javaPojoClassName})] 数据
+     * @param body  json 格式,请求体
+     * @return  json 格式响应体
+     */
+    @PostMapping("update[(${c.daoData.pojoData.javaPojoClassName})]")
+    ResMessage<?> update[(${c.daoData.pojoData.javaPojoClassName})](@RequestBody String body){
+
+        /* 解析转成实体类 */
+        [(${c.daoData.pojoData.javaPojoClassName})] pojo = convertPojo(buildJSON(body), new [(${c.daoData.pojoData.javaPojoClassName})]());
+        return update[(${c.daoData.pojoData.javaPojoClassName})](pojo);
+    }
+
+    /***
+     * 添加 [(${c.daoData.pojoData.javaPojoClassName})] 数据
+     * @param pojo  实体类数据
+     * @return  json 格式响应体
+     */
+    ResMessage<?> update[(${c.daoData.pojoData.javaPojoClassName})]([(${c.daoData.pojoData.javaPojoClassName})] pojo){
+
+        [(${c.daoData.pojoData.headLowercaseJavaClassName})]Mapper.updateElement(pojo);
+        return new ResMessage<>(Code.SUCCESS.value(), true, VariablePool.WORK_SUCCESSFUL);
+    }
+
+    /***
+     * 删除 [(${c.daoData.pojoData.javaPojoClassName})] 数据
+     * @param body  json 格式,请求体
+     * @return  json 格式响应体
+     */
+    @PostMapping("delete[(${c.daoData.pojoData.javaPojoClassName})]")
+    ResMessage<?> delete[(${c.daoData.pojoData.javaPojoClassName})](@RequestBody String body){
+        [(${c.daoData.pojoData.javaPojoClassName})] pojo = convertPojo(buildJSON(body), new [(${c.daoData.pojoData.javaPojoClassName})]());
+        return delete[(${c.daoData.pojoData.javaPojoClassName})](pojo);
+    }
+
+   /***
+     * 删除 [(${c.daoData.pojoData.javaPojoClassName})] 数据
+     * @param pojo  实体类数据
+     * @return  json 格式响应体
+     */
+    ResMessage<?> delete[(${c.daoData.pojoData.javaPojoClassName})]([(${c.daoData.pojoData.javaPojoClassName})] pojo){
+
+         [(${c.daoData.pojoData.headLowercaseJavaClassName})]Mapper.deleteElement(pojo);
+         return new ResMessage<>(Code.SUCCESS.value(), true, VariablePool.WORK_SUCCESSFUL);
+    }
+}

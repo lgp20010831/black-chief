@@ -1,0 +1,19 @@
+package [(${location.generatePath})];
+
+import lombok.Data;
+import com.black.core.tools.BaseBean;
+import com.black.core.json.Trust;
+import com.black.core.autoTree.builder.ApiRemark;
+
+import java.util.Date;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+
+@Data @Trust @SuppressWarnings("all")
+public class [(${source.className})] extends BaseBean<[(${source.className})]>{
+
+ [# th:each="field,fieldStat : ${source.tableMetadata.columnMetadatas}"]
+     @ApiRemark("[(${field.remarks})]")
+     private [(${field.javaTypeName})] [(${field.javaFieldName})];
+  [/]
+}

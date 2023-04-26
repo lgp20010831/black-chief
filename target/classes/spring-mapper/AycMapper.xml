@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.black.core.test.dao.AycDao">
+
+    <select id="get" resultType="map">
+        select * from ayc
+        where id is not null
+        <if test="source != null">
+
+            <if test="source.age != null">
+                and age = #{source.age}
+            </if>
+        </if>
+        <if test="id != null">
+            and id = #{id}
+        </if>
+        <if test="asd != null">
+            and name = #{asd.name}
+        </if>
+    </select>
+</mapper>

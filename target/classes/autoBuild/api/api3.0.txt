@@ -1,0 +1,72 @@
+
+--------------------------------------------------------------------------------------------
+接口文档:
+--------------------------------------------------------------------------------------------
+
+[# th:each="apiModel,apiModelStat : ${api}"]
+<details>
+
+<summary style="outline:none;margin-bottom: 4px;"> <font face="宋体" color=black size=5 style="font-weight: bold;">[[(${apiModel.sort})]]: [(${apiModel.modularRemark})]</font></summary>
+
+[# th:each="apiInterface,apiInterfaceStat : ${apiModel.methods}"]
+
+<details style="margin-left: 20px">
+
+---
+<summary style="outline:none;margin-bottom: 5px;">
+    <div style="display: inline-flex; flex-direction: column;background:  [(${apiInterface.bgColor})] ; border: 1px solid [(${apiInterface.bgBorderColor})];
+        border-radius: 5px; padding: 5px; width: 90%">
+        <div style="display: flex; align-items: center;">
+            <div style="width: 120px;">
+                <span style="color: #fff; background-color: [(${apiInterface.bgBorderColor})];
+                    font-size: 16px; padding: 5px 10px;display: inline-block;width: 66px;
+                    border-radius: 3px;
+                    text-align: center">[(${apiInterface.requestMethodString})]</span>
+                    <span style="font-weight: bold; font-size: 16px">[(${apiInterface.sort})]: </span>
+            </div>
+            <div style="font-family: 华文楷体">[(${apiInterface.requestUrlString})]</div>
+        </div>
+        <div style="display: flex;">
+            <div style="width: 120px;"></div>
+            <div style="color: green;font-size: 13px">[(${apiInterface.remark})]</div>
+        </div>
+    </div>
+</summary>
+
+```
+httpMethods: [# th:each="m,mStat : ${apiInterface.requestMethod}"][(${m})]  [/]
+httpUrls: [# th:each="u,uStat : ${apiInterface.requestUrl}"][(${u})]
+[/]
+```
+
+##### HTTP请求示例
+
+###### 请求 header
+```
+[# th:each="item,itemStat : ${apiInterface.headers}"]
+[(${itemStat.current.key})] : [(${itemStat.current.value})]
+[/]
+```
+
+###### 请求 body
+```
+[(${apiInterface.requestDome})]
+```
+
+
+##### HTTP响应示例
+
+###### 响应 body
+```````````````````````````````````````````````````````````````````````````````````
+[(${apiInterface.responseDome})]
+```````````````````````````````````````````````````````````````````````````````````
+--------------------------------------------------------------
+</details>
+
+[/]
+
+</details>
+
+[/]
+
+

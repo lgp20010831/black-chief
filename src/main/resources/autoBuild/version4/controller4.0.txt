@@ -1,0 +1,86 @@
+package [(${source.controllerPath})];
+
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.black.core.aop.StartPage;
+import [(${source.implPath})].[(${source.className})]Impl;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Collections;
+import java.util.List;
+
+@Log4j2
+@CrossOrigin
+@RestController
+@RequestMapping
+@SuppressWarnings("all")
+public class [(${source.className})]Controller {
+
+    @Autowired
+    [(${source.className})]Impl impl;
+
+    /***
+     * 查询  [(${source.className})] 数据
+     * @param body json 格式,请求体, 如果需要分页, 则指定 pageNum, pageSize
+     * @return 返回 json 格式响应体
+     */
+    @StartPage
+    @PostMapping("query[(${source.className})]")
+    public Object query[(${source.className})](@RequestBody JSONObject body){
+        return impl.query[(${source.className})](body);
+    }
+
+
+    /***
+     * 添加 [(${source.className})] 数据
+     * @param body  json 格式,请求体
+     * @return  json 格式响应体
+     */
+    @PostMapping("insert[(${source.className})]")
+    public Object insert[(${source.className})](@RequestBody JSONObject body){
+        return impl.insert[(${source.className})]s(Collections.singletonList(body));
+    }
+
+    /***
+     * 添加多条 [(${source.className})] 数据
+     * @param body  json 格式,请求体
+     * @return  json 格式响应体
+     */
+    @PostMapping("insert[(${source.className})]List")
+    public Object insert[(${source.className})]List(@RequestBody List<JSONObject> body){
+         return impl.insert[(${source.className})]s(body);
+    }
+
+    /***
+     * 添加 [(${source.className})] 数据
+     * @param body  json 格式,请求体
+     * @return  json 格式响应体
+     */
+    @PostMapping("update[(${source.className})]")
+    public Object update[(${source.className})](@RequestBody JSONObject body){
+        return impl.update[(${source.className})](body);
+    }
+
+    /***
+     * 删除 [(${source.className})] 数据
+     * @param body  json 格式,请求体
+     * @return  json 格式响应体
+     */
+    @PostMapping("delete[(${source.className})]")
+    public Object delete[(${source.className})](@RequestBody JSONObject body){
+        return impl.delete[(${source.className})](body);
+    }
+
+    /***
+     * 删除多条 [(${source.className})] 数据
+     * @param body  json 格式,请求体，格式为 id数组
+     *              示例 : [xx,xx,...]
+     * @return  json 格式响应体
+     */
+    @PostMapping("delete[(${source.className})]List")
+    public Object delete[(${source.className})]List(@RequestBody JSONArray body){
+        return impl.delete[(${source.className})]List(body);
+    }
+}

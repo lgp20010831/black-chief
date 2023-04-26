@@ -1,0 +1,110 @@
+package [(${daoData.scannerPath})];
+
+import [(${daoData.pojoData.scannerPath})].[(${daoData.pojoData.javaPojoClassName})];
+import org.apache.ibatis.annotations.Param;
+import org.springframework.stereotype.Repository;
+import java.util.List;
+import java.util.Map;
+
+@Repository
+public interface [(${daoData.pojoData.javaPojoClassName})]Mapper {
+
+   /***
+     * 查询出总量的数据
+     * @param condition 实体类对象作为参数: {@link [(${daoData.pojoData.javaPojoClassName})]}
+     * @return 查询到的数据集合
+     */
+    Integer queryCount([(${daoData.pojoData.javaPojoClassName})] condition);
+
+   /***
+     * 根据 id 查询出总量的数据
+     * @param id 根据一个可指定的 id 作为参数
+     * @return 查询到的数据集合
+     */
+    List<[(${daoData.pojoData.javaPojoClassName})]> queryById(@Param("id")String id);
+
+   /***
+     * 绝对查询,查询结果只为一条数据
+     * @param data 根据一个可指定的 id 作为参数
+     * @return 查询到的数据集合
+     */
+    [(${daoData.pojoData.javaPojoClassName})] queryAbsolutely(@Param("data") [(${daoData.pojoData.javaPojoClassName})] data);
+
+    /***
+      * 根据条件，查询元素对象
+      * @param data 实体类对象作为参数: {@link [(${daoData.pojoData.javaPojoClassName})]}
+      * @return 查询到的数据集合
+      */
+     List<[(${daoData.pojoData.javaPojoClassName})]> queryElements(@Param("data") [(${daoData.pojoData.javaPojoClassName})] data);
+     [# th:if="${daoData.pojoData.master}"]
+    /***
+      * 根据条件，查询元素对象
+      * @param data 实体类对象作为参数: {@link [(${daoData.pojoData.javaPojoClassName})]}
+      * @return 查询到的数据集合
+      */
+    List<[(${daoData.pojoData.javaPojoClassName})]> selectByRelevancy(@Param("data") [(${daoData.pojoData.javaPojoClassName})] data);
+
+     /***
+       * 根据条件，查询元素对象, 如果是关联主表,则会查出所有关联数据,并且返回当前总数据量
+       * @param data 实体类对象作为参数: {@link [(${daoData.pojoData.javaPojoClassName})]}
+       * @return 查询到的数据集合
+       */
+     List<Map<String, Object>> selectByRelevancyWithCount(@Param("data") [(${daoData.pojoData.javaPojoClassName})] data);
+     [/]
+
+    /***
+     * 根据条件，模糊查询元素对象
+     * @param data 实体类对象作为参数: {@link [(${daoData.pojoData.javaPojoClassName})]}
+     * @return 查询到的数据集合
+     */
+    List<[(${daoData.pojoData.javaPojoClassName})]> vagueQueryElements(@Param("data") [(${daoData.pojoData.javaPojoClassName})] data);
+
+   /***
+     * 根据条件，查询元素对象,返回Map 对象
+     * @param id 实体类对象作为参数: {@link [(${daoData.pojoData.javaPojoClassName})]}
+     * @return 查询到的数据集合
+     */
+    List<Map<String, Object>> complexSelect(@Param("id") String id);
+
+    /***
+     * 插入元素，参数为实体类对象
+     * @param data 实体类对象作为参数: {@link [(${daoData.pojoData.javaPojoClassName})]}
+     * @return 是否插入数据成功
+     */
+    boolean insertElements(@Param("data")[(${daoData.pojoData.javaPojoClassName})] data);
+
+    /***
+     * 插入多条数据, 集合形式
+     * @param dataGroup 条目数量
+     * @return 是否添加成功
+     */
+    boolean insertElementsList(@Param("list") List<[(${daoData.pojoData.javaPojoClassName})]> dataGroup);
+
+    /***
+     * 更新元素对象
+     * @param data 实体类对象作为参数: {@link [(${daoData.pojoData.javaPojoClassName})]}
+     * @return 是否更新数据成功
+     */
+    boolean updateElement(@Param("data") [(${daoData.pojoData.javaPojoClassName})] data);
+
+    /***
+     * 删除元素对象
+     * @param data 实体类对象作为参数: {@link [(${daoData.pojoData.javaPojoClassName})]}
+     * @return 是否删除数据成功
+     */
+    boolean deleteElement(@Param("data") [(${daoData.pojoData.javaPojoClassName})] data);
+
+    /***
+     * 按照 id 真实的删除数据库里的数据
+     * @param id 唯一 id
+     * @return 返回是否删除成功
+     */
+    boolean reallyDelete(@Param("id") String id);
+
+     /***
+       * 按照 data 条件筛选,真实的删除数据库里的数据
+       * @param data 条件
+       * @return 返回是否删除成功
+       */
+    boolean reallyDeleteElement(@Param("data")[(${daoData.pojoData.javaPojoClassName})] data);
+}

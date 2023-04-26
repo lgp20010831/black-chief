@@ -1,0 +1,40 @@
+spring:
+  datasource:
+    dynamic:
+      primary: one
+      datasource:
+        one:
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://localhost:3306/hcy?serverTimezone=UTC&stringtype=unspecified
+          username: root
+          password: 123698745zed
+        two:
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://localhost:3306/hcy?serverTimezone=UTC&stringtype=unspecified
+          username: root
+          password: 123698745zed
+
+automaticRunner:
+  enabled: true
+mybatis:
+  type-aliases-package: com.example.springautothymeleaf.test.pojo
+  mapper-locations: classpath*:spring-mapper/*.xml
+springUtil:
+  findStartClassOnly: true
+  cancelLoad: true
+mapping:
+  ut: updated_at = now()
+  it: inserted_at = now()
+  df: is_deleted = false
+  dt: deleted_at = now()
+minios:
+  default:
+    url: url1
+    accessKey: key1
+    secretKey: key11
+    bucket: db
+    file:
+#      minios  map: default: value
+#      default map: url: value ....
+#      url : url1
+#      file:

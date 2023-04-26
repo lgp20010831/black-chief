@@ -1,0 +1,28 @@
+package [(${location.generatePath})];
+
+import com.black.core.annotation.ChiefServlet;
+import [(${superPath})];
+import com.black.core.autoTree.builder.ApiRemark;
+import com.black.core.sql.annotation.OpenTransactional;
+import com.black.core.util.LazyAutoWried;
+import [(${mapperPath})].[(${source.className})]Mapper;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.web.bind.annotation.*;
+
+import static com.black.utils.ServiceUtils.*;
+
+@Log4j2
+@ChiefServlet("[(${source.lowName})]")
+@ApiRemark("[(${source.remark})] - 操作接口") @OpenTransactional @SuppressWarnings("all")
+public class [(${source.className})]Controller extends [(${superName})] {
+
+    @LazyAutoWried
+    [(${source.className})]Mapper [(${source.lowName})]Mapper;
+    [# th:unless="${dict}"]
+    @Override
+    protected String getTableName() {
+        return "[(${source.tableName})]";
+    }
+    [/]
+
+}

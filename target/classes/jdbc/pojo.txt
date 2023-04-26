@@ -1,0 +1,25 @@
+package [(${location.generatePath})];
+
+import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.black.core.tools.BaseBean;
+import com.black.core.tools.DefaultValue;
+import com.black.core.tools.IgnoreTime;
+import com.black.core.json.Trust;
+import com.black.core.tools.Time;
+import com.black.core.tools.UUID;
+import lombok.*;
+[# th:each="field,fieldStat : ${source.tableMetadata.columnMetadatas}"]
+import [(${field.javaTypePath})];[/]
+import java.util.List;
+
+
+@TableName("ayc") @Time   @Trust   @Data
+@NoArgsConstructor @SuppressWarnings("all")
+public class [(${source.className})] extends BaseBean<[(${source.className})]> {
+
+[# th:each="field,fieldStat : ${source.tableMetadata.columnMetadatas}"]
+    [# th:if="${field.name}=='id'"]@UUID @TableId [/]
+    [# th:if="${field.javaTypeName}=='Boolean'"]@DefaultValue("false") [/]private [(${field.javaTypeName})] [(${field.javaFieldName})];
+ [/]
+}

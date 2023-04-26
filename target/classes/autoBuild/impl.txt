@@ -1,0 +1,395 @@
+package [(${i.scannerPath})];
+
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONException;
+import com.alibaba.fastjson.JSONObject;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
+import com.black.core.builder.JsonBuilder;
+import com.black.core.response.ResMessage;
+import [(${i.sd.daoData.scannerPath})].[(${i.sd.daoData.pojoData.javaPojoClassName})]Mapper;
+import [(${i.sd.daoData.pojoData.scannerPath})].[(${i.sd.daoData.pojoData.javaPojoClassName})];
+import [(${i.sd.scannerPath})].[(${i.sd.daoData.pojoData.javaPojoClassName})]Service;
+import [(${i.md.scannerPath})].Mapping;
+import lombok.NonNull;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.black.core.response.Code.*;
+import static com.black.core.response.ConstantPool.*;
+import static com.black.core.response.VariablePool.*;
+import static [(${i.pd.scannerPath})].ValidConstantPool.*;
+
+@Log4j2
+@Service
+public class [(${i.sd.daoData.pojoData.javaPojoClassName})]Impl extends Mapping implements [(${i.sd.daoData.pojoData.javaPojoClassName})]Service {
+
+
+    /***
+     * 查询数据接口,只不过传递 json 格式数据,需要解析
+     * @param json json 数据
+     * @return 返回结果集合
+     */
+    @Override
+    public JSONObject vagueQuery[(${i.sd.daoData.pojoData.javaPojoClassName})](String json) {
+
+        if (json == null){
+            if (log.isInfoEnabled()) {
+                log.warn("query data args is null");
+            }
+            return getResponseJson(vagueQuery[(${i.sd.daoData.pojoData.javaPojoClassName})](([(${i.sd.daoData.pojoData.javaPojoClassName})]) null));
+        }
+        JSONObject jsonBody;
+        [(${i.sd.daoData.pojoData.javaPojoClassName})] pojo = convertPojo(jsonBody = buildJSON(json), new [(${i.sd.daoData.pojoData.javaPojoClassName})]());
+        if (log.isInfoEnabled()){
+            log.info("json convert [(${i.sd.daoData.pojoData.javaPojoClassName})]: {}", pojo);
+        }
+        return vagueQuery[(${i.sd.daoData.pojoData.javaPojoClassName})](pojo, jsonBody.get(PAGE_NUM), jsonBody.get(PAGE_SIZE));
+    }
+
+    /***
+     * 查询数据接口
+     * @param condition 实体类作为查询条件
+     * @return 返回结果集合
+     */
+    @Override
+    public JSONObject vagueQuery[(${i.sd.daoData.pojoData.javaPojoClassName})]([(${i.sd.daoData.pojoData.javaPojoClassName})] condition) {
+        return vagueQuery[(${i.sd.daoData.pojoData.javaPojoClassName})](condition, null ,null);
+    }
+
+    /***
+     * 查询数据接口
+     * @param condition 实体类作为查询条件
+     * @param pageNum 分页, 当前页数
+     * @param pageSize 每页大小
+     * @return 返回响应结果
+     */
+    @Override
+    public JSONObject vagueQuery[(${i.sd.daoData.pojoData.javaPojoClassName})]([(${i.sd.daoData.pojoData.javaPojoClassName})] condition, Object pageNum, Object pageSize) {
+        //查询结果
+        List<[(${i.sd.daoData.pojoData.javaPojoClassName})]> results;
+        Page<Object> page = null;
+        try {
+
+            if (pageNum == null  ||  pageSize == null){
+                page = PageHelper.startPage((int)pageNum, (int)pageSize);
+            }
+            results = [(${i.sd.daoData.pojoData.headLowercaseJavaClassName})]Mapper.vagueQueryElements(condition);
+        }catch (Throwable ex){
+            if (log.isErrorEnabled()) {
+                log.error("查询数据过程中发生异常, 异常信息: {}" , ex.getMessage());
+            }
+
+            throw new RuntimeException("查询数据过程中发生异常, 异常信息:" + ex.getMessage());
+        }
+        JSONObject response = getResponseJson( new ResMessage<>(SUCCESS.value(), true, WORK_SUCCESSFUL, results));
+        return page == null ? response : JsonBuilder.machining(response)
+                                                     .put(TOTAL_COUNT, page.getTotal())
+                                                     .build();
+    }
+
+
+    /***
+     * 查询数据接口,只不过传递 json 格式数据,需要解析
+     * @param json json 数据
+     * @return 返回结果集合
+     */
+    @Override
+    public JSONObject query[(${i.sd.daoData.pojoData.javaPojoClassName})](String json) {
+
+        if (json == null){
+            if (log.isInfoEnabled()) {
+                log.warn("query data args is null");
+            }
+            return getResponseJson(query[(${i.sd.daoData.pojoData.javaPojoClassName})](([(${i.sd.daoData.pojoData.javaPojoClassName})]) null));
+        }
+
+        JSONObject jsonBody;
+        [(${i.sd.daoData.pojoData.javaPojoClassName})] pojo = convertPojo(jsonBody = buildJSON(json), new [(${i.sd.daoData.pojoData.javaPojoClassName})]());
+
+        if (log.isInfoEnabled()){
+            log.info("json convert [(${i.sd.daoData.pojoData.javaPojoClassName})]: {}", pojo);
+        }
+        return query[(${i.sd.daoData.pojoData.javaPojoClassName})](pojo, jsonBody.get(PAGE_NUM), jsonBody.get(PAGE_SIZE));
+    }
+
+    /***
+     * 查询数据接口
+     * @param condition 实体类作为查询条件
+     * @return 返回结果集合
+     */
+    @Override
+    public JSONObject query[(${i.sd.daoData.pojoData.javaPojoClassName})]([(${i.sd.daoData.pojoData.javaPojoClassName})] condition) {
+        return query[(${i.sd.daoData.pojoData.javaPojoClassName})](condition, null ,null);
+    }
+
+    /***
+     * 查询数据接口
+     * @param condition 实体类作为查询条件
+     * @param pageNum 分页, 当前页数
+     * @param pageSize 每页大小
+     * @return 返回响应结果
+     */
+    @Override
+    public JSONObject query[(${i.sd.daoData.pojoData.javaPojoClassName})]([(${i.sd.daoData.pojoData.javaPojoClassName})] condition, Object pageNum, Object pageSize) {
+
+        //查询结果
+        List<[(${i.sd.daoData.pojoData.javaPojoClassName})]> results;
+        Page<Object> page = null;
+        try {
+
+            if (pageNum != null  &&  pageSize != null){
+                page = PageHelper.startPage((int)pageNum, (int)pageSize);
+            }
+            results = [(${i.sd.daoData.pojoData.headLowercaseJavaClassName})]Mapper.queryElements(condition);
+        }catch (Throwable ex){
+            if (log.isErrorEnabled()) {
+                log.error("查询数据过程中发生异常, 异常信息: {}" , ex.getMessage());
+            }
+            throw new RuntimeException("查询数据过程中发生异常, 异常信息:" + ex.getMessage());
+        }
+       JSONObject response = getResponseJson( new ResMessage<>(SUCCESS.value(), true, WORK_SUCCESSFUL, results));
+       return page == null ? response : JsonBuilder.machining(response)
+                                                           .put(TOTAL_COUNT, page.getTotal())
+                                                           .build();
+    }
+
+    /***
+     * 查询数据接口,只不过确定结果一定唯一
+     * 如果结果不唯一,则会抛出{@link RuntimeException} 异常
+     * @param json json 数据
+     * @return 返回结果集合
+     */
+    @Override
+    public JSONObject queryAndResultOnly(String json) {
+        return queryAndResultOnly(convertPojo(buildJSON(json), new [(${i.sd.daoData.pojoData.javaPojoClassName})]()));
+    }
+
+    /***
+     * 根据查询条件,能够保证查询到的结果只有一个
+     * @param condition 条件
+     * @return 返回原始的实体类对象,不会被封账,也不会被转成 json 格式
+     */
+    @Override
+    public [(${i.sd.daoData.pojoData.javaPojoClassName})] queryOnlyResult([(${i.sd.daoData.pojoData.javaPojoClassName})] condition) {
+        List<[(${i.sd.daoData.pojoData.javaPojoClassName})]> results = [(${i.sd.daoData.pojoData.headLowercaseJavaClassName})]Mapper.queryElements(condition);
+        if (results.isEmpty())
+            throw new RuntimeException("can not find result");
+        if (results.size() > 1)
+            throw new RuntimeException("The number of result sets should be = 1, but greater than 1");
+        return results.get(0);
+    }
+
+    /***
+     * 查询数据接口,只不过确定结果一定唯一
+     * 如果结果不唯一,则会抛出{@link RuntimeException} 异常
+     * @param condition 条件
+     * @return 唯一的数据
+     */
+    @Override
+    public JSONObject queryAndResultOnly([(${i.sd.daoData.pojoData.javaPojoClassName})] condition) {
+        return getResponseJson(
+                new ResMessage<>(SUCCESS.value(), true, WORK_SUCCESSFUL, queryOnlyResult(condition)));
+    }
+
+    /***
+     * 添加一条数据
+     * @param json json 格式数据,需要解析
+     * @return 返回是否添加成功
+     */
+    @Override
+    public JSONObject insert[(${i.sd.daoData.pojoData.javaPojoClassName})](String json) {
+        return insert[(${i.sd.daoData.pojoData.javaPojoClassName})](convertPojo(buildJSON(json), new [(${i.sd.daoData.pojoData.javaPojoClassName})]()).complete());
+    }
+
+    /***
+     * 插入一条数据
+     * @param [(${i.sd.daoData.pojoData.headLowercaseJavaClassName})] 数据封装实体类
+     * @return 是否插入成功
+     */
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public JSONObject insert[(${i.sd.daoData.pojoData.javaPojoClassName})](@NonNull [(${i.sd.daoData.pojoData.javaPojoClassName})] [(${i.sd.daoData.pojoData.headLowercaseJavaClassName})]) {
+        if (![(${i.sd.daoData.pojoData.headLowercaseJavaClassName})]Mapper.insertElements([(${i.sd.daoData.pojoData.headLowercaseJavaClassName})])) {
+            return getResponseJson(
+                    new ResMessage<>(SUCCESS.value(), false, INSERT_FAIL));
+        }
+
+        /* 如果一切正常 ,没有抛出异常 */
+        return getResponseJson(
+                new ResMessage<>(SUCCESS.value(), true, WORK_SUCCESSFUL));
+    }
+
+    /***
+     * 添加多条数据
+     * @param json json 字符串格式, 需要将json转成 array 数组
+     *             解析错误,则会抛出异常
+     * @return 返回json响应结果
+     */
+    @Override
+    public JSONObject insert[(${i.sd.daoData.pojoData.javaPojoClassName})]s(String json) {
+        if (json == null)
+            throw new NullPointerException("insert json is null");
+        try {
+            JSONArray jsonArray = JSONArray.parseArray(json);
+            List<[(${i.sd.daoData.pojoData.javaPojoClassName})]> [(${i.sd.daoData.pojoData.headLowercaseJavaClassName})]s  = new ArrayList<>();
+            jsonArray.forEach(
+                    array -> [(${i.sd.daoData.pojoData.headLowercaseJavaClassName})]s.add(convertPojo((JSONObject) array, new [(${i.sd.daoData.pojoData.javaPojoClassName})]()))
+            );
+            return insert[(${i.sd.daoData.pojoData.javaPojoClassName})]s([(${i.sd.daoData.pojoData.headLowercaseJavaClassName})]s);
+        }catch (JSONException ex) {
+            throw new RuntimeException("解析成json数组失败:" + ex.getMessage());
+        }
+    }
+
+    /***
+     * 插入多条数据, 集合形式
+     * @param [(${i.sd.daoData.pojoData.headLowercaseJavaClassName})]s 条目数量
+     * @return 返回json响应结果
+     */
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public JSONObject insert[(${i.sd.daoData.pojoData.javaPojoClassName})]s(@NonNull List<[(${i.sd.daoData.pojoData.javaPojoClassName})]> [(${i.sd.daoData.pojoData.headLowercaseJavaClassName})]s) {
+        if ([(${i.sd.daoData.pojoData.headLowercaseJavaClassName})]s.isEmpty()){
+            if (log.isWarnEnabled()) {
+                log.warn("添加多条数据操作中, 封账实体类为空, 无数据可添加");
+            }
+            return getResponseJson(
+                    new ResMessage<>(SUCCESS.value(), true, WORK_SUCCESSFUL));
+        }
+        if (![(${i.sd.daoData.pojoData.headLowercaseJavaClassName})]Mapper.insertElementsList([(${i.sd.daoData.pojoData.headLowercaseJavaClassName})]s)) {
+            return getResponseJson(
+                    new ResMessage<>(SUCCESS.value(), false, INSERT_FAIL));
+        }
+        return getResponseJson(
+                new ResMessage<>(SUCCESS.value(), true, WORK_SUCCESSFUL));
+    }
+
+
+    /***
+     * 更新一组数据
+     * @param json json 格式,需要解析成实体类
+     * @return 返回是否更新
+     */
+    @Override
+    public JSONObject update[(${i.sd.daoData.pojoData.javaPojoClassName})](String json) {
+        return update[(${i.sd.daoData.pojoData.javaPojoClassName})](convertPojo(buildJSON(json), new [(${i.sd.daoData.pojoData.javaPojoClassName})]()));
+    }
+
+    /***
+     * 更新一组数据
+     * @param condition 封装条件,更新数据,根据 mapper 来自由定义
+     * @return 是否更新成功
+     */
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public JSONObject update[(${i.sd.daoData.pojoData.javaPojoClassName})](@NonNull [(${i.sd.daoData.pojoData.javaPojoClassName})] condition) {
+         if (condition.getId() == null){
+             return insert[(${i.sd.daoData.pojoData.javaPojoClassName})](condition.complete());
+         }
+
+         if (![(${i.sd.daoData.pojoData.headLowercaseJavaClassName})]Mapper.updateElement(condition)) {
+             return getResponseJson(
+                     new ResMessage<>(SUCCESS.value(), false, UPDATE_WORK_FAIL));
+         }
+        return getResponseJson(
+                new ResMessage<>(SUCCESS.value(), true, WORK_SUCCESSFUL));
+    }
+
+    /***
+     * 删除一组数据
+     * @param json 删除条件 json
+     * @return 返回是否删除成功,封装成响应结果
+     */
+    @Override
+    public JSONObject delete[(${i.sd.daoData.pojoData.javaPojoClassName})](String json) {
+        return delete[(${i.sd.daoData.pojoData.javaPojoClassName})](convertPojo(buildJSON(json), new [(${i.sd.daoData.pojoData.javaPojoClassName})]()));
+    }
+
+    /***
+     * 删除一组数据
+     * @param condition 删除条件
+     * @return 返回是否删除成功
+     */
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public JSONObject delete[(${i.sd.daoData.pojoData.javaPojoClassName})](@NonNull [(${i.sd.daoData.pojoData.javaPojoClassName})] condition) {
+
+        if (condition.isNullObject()){
+            if (log.isWarnEnabled()) {
+                log.warn(DELETE_CONDITION_IS_NULL);
+            }
+            throw new RuntimeException(DELETE_CONDITION_IS_NULL);
+        }
+        if (![(${i.sd.daoData.pojoData.headLowercaseJavaClassName})]Mapper.deleteElement(condition)) {
+            return getResponseJson(
+                    new ResMessage<>(SUCCESS.value(), false, DELETE_FAIL));
+        }
+
+        return getResponseJson(
+                new ResMessage<>(SUCCESS.value(), true, WORK_SUCCESSFUL));
+    }
+
+
+    /***
+     * 删除一组数据,参数可能传数组,需要解析
+     * @param json 删除条件 json
+     * @return 返回是否删除成功,封装成响应结果
+     */
+    @Override
+    public JSONObject delete[(${i.sd.daoData.pojoData.javaPojoClassName})]List(String json) {
+
+        if (json == null)
+            throw new RuntimeException("接受到参数json为空");
+
+        try {
+            JSONArray jsonArray = JSONArray.parseArray(json);
+            List<[(${i.sd.daoData.pojoData.javaPojoClassName})]> [(${i.sd.daoData.pojoData.headLowercaseJavaClassName})]s  = new ArrayList<>();
+            jsonArray.forEach(
+                    array -> [(${i.sd.daoData.pojoData.headLowercaseJavaClassName})]s.add(convertPojo((JSONObject) array, new [(${i.sd.daoData.pojoData.javaPojoClassName})]()))
+            );
+            return delete[(${i.sd.daoData.pojoData.javaPojoClassName})]List([(${i.sd.daoData.pojoData.headLowercaseJavaClassName})]s);
+        }catch (JSONException ex) {
+            throw new RuntimeException("解析成json数组失败:" + ex.getMessage());
+        }
+    }
+
+    /***
+     * 删除多组数据
+     * @param [(${i.sd.daoData.pojoData.headLowercaseJavaClassName})]s 条件集合
+     * @return 响应结果
+     */
+    @Override
+    public JSONObject delete[(${i.sd.daoData.pojoData.javaPojoClassName})]List(@NonNull List<[(${i.sd.daoData.pojoData.javaPojoClassName})]> [(${i.sd.daoData.pojoData.headLowercaseJavaClassName})]s) {
+
+        if ([(${i.sd.daoData.pojoData.headLowercaseJavaClassName})]s.isEmpty()){
+            if (log.isWarnEnabled()) {
+                log.warn("删除条件集合为空");
+            }
+            return getResponseJson(
+                    new ResMessage<>(SUCCESS.value(), true, WORK_SUCCESSFUL));
+        }
+
+        [(${i.sd.daoData.pojoData.headLowercaseJavaClassName})]s.forEach(
+                this::delete[(${i.sd.daoData.pojoData.javaPojoClassName})]
+        );
+        return getResponseJson(
+                new ResMessage<>(SUCCESS.value(), true, WORK_SUCCESSFUL));
+    }
+
+    /***
+     * 真正删除一条数据, 不是假删除
+     * @param condition 条件
+     * @return 返回响应结果
+     */
+    @Override
+    public JSONObject reallyDelete(@NonNull [(${i.sd.daoData.pojoData.javaPojoClassName})] condition) {
+        return getResponseJson(
+                new ResMessage<>(SUCCESS.value(), [(${i.sd.daoData.pojoData.headLowercaseJavaClassName})]Mapper.reallyDeleteElement(condition), WORK_SUCCESSFUL));
+    }
+}

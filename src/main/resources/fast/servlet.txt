@@ -1,0 +1,53 @@
+package [(${location.generatePath})];
+
+
+import com.alibaba.fastjson.JSONObject;
+import com.black.core.aop.servlet.AnalyzedMethod;
+import com.black.core.aop.servlet.GlobalEnhanceRestController;
+import com.black.core.aop.servlet.RequiredVal;
+import com.black.core.sql.annotation.*;
+import com.black.core.sql.code.mapping.GlobalParentMapping;
+import com.black.core.util.LazyAutoWried;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.web.bind.annotation.*;
+
+import [(${mapperPath})].[(${source.className})]Mapper;
+import java.util.List;
+import java.util.Map;
+
+import static com.black.utils.ServiceUtils.*;
+
+/** 简单的增删改查, 只需要一个控制器, 和一个 mapper */
+@Log4j2 @CrossOrigin
+@GlobalEnhanceRestController @SuppressWarnings("all")
+public class [(${source.className})]Controller {
+
+    @LazyAutoWried
+    [(${source.className})]Mapper mapper;
+
+    @OpenSqlPage
+    @PostMapping("select[(${source.className})]")
+    @ApiJdbcProperty(response = "[(${source.lowName})][]", request = "[(${source.lowName})]{}", remark = "供应商查询接口")
+    Object select(@RequestBody JSONObject body){
+        return mapper.globalSelect("[(${source.tableName})]", body);
+    }
+
+    @PostMapping("insert[(${source.className})]")
+    @ApiJdbcProperty(request = "[(${source.lowName})][]", remark = "供应商批次插入接口")
+    Object insert(@RequestBody List<Map<String, Object>> array){
+        return mapper.globalInsertBatch("[(${source.tableName})]", array);
+    }
+
+    @AnalyzedMethod
+    @PostMapping("update[(${source.className})]")
+    @ApiJdbcProperty(request = "[(${source.lowName})]{}", remark = "供应商更新接口")
+    Object update(@RequestBody JSONObject body, @RequiredVal String id){
+        return mapper.globalUpdate("[(${source.tableName})]", body, ofMap("id", id));
+    }
+
+    @GetMapping("delete[(${source.className})]")
+    @ApiMethod(requestFormat = "{id:xxx}", remark = "供应商删除接口")
+    Object delete(@RequestParam String id){
+        return mapper.globalDelete("[(${source.tableName})]", ofMap("id", id));
+    }
+}

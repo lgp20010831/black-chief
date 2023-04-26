@@ -1,0 +1,27 @@
+<mapper>
+    <query id = "getAyc">
+        select * from
+        ayc
+        where ${df}
+        <if test = "notNull(map)">
+            <for target = "map" key ="key" value = "value" check = "ayc">
+                <if test="isArray(value) and key == 'id'">
+                    and id in (
+                    <for target="value" key="id" space=",">
+                        #{id}
+                    </for>
+                    )
+                    <else>
+                        and #{key} = #{value}
+                    </else>
+                </if>
+            </for>
+        </if>
+        order by account
+    </query>
+    <ns:decryptResponse xmlns:ns="http://wserver">
+        <ns:return>LI103N6092100001773716015-91W-C00/C*001</ns:return>
+    </ns:decryptResponse>
+</mapper>
+
+

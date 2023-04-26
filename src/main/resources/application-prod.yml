@@ -1,0 +1,65 @@
+spring:
+  datasource:
+    dynamic:
+      primary: one
+      datasource:
+        one:
+          driver-class-name: org.postgresql.Driver
+          url: jdbc:postgresql://10.20.252.201:5432/ldb_srm?stringtype=unspecified&reWriteBatchedInserts=true
+          username: etouwa
+          password: etouwa@0505
+        two:
+          driver-class-name: org.postgresql.Driver
+          url: jdbc:postgresql://10.20.252.201:5432/ldb_srm?stringtype=unspecified&reWriteBatchedInserts=true
+          username: etouwa
+          password: etouwa@0505
+
+#    url: jdbc:postgresql://192.168.1.241:5432/ldb_srm?stringtype=unspecified
+#    username: ldb
+#    password: LDB@2021
+    dbcp2:
+      test-while-idle: true
+      validation-query: SELECT 1;
+      time-between-eviction-runs-millis: 60000
+    hikari:
+      maximum-pool-size: 30
+      minimum-idle: 10
+  jpa:
+    show-sql: true
+mybatis-plus:
+  mapper-locations: classpath*:spring-mapper/*.xml
+  configuration:
+    log-impl: com.black.core.log.IbatisLog
+portal:
+  url: jdbc:postgresql://10.20.255.225:5432/ldb_notice?stringtype=unspecified
+  username: ldb
+  password: LDB@2021
+getpath: mark?i=error
+#配置 sql 片段映射
+mapping:
+  ut: updated_at = now()
+  it: inserted_at = now()
+  df: is_deleted = false
+  dt: deleted_at = now()
+  idt: is_deleted = true
+  uuid: id = uuid_in(md5(random()::text || now()::text)::cstring)
+  uuids: id = uuid_in(md5(random()::text || now()::text)::cstring)
+  dict:  ${arg4}.name "${arg1}"|left join dict ${arg4} on ${arg4}.p_code = '${arg2}' and ${arg4}.code = r.${arg3}|
+  m: 姓名 -> "${arg1}", 年龄 -> "${arg2}"
+datasource:
+  master:
+    username: ldb
+    password: LDB@2021
+    jdbcUrl: jdbc:postgresql://10.20.255.225:5432/ldb_srm?stringtype=unspecified
+    driverClassName: org.postgresql.Driver
+  second:
+    username: ldb
+    password: LDB@2021
+    jdbcUrl: jdbc:postgresql://10.20.255.225:5432/ldb_notice?stringtype=unspecified
+    driverClassName: org.postgresql.Driver
+hitp:
+  server:
+    port: 4000
+  client:
+    port: 4000
+    host: 127.0.0.1

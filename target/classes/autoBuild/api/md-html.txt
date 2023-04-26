@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>接口文档</title>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+</head>
+<style>
+.http-method,.http-url, .header, .request-example, .response-example{
+        background-color: aliceblue;
+        border: none;
+        border-radius: 3px;
+        padding: 15px;
+        font-size: 16px;
+        font-weight: bold;
+        font-family: 微软雅黑;
+        color: #605d5d;
+    }
+    .http-body{
+        width: 91%;
+        padding: 3px 1%;
+    }
+    h5{
+        font-weight: bold;
+        color: #a5a5a5;
+        font-size: 15px;
+    }
+    h3{
+        font-weight: bold;
+        font-family: 华文宋体;
+    }
+    summary{
+        outline:none;
+        margin-bottom: 5px;
+    }
+    .http-inter-box{
+        display: inline-flex;
+        flex-direction: column;
+        border-radius: 5px;
+        padding: 5px;
+        width: 90%;
+    }
+    .http-method-sort-url{
+        display: flex;
+        align-items: center;
+    }
+    .http-method-span{
+        color: #fff;
+        font-size: 16px;
+        padding: 5px 10px;
+        display: inline-block;
+        width: 66px;
+        border-radius: 3px;
+        text-align: center
+    }
+    .http-sort-span{
+        font-weight: bold;
+        font-size: 16px;
+        padding-left: 15%;
+    }
+    .http-method-sort{
+        width: 15%;
+    }
+    .http-url-span{
+        font-family: 华文宋体;
+        font-weight: bold;
+    }
+    .http-remark{
+        font-size: 13px;
+    }
+    .http-controller{
+        font-family: 华文宋体;
+        color: black;
+        font-weight: bold;
+        font-size: 22px;
+        text-align: left;
+    }
+    .controller-set{
+        width: 70%;
+        margin: auto;
+    }
+    .tryItOut{
+        width: 100px;
+        height: 30px;
+        left: 80%;
+        position: absolute;
+        font-size: 10px;
+        font-weight: 700;
+        padding: 5px 20px;
+        border: 2px solid gray;
+        border-radius: 4px;
+        box-shadow: 0 1px 2px rgb(0 0 0 / 10%);
+        font-family: Titillium Web,sans-serif;
+        color: #3b4151;
+        background: transparent;
+        cursor: pointer;
+    }
+    .requestInput{
+        font-size: 16px;
+        width: 93%;
+        min-height: 250px;
+        padding: 0px;
+        border: none;
+        border-radius: 4px;
+        outline: none;
+        /*background: hsla(0,0%,100%,.8);*/
+        font-family: Source Code Pro,monospace;
+        font-weight: 600;
+        color: #fff;
+        background: #41444e;
+    }
+    .executeButton{
+        width: 100%;
+        background-color: #4990e2;
+        color: #fff;
+        border-color: #4990e2;
+        font-size: 14px;
+        font-weight: 700;
+        padding: 5px 23px;
+        -webkit-transition: all .3s;
+        transition: all .3s;
+        border: 2px solid gray;
+        border-radius: 4px;
+        -webkit-box-shadow: 0 1px 2px rgba(0,0,0,.1);
+        box-shadow: 0 1px 2px rgba(0,0,0,.1);
+        font-family: Titillium Web,sans-serif;
+        cursor: pointer;
+    }
+    .responsePre{
+        height: 200px;
+        font-size: 16px;
+        width: 90%;
+        margin: 0;
+        padding: 10px;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        word-break: break-word;
+        -webkit-hyphens: auto;
+        -ms-hyphens: auto;
+        hyphens: auto;
+        border-radius: 4px;
+        background: #41444e;
+        overflow-wrap: break-word;
+        font-family: Source Code Pro,monospace;
+        font-weight: 600;
+        color: #fff;
+    }
+    .headerInput{
+        font-size: 16px;
+        width: 90%;
+        height: 50px;
+        min-height: 100px;
+        padding: 10px;
+        border: none;
+        border-radius: 4px;
+        outline: none;
+        /*background: hsla(0,0%,100%,.8);*/
+        font-family: Source Code Pro,monospace;
+        font-weight: 600;
+        color: #fff;
+        background: #41444e;
+    }
+    .requestParamInput{
+        display: block;
+        min-width: 100px;
+        margin: 10px 0;
+        padding: 8px 10px;
+        border: 1px solid #d9d9d9;
+        border-radius: 4px;
+        background: #fff;
+        width: 100%;
+        max-width: 340px;
+    }
+    .requestParamName{
+        display: block;
+        font-family: Open Sans,sans-serif;
+        color: #3b4151;
+        padding: 2px;
+    }
+</style>
+<body>
+<h1 style="text-align: center">接口文档:</h1>
+<code id="global-configuration" style="display: none">
+    [[(${globalConfig.json})]]
+</code>
+[# th:each="apiModel,apiModelStat : ${api}"]
+<details class="controller-set">
+    <summary class="http-controller">[[(${apiModel.sort})]]: [(${apiModel.modularRemark})]</summary>
+    [# th:each="apiInterface,apiInterfaceStat : ${apiModel.methods}"]
+    <details style="margin-left: 20px">
+        <summary>
+            <div class="http-inter-box" style="background: [(${apiInterface.bgColor})]; border: 1px solid [(${apiInterface.bgBorderColor})]; ">
+                <div class="http-method-sort-url">
+                    <div class="http-method-sort">
+                        <span class = "http-method-span" style="background-color: [(${apiInterface.bgBorderColor})];">[(${apiInterface.requestMethodString})]</span>
+                        <span class="http-sort-span">[(${apiInterface.sort})]: </span>
+                    </div>
+                    <div class="http-url-span">[(${apiInterface.requestUrlString})]</div>
+                </div>
+                <div style="display: flex;">
+                    <div style="width: 15%;"></div>
+                    <div class="http-remark" style="color: green;">[(${apiInterface.remark})]</div>
+                </div>
+            </div>
+        </summary>
+
+        <div class="http-body">
+                <code class="http-method-configuration" style="display: none">
+                    [[(${apiInterface.json})]]
+                </code>
+            <button class = "tryItOut">try it out</button>
+            <h5>请求方法</h5>
+            <div class="http-method">
+            [(${apiInterface.requestMethodString})]
+            </div>
+            <h5>请求地址</h5>
+            <div class="http-url">
+            [(${apiInterface.requestUrlString})]
+            </div>
+            <h3>HTTP请求示例</h3>
+            <h5>请求 header</h5>
+            <div class="header">
+                <code>
+                [# th:each="item,itemStat : ${apiInterface.headers}"]
+                [(${itemStat.current.key})] : [(${itemStat.current.value})]
+                [/]
+                </code>
+
+            </div>
+            <h5>请求 body</h5>
+            <pre class="request-example">
+                <code>
+[(${apiInterface.requestDome})]
+                </code>
+            </pre>
+            <h3>HTTP响应示例</h3>
+            <h5>响应 body</h5>
+            <pre class="response-example">
+            <code >
+[(${apiInterface.responseDome})]
+            </code>
+        </pre>
+        </div>
+    </details>
+    [/]
+</details>
+[/]
+<script>
+
+    //全局配置属性
+    let globalConfig;
+    //http 方法区内部配置属性
+    let httpMethodConfig;
+    //服务器地址前缀
+    let fetchPrefix;
+    //是否以及初始化了全局配置
+    let isInit = false;
+    $('.tryItOut').click(function (){
+        //初始化
+        init(this);
+        let tryOrCancel = $(this).text() !== 'cancel';
+        if (tryOrCancel){
+            $(this).text("cancel");
+            hideAndCreateElement(this);
+        }else {
+            $(this).text("try it out");
+            showElement(this);
+        }
+
+    })
+
+
+    //初始化方法
+    function init(but){
+        let parent = $(but).parent();
+        if (!isInit){
+            isInit = true;
+            console.log("初始化全局配置...");
+            let g_config = $("#global-configuration").text().trim();
+            console.log(g_config);
+            globalConfig = JSON.parse(g_config);
+            console.log(globalConfig);
+            fetchPrefix = globalConfig["address"];
+        }
+        console.log("初始化方法内部配置...");
+        let m_config = $(parent).children("code.http-method-configuration").text().trim();
+        console.log(m_config);
+        httpMethodConfig = JSON.parse(m_config);
+        console.log("方法内部配置: " + httpMethodConfig);
+    }
+
+    function showElement(but){
+        let parent = $(but).parent();
+        parent.children("pre.request-example").find("code").show();
+        parent.children("pre.response-example").find("code").show();
+        parent.children("div.header").find("code").show();
+        parent.children("button.executeButton").hide();
+        parent.find(".requestInput").remove();
+        parent.find(".responsePre").remove();
+        parent.find(".headerInput").remove();
+        parent.find(".requestParamInput").remove();
+        parent.find(".requestParamName").remove();
+    }
+
+    function hideAndCreateElement(but){
+        let parent = $(but).parent();
+        let request = parent.children("pre.request-example");
+        request.find("code").hide();
+        let response = parent.children("pre.response-example");
+        response.find("code").hide();
+
+        //解析 url 判断一共需要几个参数的输入框
+        let keys = parseUrl();
+        keys.map(item =>{
+            console.log("创建 key 为: " + item + "的输入框")
+            let requestParamName = $("<div class='requestParamName'>" + item + "</div>")
+            let requestParamInput = $("<input class='requestParamInput' name='" + item + "' placeholder='" + item + "'/>")
+            request.append(requestParamName);
+            request.append(requestParamInput);
+        })
+
+
+        //创建请求输入框
+        let requestInput = $("<textarea class='requestInput' name = 'text'/>");
+        requestInput.text(httpMethodConfig["requestInvokeDome"]);
+        request.append(requestInput);
+
+        //创建请求头输入框
+        let headerInput = $("<textarea class ='headerInput'/>")
+        headerInput.text(JSON.stringify(httpMethodConfig["headers"], null, 2));
+        let header = parent.find(".header");
+        header.children("code").hide();
+        header.append(headerInput);
+
+
+        //创建一个响应框
+        let responsePre = $("<pre class='responsePre'></pre>")
+        response.append(responsePre);
+
+        //创建提交按钮
+        let executeButton = $("<button class='executeButton'>execute</button>");
+        parent.append(executeButton);
+
+        $('.executeButton').click(function (){
+            doTryItOut(executeButton.parent());
+        })
+
+
+    }
+
+    //解析 url 返回所有参数 key 数组
+    function parseUrl(){
+        let url = httpMethodConfig["requestUrl"][0];
+        let index = url.indexOf("?");
+        if (index == -1){
+            return [];
+        }else {
+            let param = url.substring(index + 1);
+            let params = param.split("&");
+            return params.map(item => {
+                let kv = item.split("=");
+                return kv[0];
+            })
+        }
+    }
+
+    //获取参数输入框的数据生成完整 url 后缀
+    function getParamUrl(parent){
+        let url = httpMethodConfig["requestUrl"][0];
+        let index = url.indexOf("?");
+        if (index == -1){
+            return url;
+        }else {
+            let prefix = url.substring(0, index) + "?";
+            let inputs = parent.find(".requestParamInput");
+            let length = inputs.length;
+            for (let i = 0; i < length; i++) {
+                let item = inputs[i];
+                console.log(item)
+                let key = $(item).attr("name");
+                let val = $(item).val();
+                prefix = prefix + (key + "=" + val + "&");
+            }
+
+            if (prefix.endsWith("&")) {
+                return prefix.substring(0, prefix.length - 1);
+            }
+            return prefix;
+        }
+    }
+
+    //发送请求
+    function doTryItOut(parent){
+        if (httpMethodConfig["mulitPartRequest"]){
+            parent.find(".responsePre").text("不支持 mulit part 请求...");
+            return;
+        }
+        //拿到 url
+        let url = getCompleteUrl(getParamUrl(parent));
+        console.log("url:" + url);
+        //拿到 http method
+        let method = httpMethodConfig["requestMethod"][0];
+        console.log("method:" + method);
+        //拿到 header
+        let headers = JSON.parse(getTrimVal(parent.children("div.header").find("textarea")));
+        console.log("headers: " + headers);
+        console.log("发送请求: " + method + " -- url: " + url);
+        let requestBody = getTrimVal(parent.children("pre.request-example").find("textarea"));
+        $.ajax({
+            url: url,
+            method: method,
+            data: requestBody,
+            beforeSend: setHeaders(headers),
+            success: function (result){
+                console.log(result);
+                parent.find(".responsePre").text(JSON.stringify(result, null, 2));
+            },
+            error: function (error){
+                console.log(error)
+                parent.find(".responsePre").text(JSON.stringify(error, null, 2));
+            }
+        });
+    }
+
+    //将 header map 设置到请求里
+    function setHeaders(headers){
+        return function (XMLHttpRequest){
+            $.each(headers, function (k, v){
+                XMLHttpRequest.setRequestHeader(k, v);
+            })
+        }
+    }
+
+    function caseHeadersToMap(headers){
+        let headerMap = {};
+        headers.map(item => {
+            let kv = item.split(":");
+            headerMap[kv[0].trim()] = kv[1].trim();
+        })
+        return headerMap;
+    }
+
+    function getTrimText(obj){
+        if (typeof obj == 'string'){
+            return obj.trim();
+        }else {
+            return $(obj).text().trim();
+        }
+    }
+
+    function getTrimVal(obj){
+        if (typeof obj == 'string'){
+            return obj.trim();
+        }else {
+            return $(obj).val().trim();
+        }
+    }
+
+    // 将url截取拿到第一个url
+    function getUrl(urls){
+        return urls.split("or")[0].trim();
+    }
+
+    function getCompleteUrl(url){
+        return fetchPrefix + url;
+    }
+
+</script>
+</body>
+</html>

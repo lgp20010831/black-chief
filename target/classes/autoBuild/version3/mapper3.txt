@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="[(${source.daoPath})].[(${source.className})]Mapper">
+
+       <!--   实体类对应 mapper -->
+      <resultMap id="resultMap" type="[(${source.className})]">[# th:each="field,fieldStat : ${source.dataSheetData.fieldObjects}"]
+            <result column="[(${field.dataFieldName})]" property="[(${field.javaFieldName})]" javaType="[(${field.javaType})]" jdbcType="[(${field.jdbcType})]"/>
+      [/] </resultMap>
+
+[# th:if="${source.dataSheetData.master}"]
+     <!--   关联表对应 实体类map -->
+      <resultMap id="resultMapRelevancy" type="[(${source.className})]" extends="pojoMapId">
+        [# th:if="${source.lowName} != null"][# th:each="one,oneStat : ${source.dataSheetData.oneWithOneSubTables}"]
+            <association property = "[(${one.headLowercaseJavaClassName})]" column = "[(${source.dataSheetData.primaryKey})]" javaType="[(${one.javaPojoClassName})]" select = "select[(${one.javaPojoClassName})]"/>
+      [/][/][# th:if="${source.dataSheetData.oneWithMoreSubTables} != null"][# th:each="more,moreStat : ${source.dataSheetData.oneWithMoreSubTables}"]
+            <collection property="[(${more.headLowercaseJavaClassName})]s" column ="[(${source.dataSheetData.primaryKey})]" javaType="ArrayList" ofType="[(${more.javaPojoClassName})]" select ="select[(${more.javaPojoClassName})]"/>
+      [/][/]</resultMap>[/]
+
+    [# th:if="${source.dataSheetData.master}"][# th:each="sub,subStat : ${source.dataSheetData.subTables}"]
+        <!--   查询从表: [(${sub.tableName})] -->
+    <select id = "select[(${sub.javaPojoClassName})]" resultType="[(${sub.javaPojoClassName})]">
+        select * from [(${sub.tableName})] where [(${sub.relationKey})] = #{[(${source.dataSheetData.primaryKey})]} and is_deleted = false
+    </select>
+    [/][/]
+
+    <!--   提供一个复杂查询的模板 -->
+    <select id = "complexSelect" resultType ="HashMap">
+        SELECT t.* FROM [(${source.tableName})] t WHERE is_deleted = false
+    </select>
+
+    <!--  条件查询 -->
+    <select id="queryElements" resultType="[(${source.className})]" parameterType="[(${source.className})]" resultMap="resultMap[# th:if="${source.dataSheetData.master}"]Relevancy[/]">
+        SELECT * FROM [(${source.tableName})] WHERE is_deleted = false
+            <if test= "data != null">[# th:each="field,fieldStat : ${source.dataSheetData.fieldObjects}"]
+                <if test="data.[(${field.javaFieldName})] != null">
+                    AND [(${field.dataFieldName})] = #{data.[(${field.javaFieldName})]}
+                </if>[/]
+            </if>
+    </select>
+
+    <!--  添加数据列表 -->
+    <insert id="insertElementsList" parameterType="[(${source.className})]">
+      INSERT INTO [(${source.tableName})]([# th:each="field,fieldStat : ${source.dataSheetData.fieldObjects}"][(${field.dataFieldName})][# th:unless="${fieldStat.last}"], [/][/]) VALUES
+        <foreach collection="list" item="data" index="index" separator=",">
+            ([# th:each="field,fieldStat : ${source.dataSheetData.fieldObjects}"]#{data.[(${field.javaFieldName})]}[# th:unless="${fieldStat.last}"], [/][/])
+        </foreach>
+    </insert>
+
+    <!--   更新数据 -->
+    <update id="updateElement" parameterType="[(${source.className})]">
+        UPDATE [(${source.tableName})] SET
+        <trim suffixOverrides=",">[# th:each="field,fieldStat : ${source.dataSheetData.fieldObjects}"]
+            <if test="data.[(${field.javaFieldName})] != null">
+                [(${field.dataFieldName})] = #{data.[(${field.javaFieldName})]},
+            </if>[/]
+        </trim>
+       WHERE is_deleted = false AND id = #{data.id}
+    </update>
+
+    <!--  假删除数据  -->
+    <delete id="deleteElement" parameterType="[(${source.className})]">
+       UPDATE [(${source.tableName})] SET is_deleted=true, deleted_at = now()
+          WHERE is_deleted = false
+                  <if test= "data != null">[# th:each="field,fieldStat : ${source.dataSheetData.fieldObjects}"]
+                      <if test="data.[(${field.javaFieldName})] != null">
+                          AND [(${field.dataFieldName})] = #{data.[(${field.javaFieldName})]}
+                      </if>[/]
+                  </if>
+    </delete>
+</mapper>

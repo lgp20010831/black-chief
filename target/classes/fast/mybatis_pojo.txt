@@ -1,0 +1,26 @@
+package [(${location.generatePath})];
+
+import lombok.Data;
+import com.black.ibtais.IbatisBean;
+import com.black.core.json.Trust;
+import io.swagger.annotations.ApiModelProperty;
+import com.baomidou.mybatisplus.annotation.*;
+
+import java.math.*;
+import java.util.Date;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+
+@TableName("[(${source.tableName})]")
+@Data @Trust @SuppressWarnings("all")
+public class [(${source.className})] extends IbatisBean<[(${source.className})]>{
+
+    private static final long serialVersionUID = 1L;
+
+ [# th:each="field,fieldStat : ${source.tableMetadata.columnMetadatas}"]
+    @ApiModelProperty("[(${field.remarks})]")
+    [(${field.fieldAnnotation})][# th:if="${field.javaFieldName} == 'id'"] @TableId[/]
+    private [(${field.javaTypeName})] [(${field.javaFieldName})];
+
+  [/]
+}

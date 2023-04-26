@@ -1,0 +1,53 @@
+package [(${location.generatePath})];
+
+import com.alibaba.fastjson.JSONObject;
+import com.black.api.GetApiProperty;
+import com.black.api.PostApiProperty;
+import com.black.core.sql.annotation.OpenSqlPage;
+import com.black.core.annotation.ChiefServlet;
+import com.black.core.autoTree.builder.ApiRemark;
+import com.black.core.sql.annotation.OpenTransactional;
+import com.black.sql_v2.action.AbstractSqlOptServlet;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.io.Serializable;
+import java.util.List;
+
+@ApiRemark("[(${source.remark})]")
+@ChiefServlet("[(${source.lowName})]") @Log4j2 @OpenTransactional @SuppressWarnings("all")
+public class [(${source.className})]Controller extends AbstractSqlOptServlet{
+
+    public String getTableName(){
+        return "[(${source.tableName})]";
+    }
+
+
+    //****************************************************************
+    //          A   U   T   O           C   R   E   A   T   E
+    //****************************************************************
+
+    @OpenSqlPage
+    @PostApiProperty(url = "list", request = "$S: [(${source.tableName})]{}  + {pageSize:每页数量, pageNum:当前页数}",
+            response = "[(${source.tableName})][]", remark = "列表查询", hide = true)
+    Object list(@RequestBody JSONObject json){
+        return list0(json);
+    }
+
+    @GetApiProperty(url = "queryById", response = "[(${source.tableName})]{}", remark = "根据id查询", hide = true)
+    Object queryById(@RequestParam Serializable id){
+        return queryById0(id);
+    }
+
+    @PostApiProperty(url = "save", request = "[(${source.tableName})]{}", remark = "更新/添加", hide = true)
+    void save(@RequestBody JSONObject json){
+        save0(json);
+    }
+
+    @GetApiProperty(url = "deleteById", remark = "根据id删除", hide = true)
+    void deleteById(@RequestParam Serializable id){
+        deleteById0(id);
+    }
+
+}

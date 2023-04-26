@@ -1,0 +1,43 @@
+package [(${source.aopPath})];
+
+
+import com.black.core.mybatis.source.IbatisAopRollBackTemplate;
+import com.black.core.mvc.page.PageArgumentHolder;
+import lombok.extern.log4j.Log4j2;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Pointcut;
+import org.springframework.stereotype.Component;
+
+
+import javax.servlet.http.HttpServletRequest;
+import java.lang.reflect.Method;
+
+
+@Log4j2
+@Aspect
+@Component
+@SuppressWarnings("all")
+public class AopTemplate extends IbatisAopRollBackTemplate {
+
+    public AopTemplate(HttpServletRequest request, PageArgumentHolder holder) {
+        super(request, holder);
+    }
+
+    /** 拦截地址 */
+    @Pointcut("execution(* [(${source.controllerPath})].*.*(..))")
+    void aopCut() {
+    }
+
+    /**
+     * 拦截方法, 主要对控制器进行拦截
+     * @param point 控制方法的句柄
+     * @return 返回最终结果
+     * @throws Throwable 异常
+     */
+    @Around("aopCut()")
+    Object enhance(ProceedingJoinPoint point) throws Throwable{
+        return enhanceByTemplate(point);
+    }
+}

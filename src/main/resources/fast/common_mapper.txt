@@ -1,0 +1,16 @@
+package [(${location.generatePath})];
+
+import com.black.core.sql.annotation.GlobalConfiguration;
+import com.black.core.sql.annotation.GlobalPlatform;
+import com.black.core.sql.annotation.GlobalSetPlatform;
+import com.black.core.sql.code.mapping.GlobalParentMapping;
+
+
+@GlobalConfiguration(value = "[(${alias})]")
+//@GlobalSetPlatform("amend[], update[]")
+//@GlobalPlatform("select[], insert[], update[], delete[]")
+public interface [(${mapperName})] extends GlobalParentMapping {
+
+
+
+}

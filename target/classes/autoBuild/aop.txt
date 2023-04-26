@@ -1,0 +1,133 @@
+package [(${a.scannerPath})];
+
+import com.alibaba.fastjson.JSONObject;
+import com.black.core.aop.AopAutoSearch;
+import com.black.core.aop.AopRecord;
+import com.black.core.json.JSONConvert;
+import com.black.core.util.CentralizedExceptionHandling;
+import com.black.core.response.ResMessage;
+import lombok.extern.log4j.Log4j2;
+import org.apache.tomcat.util.http.fileupload.impl.FileSizeLimitExceededException;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Pointcut;
+import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import javax.servlet.http.HttpServletRequest;
+import java.lang.reflect.InvocationTargetException;
+
+import static com.black.core.response.Code.*;
+import static com.black.core.response.Code.NULL_WARM;
+import static com.black.core.response.Code.UPLOAD_FILE_FAIL;
+import static com.black.core.response.ConstantPool.*;
+import static com.black.core.response.VariablePool.*;
+
+@Log4j2
+@Aspect
+@Component
+@SuppressWarnings("all")
+public class AopHandler extends JSONConvert {
+
+    @Autowired  /** aop 工具类 */
+    AopAutoSearch aopAutoSearch;
+
+    @Autowired  /** http 请求单例 */
+    HttpServletRequest request;
+
+    @Pointcut("execution(* [(${a.cd.scannerPath})].*.*(..))")
+    void invokeCut(){}
+
+    @Around("invokeCut()")
+    Object logInfo(ProceedingJoinPoint point)
+    throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+        aopAutoSearch.ifControllerDo(point, aopRecord -> {
+                loggerInfo(aopRecord);
+                return null;
+        });
+
+        Object result = null;
+        try {
+
+            long startTime = System.currentTimeMillis();
+            result = point.proceed(point.getArgs());
+             if (log.isInfoEnabled()) {
+                 log.info("程序执行时间: {} 毫秒", (System.currentTimeMillis() - startTime));
+             }
+        } catch (Throwable e) {
+
+            /* logo for error */
+            CentralizedExceptionHandling.handlerException(e);
+
+            /* matching error */
+            if (e instanceof NullPointerException)
+                result = new ResMessage<>(NULL_WARM.value(), false, e.getMessage());
+
+            else if (e instanceof RuntimeException)
+                result = new ResMessage<>(HANDLER_FAIL.value(), false, e.getMessage());
+
+            else if (e instanceof FileSizeLimitExceededException)
+                result = new ResMessage<>(UPLOAD_FILE_FAIL.value(), false, "文件上传最大不能超过10MB");
+            else
+
+            /* 构造 result */
+            result = new ResMessage<Object>(HANDLER_FAIL.value(), false, WORK_FAIL);
+
+        }finally{
+           /*
+                       如果接口方法返回值并不是  ResMessage 类型，则直接返回肯定会报错
+                       所以需要获取返回值，判断类型,进行转类型,这里值判断了如果是 json 类型
+                       则转成 json
+             */
+            MethodSignature methodSignature = (MethodSignature) point.getSignature();
+
+            //拿到方法返回值
+            final Class<?> returnType = methodSignature.getReturnType();
+
+            if (result == null)
+                result = new ResMessage<>(HANDLER_FAIL.value(), false, WORK_OVER);
+            if (!result.getClass().equals(returnType)){
+
+                if (log.isInfoEnabled()) {
+                    log.info("result type with return type inequality");
+                }
+
+                Class<?> signatureReturnType = methodSignature.getReturnType();
+                if (JSONObject.class.equals(signatureReturnType)) {
+                    result = getResponseJson(result);
+                }else if (String.class.equals(signatureReturnType))
+                {
+                    result = toJsonString(result);
+                }else {
+                    if (log.isErrorEnabled()) {
+                        log.error("Cannot convert to the specified response type：{}", returnType);
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    /** 打印 logo */
+    void loggerInfo(AopRecord aopRecord){
+        try {
+
+            if (log.isInfoEnabled()){
+                log.info("接口调用 ===> [Controller: {} ] ===> [Method: {} ] ===> Args Body: {} ",
+                        aopRecord.getControllerClass().getSimpleName(), aopRecord.getControllerMethod().getName(), aopRecord.showArgs());
+                }
+
+        }catch (Throwable e){
+            if (e instanceof NullPointerException){
+                if (aopRecord == null)
+                    return;
+            if (log.isInfoEnabled()){
+                log.info("接口调用 ===> [Controller: {} ] ===> [Method: {} ] ===> Args Body: {} ",
+                        aopRecord.getControllerClass().getSimpleName(), aopRecord.getControllerMethod().getName(), "can not resolve args");
+                }
+            }
+        }
+    }
+}

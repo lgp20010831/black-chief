@@ -1,0 +1,29 @@
+package [(${source.pojoPath})];
+
+import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.black.core.autoTree.builder.ApiRemark;
+import com.black.core.json.Ignore;
+[# th:if="${source.dataSheetData.pojoEnhance}"]import com.black.core.tools.BaseBean;
+import com.black.core.tools.DefaultValue;
+import com.black.core.tools.IgnoreTime;
+import com.black.core.json.Trust;
+import com.black.core.tools.Time;
+import com.black.core.tools.UUID;[/]
+import lombok.*;
+[# th:each="field,fieldStat : ${source.dataSheetData.fieldObjects}"][# th:unless="${field.javaFieldClassPath}==null"]
+import [(${field.javaFieldClassPath})];[/][/]
+import java.util.List;
+
+
+@Time   @Trust   @Data
+@TableName("[(${source.tableName})]")
+@SuppressWarnings("all")
+@NoArgsConstructor
+public class [(${source.className})][# th:if="${source.dataSheetData.pojoEnhance}"] extends BaseBean<[(${source.className})]>[/] {
+
+[# th:each="field,fieldStat : ${source.dataSheetData.fieldObjects}"]
+    [# th:if="${field.javaFieldName}=='id'"]@UUID @TableId [/]
+    [# th:if="${field.javaType}=='Boolean'"]@DefaultValue("false") [/]private [(${field.javaType})] [(${field.javaFieldName})];
+ [/]
+}

@@ -1,0 +1,12 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.black.core.aop.config.GlobalAopAutoConfiguration,\
+com.black.core.config.SpringAutoConfiguration
+
+org.springframework.context.ApplicationListener=\
+com.black.core.aop.listener.EnableAopStartListener,\
+com.black.core.spring.ChiefApplicationRunner
+
+org.springframework.boot.SpringApplicationRunListener=\
+com.black.core.aop.listener.GlobalAopRunnerListener,\
+com.black.core.run.SpringRunnerPrint,\
+com.black.callback.ChiefProjectSpringApplicationRunListener

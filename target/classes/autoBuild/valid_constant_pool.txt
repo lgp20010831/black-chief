@@ -1,0 +1,10 @@
+package [(${p.scannerPath})];
+
+@SuppressWarnings("ALL")
+public class ValidConstantPool {
+
+[# th:each="field,fieldStat : ${p.fields}"]
+    public static final String [(${fieldStat.current.key})] = "[(${fieldStat.current.value})]";
+
+[/]
+}

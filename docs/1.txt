@@ -1,0 +1,48 @@
+[33m===============================================[0;39m[33m       测试控制器:  [DataController]  [0;39m[33m===============================================[0;39m[33m======>       测试接口方法: [insertBatch][0;39m[33m===> request [POST] url: http://localhost:1003/srm/ayc/insertBatch[0;39m[94m===> request [POST] Body: 
+[
+   {
+      "isDeleted":false,
+      "name":"example",
+      "id":"3d359687-f5ea-4304-ac31-9712afd72261",
+      "age":0,
+      "account":"example"
+   }
+
+][0;39m[33m do execute .... please wait[0;39m[33mexecute finish, take [6295] ms[0;39m[31minvoke error ===> 
+org.apache.http.conn.HttpHostConnectException: Connect to localhost:1003 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused: connect[0;39m[33m --------------------end--------------------- [0;39m[33m======>       测试接口方法: [save][0;39m[33m===> request [POST] url: http://localhost:1003/srm/ayc/save[0;39m[94m===> request [POST] Body: 
+{
+   "isDeleted":false,
+   "name":"example",
+   "id":"ebe8fcff-4812-492f-8203-7078c30a23ce",
+   "age":0,
+   "account":"example"
+}[0;39m[33m do execute .... please wait[0;39m[33mexecute finish, take [4081] ms[0;39m[31minvoke error ===> 
+org.apache.http.conn.HttpHostConnectException: Connect to localhost:1003 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused: connect[0;39m[33m --------------------end--------------------- [0;39m[33m======>       测试接口方法: [update][0;39m[33m===> request [POST] url: http://localhost:1003/srm/ayc/update[0;39m[94m===> request [POST] Body: 
+{
+   "isDeleted":false,
+   "name":"example",
+   "id":"99eef540-81cd-4a27-bb90-35431558b389",
+   "age":0,
+   "account":"example"
+}[0;39m[33m do execute .... please wait[0;39m[33mexecute finish, take [4121] ms[0;39m[31minvoke error ===> 
+org.apache.http.conn.HttpHostConnectException: Connect to localhost:1003 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused: connect[0;39m[33m --------------------end--------------------- [0;39m[33m======>       测试接口方法: [select][0;39m[33m===> request [POST] url: http://localhost:1003/srm/ayc/list[0;39m[94m===> request [POST] Body: 
+{
+   "isDeleted":false,
+   "name":"example",
+   "pageSize":1,
+   "id":"b262e102-8d91-4714-80ee-b9d3c4c177b2",
+   "pageNum":1,
+   "age":0,
+   "account":"example"
+}[0;39m[33m do execute .... please wait[0;39m[33mexecute finish, take [4108] ms[0;39m[31minvoke error ===> 
+org.apache.http.conn.HttpHostConnectException: Connect to localhost:1003 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused: connect[0;39m[33m --------------------end--------------------- [0;39m[33m======>       测试接口方法: [findSingle][0;39m[33m===> request [POST] url: http://localhost:1003/srm/ayc/findSingle[0;39m[94m===> request [POST] Body: 
+{
+   "isDeleted":false,
+   "name":"example",
+   "id":"26168633-9ab1-4213-862e-fd2aa35d3c36",
+   "age":0,
+   "account":"example"
+}[0;39m[33m do execute .... please wait[0;39m[33mexecute finish, take [4076] ms[0;39m[31minvoke error ===> 
+org.apache.http.conn.HttpHostConnectException: Connect to localhost:1003 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused: connect[0;39m[33m --------------------end--------------------- [0;39m[33m======>       测试接口方法: [illDel][0;39m[33m===> request [GET] url: http://localhost:1003/srm/ayc/illDel?id=f4dfe601-50e4-4ba4-92c5-13b16529deda[0;39m[33m do execute .... please wait[0;39m[33mexecute finish, take [4104] ms[0;39m[31minvoke error ===> 
+org.apache.http.conn.HttpHostConnectException: Connect to localhost:1003 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused: connect[0;39m[33m --------------------end--------------------- [0;39m[33m======>       测试接口方法: [delete][0;39m[33m===> request [GET] url: http://localhost:1003/srm/ayc/delete?id=5c67f9e9-64c2-4d92-9e54-c49237170bdd[0;39m[33m do execute .... please wait[0;39m[33mexecute finish, take [4100] ms[0;39m[31minvoke error ===> 
+org.apache.http.conn.HttpHostConnectException: Connect to localhost:1003 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused: connect[0;39m[33m --------------------end--------------------- [0;39m[33m总共测试接口数量: [7], 成功: [0], 失败: [7][0;39m

@@ -1,0 +1,47 @@
+
+[# th:each="controller,controllerStat : ${api}"]
+
+--------------------------------------------------------------------------------------------
+ [(${controller.remark})]:
+--------------------------------------------------------------------------------------------
+
+[# th:each="apiInterface,apiInterfaceStat : ${controller.restInterfaces}"]
+
+---
+#### [(${apiInterface.remark})]
+```
+httpMethods: [# th:each="m,mStat : ${apiInterface.httpMethods}"][(${m})]  [/]
+httpUrls: [# th:each="u,uStat : ${apiInterface.urls}"][(${u})]
+[/]
+```
+
+##### 参数
+
+|类型|名称|说明|是否必需|
+|---|---|---|---|[# th:each="p,pStat : ${apiInterface.requestListDetails}"]
+|**[(${p.type})]**|**[(${p.name})]**| [(${p.remark})] | [(${p.required})] |[/]
+
+
+##### HTTP请求示例
+
+###### 请求 header
+```
+[# th:each="item,itemStat : ${apiInterface.requestHeaders}"]
+[(${itemStat.current.key})] : [(${itemStat.current.value})]
+[/]
+```
+
+###### 请求 body
+```
+[(${apiInterface.requestExample})]
+```
+
+
+##### HTTP响应示例
+
+###### 响应 body
+```````````````````````````````````````````````````````````````````````````````````
+[(${apiInterface.responseExample})]
+```````````````````````````````````````````````````````````````````````````````````
+--------------------------------------------------------------
+[/][/]
