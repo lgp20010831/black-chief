@@ -14,6 +14,7 @@ import lombok.extern.log4j.Log4j2;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
@@ -34,6 +35,11 @@ public class ConnectionManagement {
     public static void registerApplicationContext(SQLApplicationContext context){
         GlobalSQLConfiguration configuration = context.getConfiguration();
         registerListener(configuration.getDataSourceAlias(), context.getSQLRunningListeners());
+    }
+
+    public static void registerListeners(String alias, GlobalSQLRunningListener... listeners){
+        Collection<GlobalSQLRunningListener> queue = ConnectionManagement.listeners.computeIfAbsent(alias, al -> new LinkedBlockingQueue());
+        queue.addAll(Arrays.asList(listeners));
     }
 
     public static void registerListener(String alias, Collection<GlobalSQLRunningListener> listeners){

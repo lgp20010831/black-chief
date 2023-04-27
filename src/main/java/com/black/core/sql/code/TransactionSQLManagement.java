@@ -1,8 +1,12 @@
 package com.black.core.sql.code;
 
+import com.black.core.log.IoLog;
 import com.black.core.sql.SQLSException;
 import com.black.core.sql.code.config.GlobalSQLConfiguration;
 import com.black.core.sql.code.datasource.ConnectionManagement;
+import com.black.core.sql.code.log.Log;
+import com.black.core.sql.code.log.Log4jSqlLog;
+import com.black.core.sql.code.log.SystemLog;
 import com.black.core.util.Callables;
 import com.black.utils.LocalSet;
 import lombok.extern.log4j.Log4j2;
@@ -72,7 +76,7 @@ public class TransactionSQLManagement {
             for (TransactionHandler handler : handlers) {
                 if (loop.get(handler.getAlias())) {
                     if (log.isInfoEnabled()) {
-                        log.info("transaction interceptor do rollback: [{}]", handler.getConfiguration().getDataSourceAlias());
+                        log.info("transaction interceptor do rollback: [{}]", handler.getAlias());
                     }
                     handler.rollback();
                 }
@@ -83,7 +87,7 @@ public class TransactionSQLManagement {
                 if (loop.get(handler.getAlias())){
                     try {
                         if (log.isDebugEnabled()) {
-                            log.debug("transaction interceptor do commit: [{}]", handler.getConfiguration().getDataSourceAlias());
+                            log.debug("transaction interceptor do commit: [{}]", handler.getAlias());
                         }
                         handler.commit();
                     }finally {
@@ -91,7 +95,7 @@ public class TransactionSQLManagement {
                             handler.close();
                         }catch (RuntimeException re){
                             if (log.isWarnEnabled()) {
-                                log.warn("has error from close transaciton: [{}]", handler.getConfiguration().getDataSourceAlias());
+                                log.warn("has error from close transaciton: [{}]", handler.getAlias());
                             }
                         }
                     }
@@ -141,10 +145,19 @@ public class TransactionSQLManagement {
 
     public static class TransactionConnectionListener implements GlobalSQLRunningListener{
 
-        private final GlobalSQLConfiguration configuration;
+
+        private final Log sqlLog;
+
+        private final String alias;
 
         public TransactionConnectionListener(GlobalSQLConfiguration configuration) {
-            this.configuration = configuration;
+            sqlLog = configuration.getLog();
+            alias = configuration.getDataSourceAlias();
+        }
+
+        public TransactionConnectionListener(String alias){
+            this.alias = alias;
+            sqlLog = new SystemLog();
         }
 
         @Override
@@ -162,7 +175,7 @@ public class TransactionSQLManagement {
         public void createNewConnection(Connection connection, String alias) {
             Map<String, TransactionHandler> handlerMap = getHandlerMap(handlerCache);
             if (!handlerMap.containsKey(alias)){
-                DefaultTransactionHandler handler = new DefaultTransactionHandler(connection, configuration);
+                DefaultTransactionHandler handler = new DefaultTransactionHandler(connection, alias, sqlLog);
                 handlerMap.put(alias, handler);
                 if (log.isDebugEnabled()) {
                     log.debug("create a new transaction processor：[{}]", alias);

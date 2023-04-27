@@ -21,13 +21,13 @@
         <skipTests>true</skipTests>
     </properties>
     <dependencies>
-        <dependency>
-            　　<groupId>com.sun</groupId>
-            　　<artifactId>tools</artifactId>
-            　　<version>1.8</version>
-            　　<scope>system</scope>
-            　　<systemPath>C:/Program Files/Java/jdk1.8.0_241/lib/tools.jar</systemPath>
-        </dependency>
+<!--        <dependency>-->
+<!--            　　<groupId>com.sun</groupId>-->
+<!--            　　<artifactId>tools</artifactId>-->
+<!--            　　<version>1.8</version>-->
+<!--            　　<scope>system</scope>-->
+<!--            　　<systemPath>C:/Program Files/Java/jdk1.8.0_241/lib/tools.jar</systemPath>-->
+<!--        </dependency>-->
         <!-- https://mvnrepository.com/artifact/org.ow2.asm/asm -->
         <dependency>
             <groupId>org.ow2.asm</groupId>
@@ -378,7 +378,7 @@
                             </execution>
                         </executions>
                         <configuration>
-                            <finalName>open-chief-sdk</finalName>
+                            <finalName>open-black-chief</finalName>
 
                             <artifactSet>
                                 <includes>
@@ -404,7 +404,7 @@
                                     <include>org.postgresql:postgresql</include>
                                     <include>org.checkerframework:checker-qual</include>
                                     <include>io.netty:netty-all</include>
-<!--                                    <include>mysql:mysql-connector-java</include>-->
+                                    <include>mysql:mysql-connector-java</include>
                                     <include>dom4j:dom4j</include>
                                     <include>xml-apis:xml-apis</include>
                                     <include>org.eclipse.paho:org.eclipse.paho.client.mqttv3</include>
@@ -421,6 +421,7 @@
                                     <include>ognl:ognl</include>
                                     <include>org.javassist:javassist</include>
 <!--                                    <include>io.minio:minio</include>-->
+                                    <include>org.ow2.asm:asm</include>
                                 </includes>
                                 <excludes>
                                     <exclude>sql/**</exclude>
@@ -436,21 +437,21 @@
                     </plugin>
 
         </plugins>
-<!--        <resources>-->
-<!--            <resource>-->
-<!--                <directory>src/main/resources</directory>-->
-<!--                <excludes>-->
-<!--                    <exclude>application.yml</exclude>-->
-<!--                    <exclude>application-home.yml</exclude>-->
-<!--                    <exclude>application-prod.yml</exclude>-->
-<!--                    <exclude>spring-mapper/**</exclude>-->
-<!--                    <exclude>sql/**</exclude>-->
-<!--                    <exclude>**.png</exclude>-->
-<!--                    <exclude>**.xlsm</exclude>-->
-<!--                    <exclude>**.xls</exclude>-->
-<!--                </excludes>-->
-<!--            </resource>-->
-<!--        </resources>-->
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <excludes>
+                    <exclude>application.yml</exclude>
+                    <exclude>application-home.yml</exclude>
+                    <exclude>application-prod.yml</exclude>
+                    <exclude>spring-mapper/**</exclude>
+                    <exclude>sql/**</exclude>
+                    <exclude>**.png</exclude>
+                    <exclude>**.xlsm</exclude>
+                    <exclude>**.xls</exclude>
+                </excludes>
+            </resource>
+        </resources>
     </build>
 
 </project>

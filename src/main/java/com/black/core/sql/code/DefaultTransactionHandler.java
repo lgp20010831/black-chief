@@ -4,6 +4,7 @@ import com.black.core.sql.SQLSException;
 import com.black.core.sql.code.config.GlobalSQLConfiguration;
 import com.black.core.sql.code.datasource.ConnectionManagement;
 import com.black.core.sql.code.log.Log;
+import com.black.core.sql.code.log.SystemLog;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -12,24 +13,33 @@ public class DefaultTransactionHandler implements TransactionHandler{
 
     private boolean close = true;
     private Connection connection;
-    private final GlobalSQLConfiguration configuration;
+    private final String alias;
+    private final Log log;
 
-    public DefaultTransactionHandler(Connection connection, GlobalSQLConfiguration configuration) {
+    public DefaultTransactionHandler(Connection connection, String alias){
+        this(connection, alias, new SystemLog());
+    }
+    
+    public DefaultTransactionHandler(Connection connection, String alias, Log log) {
         this.connection = connection;
-        this.configuration = configuration;
+        this.alias = alias;
+        this.log = log;
+        
     }
 
     public void setConnection(Connection connection) {
         this.connection = connection;
     }
 
+
+    @Override
     public GlobalSQLConfiguration getConfiguration() {
-        return configuration;
+        return null;
     }
 
     @Override
     public String getAlias() {
-        return configuration.getDataSourceAlias();
+        return alias;
     }
 
     @Override
@@ -37,20 +47,24 @@ public class DefaultTransactionHandler implements TransactionHandler{
         return connection;
     }
 
+    public Log getLog() {
+        return log;
+    }
+
     @Override
     public void commit() {
-        Log log = configuration.getLog();
+        Log log = getLog();
         if (!isOpen()){
             if (log.isDebugEnabled()) {
                 log.debug("Cannot commit at this time because it is " +
-                        "controlled by an external method transaction" + configuration.getDataSourceAlias());
+                        "controlled by an external method transaction" + alias);
             }
             return;
         }
         try {
             if (ConnectionManagement.checkConnection(connection)){
                 if (log.isDebugEnabled()) {
-                    log.debug("==> commit transaction: [" + configuration.getDataSourceAlias() + "]");
+                    log.debug("==> commit transaction: [" + alias + "]");
                 }
                 connection.commit();
             }else {
@@ -60,19 +74,19 @@ public class DefaultTransactionHandler implements TransactionHandler{
             }
 
         } catch (SQLException e) {
-            ConnectionManagement.closeCurrentConnection(configuration.getDataSourceAlias());
+            ConnectionManagement.closeCurrentConnection(alias);
             throw new SQLSException("commit sql fail", e);
         }
     }
 
     @Override
     public void rollback() {
-        Log log = configuration.getLog();
+        Log log = getLog();
         try {
             if (!isOpen()){
                 if (log.isDebugEnabled()) {
                     log.debug("Cannot roll back at this time because it is " +
-                            "controlled by an external method transaction" + configuration.getDataSourceAlias());
+                            "controlled by an external method transaction" + alias);
                 }
                 return;
             }
@@ -81,12 +95,12 @@ public class DefaultTransactionHandler implements TransactionHandler{
                 String savePointAlias = SaveManager.getSavePointAlias(getAlias());
                 if (savePointAlias != null){
                     if (log.isDebugEnabled()) {
-                        log.debug("<== rollback transaction: [" + configuration.getDataSourceAlias() + "] of save point: [" + savePointAlias + "}");
+                        log.debug("<== rollback transaction: [" + alias + "] of save point: [" + savePointAlias + "}");
                     }
                     connection.rollback(SaveManager.getSavePoint(getAlias(), savePointAlias));
                 }else {
                     if (log.isDebugEnabled()) {
-                        log.debug("<== rollback transaction: [" + configuration.getDataSourceAlias() + "]");
+                        log.debug("<== rollback transaction: [" + alias + "]");
                     }
 
                     connection.rollback();
@@ -99,9 +113,9 @@ public class DefaultTransactionHandler implements TransactionHandler{
 
         } catch (SQLException e) {
             if (log.isErrorEnabled()) {
-                log.error("rollback data source fail: " + configuration.getDataSourceAlias());
+                log.error("rollback data source fail: " + alias);
             }
-            ConnectionManagement.closeCurrentConnection(configuration.getDataSourceAlias());
+            ConnectionManagement.closeCurrentConnection(alias);
             throw new SQLSException("rollback fail", e);
         }finally {
             SaveManager.clear();
@@ -110,11 +124,11 @@ public class DefaultTransactionHandler implements TransactionHandler{
 
     @Override
     public void close() {
-        Log log = configuration.getLog();
+        Log log = getLog();
         try {
             if (!close){
                 if (log.isDebugEnabled()) {
-                    log.debug("===> close transaction: [" + configuration.getDataSourceAlias() + "]");
+                    log.debug("===> close transaction: [" + alias + "]");
                 }
                 if (!connection.getAutoCommit()){
                     connection.setAutoCommit(true);
@@ -122,14 +136,14 @@ public class DefaultTransactionHandler implements TransactionHandler{
             }else {
                 if (log.isDebugEnabled()) {
                     log.debug("Cannot close transaction at this time because it is " +
-                            "controlled by an external method transaction" + configuration.getDataSourceAlias());
+                            "controlled by an external method transaction" + alias);
                 }
             }
         } catch (SQLException e) {
             if (log.isErrorEnabled()) {
-                log.error("close transaction fail: " + configuration.getDataSourceAlias());
+                log.error("close transaction fail: " + alias);
             }
-            ConnectionManagement.closeCurrentConnection(configuration.getDataSourceAlias());
+            ConnectionManagement.closeCurrentConnection(alias);
             throw new SQLSException("close transaction fail: ", e);
         }finally {
             close = true;
@@ -138,11 +152,11 @@ public class DefaultTransactionHandler implements TransactionHandler{
 
     @Override
     public void open() throws SQLException {
-        Log log = configuration.getLog();
+        Log log = getLog();
         try {
             if (close){
                 if (log.isDebugEnabled()) {
-                    log.debug("==> open transaction: [" + configuration.getDataSourceAlias() + "]");
+                    log.debug("==> open transaction: [" + alias + "]");
                 }
                 if (connection.getAutoCommit()){
                     connection.setAutoCommit(false);
@@ -150,14 +164,14 @@ public class DefaultTransactionHandler implements TransactionHandler{
             }else {
                 if (log.isDebugEnabled()) {
                     log.debug("Cannot open transaction at this time because it is " +
-                            "controlled by an external method transaction" + configuration.getDataSourceAlias());
+                            "controlled by an external method transaction" + alias);
                 }
             }
         } catch (SQLException e) {
             if (log.isErrorEnabled()) {
-                log.error("open transaction fail: " + configuration.getDataSourceAlias());
+                log.error("open transaction fail: " + alias);
             }
-            ConnectionManagement.closeCurrentConnection(configuration.getDataSourceAlias());
+            ConnectionManagement.closeCurrentConnection(alias);
             throw e;
         }finally {
             close = false;

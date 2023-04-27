@@ -4,6 +4,11 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.util.TypeUtils;
+import com.black.bin.InstanceBeanManager;
+import com.black.bin.InstanceType;
+import com.black.core.cache.TypeConvertCache;
+import com.black.core.chain.GroupBy;
+import com.black.core.convert.TypeHandler;
 import com.black.map.CompareBody;
 import com.black.core.builder.Sort;
 import com.black.core.chain.GroupUtils;
@@ -17,6 +22,8 @@ import com.black.core.sql.SQLSException;
 import com.black.core.sql.code.util.SQLUtils;
 import com.black.core.tools.BeanUtil;
 import com.black.core.util.*;
+import com.black.scan.ChiefScanner;
+import com.black.scan.ScannerManager;
 import com.black.syntax.TextParseUtils;
 import com.black.throwable.BreakException;
 import lombok.Getter;
@@ -27,6 +34,7 @@ import org.springframework.util.StringUtils;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -36,6 +44,140 @@ import java.util.function.Function;
 
 @SuppressWarnings("all")
 public class ServiceUtils {
+
+    public static Object getByExpression(Object ele, String expression){
+        if (ele == null){
+            return null;
+        }
+        if (!StringUtils.hasText(expression)){
+            return ele;
+        }
+        String[] instructs = expression.split(".");
+        Object object = ele;
+        for (String instruct : instructs) {
+            if (object == null){
+                break;
+            }
+            Class<Object> primordialClass = BeanUtil.getPrimordialClass(object);
+            if (Collection.class.isAssignableFrom(primordialClass) || primordialClass.isArray()){
+                Integer index = com.black.utils.TypeUtils.castToInt(instruct);
+                List<Object> list = SQLUtils.wrapList(object);
+                object = list.get(index);
+            }else if (Map.class.isAssignableFrom(primordialClass)){
+                Map<String, Object> map = (Map<String, Object>) object;
+                object = map.get(instruct);
+            }else {
+                ClassWrapper<Object> classWrapper = ClassWrapper.get(primordialClass);
+                FieldWrapper fieldWrapper = classWrapper.getField(instruct);
+                if (fieldWrapper != null){
+                    object = fieldWrapper.getValue(object);
+                }else {
+                    object = null;
+                }
+            }
+        }
+        return object;
+    }
+
+    public static String lastName(String... array){
+        if (array.length == 0){
+            return null;
+        }
+        return array[array.length - 1];
+    }
+
+    public static String firstName(String... array){
+        if (array.length == 0){
+            return null;
+        }
+        return array[0];
+    }
+
+    public static <T> List<T> filterList(List<T> list, GroupBy<Object, T> by){
+        return new ArrayList<>(GroupUtils.singleGroupArray(list, by).values());
+    }
+
+
+    public static <T> List<Class<T>> scanAndLoadType(String packageName, Class<T> type){
+        List<Class<T>> list = new ArrayList<>();
+        ChiefScanner scanner = ScannerManager.getScanner();
+        Set<Class<?>> classSet = scanner.load(packageName);
+        for (Class<?> clazz : classSet) {
+            if (BeanUtil.isSolidClass(clazz) && type.isAssignableFrom(clazz)){
+                list.add((Class<T>) clazz);
+            }
+        }
+        return list;
+    }
+
+    public static <T> List<T> scanAndLoad(String packageName, Class<T> type){
+        List<T> list = new ArrayList<>();
+        ChiefScanner scanner = ScannerManager.getScanner();
+        Set<Class<?>> classSet = scanner.load(packageName);
+        for (Class<?> clazz : classSet) {
+            if (BeanUtil.isSolidClass(clazz) && type.isAssignableFrom(clazz)){
+                Object instance = InstanceBeanManager.instance(clazz, InstanceType.REFLEX_AND_BEAN_FACTORY);
+                list.add((T) instance);
+            }
+        }
+        return list;
+    }
+
+    public static <T> T getJavaEnumByName(String name, Class<T> type){
+        if (!type.isEnum()) {
+            throw new IllegalStateException("type is not enum");
+        }
+        ClassWrapper<?> classWrapper = BeanUtil.getPrimordialClassWrapper(type);
+        for (FieldWrapper field : classWrapper.getFields()) {
+            if (!Modifier.isStatic(field.get().getModifiers())){
+                continue;
+            }
+            String fn = field.getName();
+            if (fn.equalsIgnoreCase(name)){
+                return (T) field.getValue(null);
+            }
+        }
+        return null;
+    }
+
+    public static <T> T mappingBean(T target, Object dataBean){
+        if (dataBean != null && target != null) {
+            JSONObject json = JsonUtils.letJson(dataBean);
+            return mapping(target, json);
+        } else {
+            return target;
+        }
+    }
+
+    public static <T> T mapping(T target, Map<String, Object> data){
+        ClassWrapper<?> classWrapper = BeanUtil.getPrimordialClassWrapper(target);
+        Collection<FieldWrapper> fields = classWrapper.getFields();
+        for (FieldWrapper field : fields) {
+            Class<?> type = field.getType();
+            if (!SetGetUtils.hasSetMethod(field.getField())) {
+                continue;
+            }
+            if (!data.containsKey(field.getName())){
+                continue;
+            }
+            Object value = data.get(field.getName());
+            if (value == null){
+                field.setNullValue(target);
+            }
+            TypeHandler typeHandler = TypeConvertCache.initAndGet();
+            Object convert = typeHandler.convert(type, value);
+            if (Collection.class.isAssignableFrom(type)){
+                Collection<Object> fieldValue = (Collection<Object>) field.getValue(target);
+                fieldValue.addAll((Collection<?>) convert);
+            }else if (Map.class.isAssignableFrom(type)){
+                Map<Object, Object> fieldValue = (Map<Object, Object>) field.getValue(target);
+                fieldValue.putAll((Map<?, ?>) convert);
+            }else {
+                SetGetUtils.invokeSetMethod(field.getField(), convert, target);
+            }
+        }
+        return target;
+    }
 
     //根据key取出每个元素然后根据连接符连接
     public static String appendItem(List<Map<String, Object>> source, String key, String interval){

@@ -182,6 +182,15 @@ public class ElementWrapper implements Wrapper<Element> {
         return attrs;
     }
 
+    public Map<String, Object> getAttrMap(){
+        Map<String, Attribute> attrs = getAttrs();
+        Map<String, Object> data = new LinkedHashMap<>();
+        this.attrs.forEach((k, v) -> {
+            data.put(k, v.getData());
+        });
+        return data;
+    }
+
     public Map<String, List<ElementWrapper>> getElements() {
         return elements;
     }

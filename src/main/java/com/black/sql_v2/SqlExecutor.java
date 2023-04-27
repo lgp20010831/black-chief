@@ -72,6 +72,9 @@ public class SqlExecutor implements NativeSqlAdapter {
         DataSource dataSource = dataSourceBuilder.getDataSource();
         this.name = name;
         ConnectionManagement.registerDataSource(name, dataSource);
+        //保证事务
+        ConnectionManagement.registerListeners(name,
+                new TransactionSQLManagement.TransactionConnectionListener(name));
         BeanUtil.mappingBean(globalEnvironment, environment);
     }
 
@@ -224,7 +227,7 @@ public class SqlExecutor implements NativeSqlAdapter {
                 int count = queryCount(tableName, effectCondition);
                 if (count <= 0){
                     //go insert
-                    insert(tableName, addArray(params, param, true));
+                    insert(tableName, addArray(params, json, true));
                     return;
                 }
             }
@@ -232,7 +235,7 @@ public class SqlExecutor implements NativeSqlAdapter {
             update(tableName, param, addArray(params, effectCondition, true));
         }else {
             //go insert
-            insert(tableName, addArray(params, param, true));
+            insert(tableName, addArray(params, json, true));
         };
     }
 

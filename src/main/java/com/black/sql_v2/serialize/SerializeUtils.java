@@ -240,22 +240,33 @@ public class SerializeUtils {
         for (FieldWrapper field : fields) {
             String name = field.getName();
             Class<?> type = field.getType();
+            CustomSerialize annotation = field.getAnnotation(CustomSerialize.class);
             Object val = json.get(name);
-            Object deserialize = deserialize(val, field.getType());
-            if (Collection.class.isAssignableFrom(type)){
-                Class<?>[] genericVal = ReflectionUtils.genericVal(field.get(), type);
-                if (genericVal.length == 1){
-                    Class<?> genClazz = genericVal[0];
-                    Collection<?> collection = (Collection<?>) deserialize;
-                    Collection<Object> objectCollection = ServiceUtils.createCollection(type);
-                    for (Object ele : collection) {
-                        Object deserialized = deserialize(ele, genClazz);
-                        objectCollection.add(deserialized);
-                    }
-                    deserialize = objectCollection;
+            Object deserialize;
+            if (val == null){
+                deserialize = null;
+            }else{
+                if (annotation != null){
+                    AvailCustomSerializer availCustomSerializer = InstanceBeanManager.instance(annotation.value(), InstanceType.BEAN_FACTORY_SINGLE);
+                    deserialize = availCustomSerializer.deSerialize(val.toString());
+                }else {
+                    deserialize = deserialize(val, field.getType());
                 }
-            }
+                if (Collection.class.isAssignableFrom(type)){
+                    Class<?>[] genericVal = ReflectionUtils.genericVal(field.get(), type);
+                    if (genericVal.length == 1){
+                        Class<?> genClazz = genericVal[0];
+                        Collection<?> collection = (Collection<?>) deserialize;
+                        Collection<Object> objectCollection = ServiceUtils.createCollection(type);
+                        for (Object ele : collection) {
+                            Object deserialized = deserialize(ele, genClazz);
+                            objectCollection.add(deserialized);
+                        }
+                        deserialize = objectCollection;
+                    }
+                }
 
+            }
             field.setValue(instance, deserialize);
         }
         return instance;
@@ -281,7 +292,13 @@ public class SerializeUtils {
                 json.put(name, null);
                 continue;
             }
-            value = serializeValue(value);
+            CustomSerialize annotation = fieldWrapper.getAnnotation(CustomSerialize.class);
+            if (annotation != null){
+                AvailCustomSerializer availCustomSerializer = InstanceBeanManager.instance(annotation.value(), InstanceType.BEAN_FACTORY_SINGLE);
+                value = availCustomSerializer.toSerialize(value);
+            }else {
+                value = serializeValue(value);
+            }
             json.put(name, value);
         }
         return json;
