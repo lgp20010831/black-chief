@@ -279,6 +279,11 @@ public class SerializeUtils {
         if (bean instanceof Map){
             return JsonUtils.letJson(bean);
         }
+
+        if (bean instanceof String){
+            return JsonUtils.letJson(bean);
+        }
+
         if (bean instanceof Collection){
             throw new IllegalStateException("can not serialize collection to map");
         }

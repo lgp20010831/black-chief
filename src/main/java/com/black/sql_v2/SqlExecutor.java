@@ -337,8 +337,8 @@ public class SqlExecutor implements NativeSqlAdapter {
     }
 
     public QueryResultSetParser doExecute0(SqlOutStatement sqlOutStatement, Connection connection, Object... params){
-        GlobalEnvironment environment = GlobalEnvironment.getInstance();
-        LinkedBlockingQueue<SqlListener> listeners = environment.getListeners();
+        GlobalEnvironment globalEnvironment = GlobalEnvironment.getInstance();
+        LinkedBlockingQueue<SqlListener> listeners = globalEnvironment.getListeners();
         IoLog log = environment.getLog();
         try {
             sqlOutStatement = handlerStatement(sqlOutStatement, params);
@@ -367,12 +367,12 @@ public class SqlExecutor implements NativeSqlAdapter {
     }
 
     public QueryResultSetParser runSql(SqlOutStatement sqlOutStatement, String sql){
-        GlobalEnvironment environment = GlobalEnvironment.getInstance();
+        GlobalEnvironment globalEnvironment = GlobalEnvironment.getInstance();
         IoLog log = environment.getLog();
         log.info("[SQL] -- execute sql -- {}", sql);
         ResultSet resultSet = null;
         boolean invoke = false;
-        LinkedBlockingQueue<SqlRunntimeExecutor> sqlRunntimeExecutors = environment.getSqlRunntimeExecutors();
+        LinkedBlockingQueue<SqlRunntimeExecutor> sqlRunntimeExecutors = globalEnvironment.getSqlRunntimeExecutors();
         for (SqlRunntimeExecutor runntimeExecutor : sqlRunntimeExecutors) {
             if (runntimeExecutor.support(sqlOutStatement)) {
                 try {
@@ -419,9 +419,9 @@ public class SqlExecutor implements NativeSqlAdapter {
     }
 
     public Statement handlerJavaStatment(Statement statement, Object... params){
-        GlobalEnvironment environment = GlobalEnvironment.getInstance();
+        GlobalEnvironment globalEnvironment = GlobalEnvironment.getInstance();
         IoLog ioLog = getEnvironment().getLog();
-        LinkedBlockingQueue<JavaSqlStatementHandler> statementHandlers = environment.getJavaSqlStatementHandlers();
+        LinkedBlockingQueue<JavaSqlStatementHandler> statementHandlers = globalEnvironment.getJavaSqlStatementHandlers();
         P: for (Object param : params) {
             for (JavaSqlStatementHandler statementHandler : statementHandlers) {
                 String handlerName = SqlV2Utils.getName(statementHandler);
@@ -448,8 +448,8 @@ public class SqlExecutor implements NativeSqlAdapter {
     }
 
     private SqlOutStatement handlerStatement(SqlOutStatement sqlOutStatement, Object... params){
-        GlobalEnvironment environment = GlobalEnvironment.getInstance();
-        LinkedBlockingQueue<SqlStatementHandler> sqlStatementHandlers = environment.getSqlStatementHandlers();
+        GlobalEnvironment globalEnvironment = GlobalEnvironment.getInstance();
+        LinkedBlockingQueue<SqlStatementHandler> sqlStatementHandlers = globalEnvironment.getSqlStatementHandlers();
         for (Object param : params) {
             for (SqlStatementHandler statementHandler : sqlStatementHandlers) {
                 if (!statementHandler.supportStatement(sqlOutStatement)) {
@@ -469,8 +469,8 @@ public class SqlExecutor implements NativeSqlAdapter {
     }
 
     public void handlerResult(List<Map<String, Object>> dataList, SqlOutStatement statement, SqlV2Pack pack){
-        GlobalEnvironment environment = GlobalEnvironment.getInstance();
-        LinkedBlockingQueue<SqlResultHandler> resultHandlers = environment.getResultHandlers();
+        GlobalEnvironment globalEnvironment = GlobalEnvironment.getInstance();
+        LinkedBlockingQueue<SqlResultHandler> resultHandlers = globalEnvironment.getResultHandlers();
         Object[] params = pack.getParams();
         for (Object param : params) {
             for (SqlResultHandler statementHandler : resultHandlers) {
@@ -491,10 +491,10 @@ public class SqlExecutor implements NativeSqlAdapter {
 
 
     public SqlOutStatement createSelectStatement(String tableName, boolean alias, Object... params){
-        GlobalEnvironment environment = GlobalEnvironment.getInstance();
+        GlobalEnvironment globalEnvironment = GlobalEnvironment.getInstance();
         SqlStatementBuilder builder = null;
         Object targetParam = null;
-        LinkedBlockingQueue<SqlStatementBuilder> selectSqlBuilders = environment.getSelectSqlBuilders();
+        LinkedBlockingQueue<SqlStatementBuilder> selectSqlBuilders = globalEnvironment.getSelectSqlBuilders();
         loop: for (SqlStatementBuilder selectSqlBuilder : selectSqlBuilders) {
             for (Object param : params) {
                 if (selectSqlBuilder.support(param)) {
@@ -505,7 +505,7 @@ public class SqlExecutor implements NativeSqlAdapter {
             }
         }
         if (builder == null){
-            builder = environment.getDefaultSelectSqlBuilder();
+            builder = globalEnvironment.getDefaultSelectSqlBuilder();
         }
         environment.getLog().debug("[SQL] -- select statement builder is [{}]", SqlV2Utils.getName(builder));
         return builder.build(tableName, alias, targetParam);
