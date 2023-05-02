@@ -140,7 +140,6 @@ public class WorkFlowScheduler implements OpenComponent, EnabledControlRisePoten
 
     @Override
     public boolean premise() {
-        Class<?> mainClass = ChiefApplicationRunner.getMainClass();
-        return mainClass != null && AnnotationUtils.getAnnotation(mainClass, EnableWorkflowModule.class) != null;
+        return ChiefApplicationRunner.isPertain(EnableWorkflowModule.class);
     }
 }

@@ -83,13 +83,14 @@ public class Mysql8DatabaseMetadata extends AbstractDatabaseMetadata {
                 String typeName = columns.getString("DATA_TYPE");
                 //获取备注
                 String remarks = columns.getString("COLUMN_COMMENT");
-
+                String extra = columns.getString("EXTRA");
                 JdbcType jdbcType = JdbcType.getByName(typeName.toUpperCase());
 
                 //构造字段对象
                 DefaultColumnMetadata metadata = new DefaultColumnMetadata(columnName, -1, typeName, jdbcType == null ? -1 : jdbcType.getJdbcType());
                 metadata.setMetadata(defaultTableMetadata);
                 metadata.setRemarks(remarks);
+                metadata.setAutoIncrement("auto_increment".equalsIgnoreCase(extra));
                 columnMetadataMap.put(columnName, metadata);
             }
             columns.close();

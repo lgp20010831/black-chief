@@ -19,8 +19,32 @@
         <pagehelper.boot.version>1.3.0</pagehelper.boot.version>
         <spring-cloud.version>2020.0.4</spring-cloud.version>
         <skipTests>true</skipTests>
+<!--        &lt;!&ndash; 设置kotlin版本 &ndash;&gt;-->
+<!--        <kotlin.version>1.4.21</kotlin.version>-->
+<!--        &lt;!&ndash; 启用kotlin增量编译 &ndash;&gt;-->
+<!--        <kotlin.compiler.incremental>true</kotlin.compiler.incremental>-->
+
     </properties>
     <dependencies>
+
+
+<!--        kotlin -->
+
+        <!-- kotlin -->
+<!--        <dependency>-->
+<!--            <groupId>org.jetbrains.kotlin</groupId>-->
+<!--            <artifactId>kotlin-reflect</artifactId>-->
+<!--            <version>${kotlin.version}</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>org.jetbrains.kotlin</groupId>-->
+<!--            <artifactId>kotlin-stdlib-jdk8</artifactId>-->
+<!--            <version>${kotlin.version}</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>com.fasterxml.jackson.module</groupId>-->
+<!--            <artifactId>jackson-module-kotlin</artifactId>-->
+<!--        </dependency>-->
 <!--        <dependency>-->
 <!--            　　<groupId>com.sun</groupId>-->
 <!--            　　<artifactId>tools</artifactId>-->
@@ -435,6 +459,42 @@
                             </artifactSet>
                         </configuration>
                     </plugin>
+<!--&lt;!&ndash;            kotlin 编译 &ndash;&gt;-->
+<!--            <plugin>-->
+<!--                <groupId>org.jetbrains.kotlin</groupId>-->
+<!--                <artifactId>kotlin-maven-plugin</artifactId>-->
+<!--                <version>${kotlin.version}</version>-->
+<!--                <configuration>-->
+<!--                    <jvmTarget>1.8</jvmTarget>-->
+<!--                    <args>-->
+<!--                        <arg>-Xjsr305=strict</arg>-->
+<!--                    </args>-->
+<!--                    <compilerPlugins>-->
+<!--                        &lt;!&ndash; Spring使用动态代理需要所有Bean可继承，该插件为所有Bean添加open关键字 &ndash;&gt;-->
+<!--                        <plugin>spring</plugin>-->
+<!--                        &lt;!&ndash; 该插件为jpa实体类解决没有无参构造器的问题 &ndash;&gt;-->
+<!--                        &lt;!&ndash; <plugin>jpa</plugin> &ndash;&gt;-->
+<!--                        <plugin>no-arg</plugin>-->
+<!--                    </compilerPlugins>-->
+<!--                    <pluginOptions>-->
+<!--                        &lt;!&ndash; 有些持久层框架需要实体类需要无参构造器，使用该注解标注解决kotlin data class没有无参构造器的问题 &ndash;&gt;-->
+<!--                        <option>no-arg:annotation=com.example.annotations.NoArg</option>-->
+<!--                    </pluginOptions>-->
+<!--                </configuration>-->
+<!--                <dependencies>-->
+<!--                    <dependency>-->
+<!--                        <groupId>org.jetbrains.kotlin</groupId>-->
+<!--                        <artifactId>kotlin-maven-allopen</artifactId>-->
+<!--                        <version>${kotlin.version}</version>-->
+<!--                    </dependency>-->
+<!--                    <dependency>-->
+<!--                        <groupId>org.jetbrains.kotlin</groupId>-->
+<!--                        <artifactId>kotlin-maven-noarg</artifactId>-->
+<!--                        <version>${kotlin.version}</version>-->
+<!--                    </dependency>-->
+<!--                </dependencies>-->
+<!--            </plugin>-->
+
 
         </plugins>
         <resources>

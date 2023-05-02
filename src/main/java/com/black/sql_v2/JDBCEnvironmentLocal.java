@@ -3,26 +3,47 @@ package com.black.sql_v2;
 import com.black.core.util.Assert;
 
 import java.sql.Connection;
+import java.util.LinkedList;
 import java.util.Map;
 
 public class JDBCEnvironmentLocal {
 
-    private static final ThreadLocal<SqlV2Pack> sqlLocal = new ThreadLocal<>();
+    private static final ThreadLocal<LinkedList<SqlV2Pack>> sqlLocal = new ThreadLocal<>();
 
+    private static LinkedList<SqlV2Pack> init(){
+        LinkedList<SqlV2Pack> packs = sqlLocal.get();
+        if (packs == null){
+            packs = new LinkedList<>();
+            sqlLocal.set(packs);
+        }
+        return packs;
+    }
+
+    private static SqlV2Pack peek(){
+        return init().peek();
+    }
 
     public static void set(SqlV2Pack pack){
-        sqlLocal.set(pack);
+        LinkedList<SqlV2Pack> packs = init();
+        SqlV2Pack peek = packs.peek();
+        if (peek == null){
+            packs.add(pack);
+        }else {
+            if (!peek.getPassID().equals(pack.getPassID())) {
+                packs.addFirst(pack);
+            }
+        }
     }
 
     public static void setEnv(Map<String, Object> env){
-        SqlV2Pack sqlV2Pack = sqlLocal.get();
+        SqlV2Pack sqlV2Pack = peek();
         if (sqlV2Pack != null){
             sqlV2Pack.setEnv(env);
         }
     }
 
     public static SqlV2Pack getPack(){
-        return sqlLocal.get();
+        return peek();
     }
 
     public static Connection getConnection(){
@@ -58,7 +79,7 @@ public class JDBCEnvironmentLocal {
     }
 
     public static void remove(){
-        sqlLocal.remove();
+        init().poll();
     }
 
 

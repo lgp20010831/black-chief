@@ -5,25 +5,24 @@ import com.black.GlobalVariablePool;
 import com.black.core.aop.code.AopTaskIntercepet;
 import com.black.core.aop.code.HijackObject;
 import com.black.core.aop.servlet.result.*;
-
 import com.black.core.cache.AopControllerStaticCache;
 import com.black.core.chain.*;
 import com.black.core.factory.manager.FactoryManager;
 import com.black.core.json.JsonUtils;
 import com.black.core.mvc.response.Response;
-import com.black.core.util.CentralizedExceptionHandling;
-import com.black.core.util.ExceptionUtil;
 import com.black.core.query.ClassWrapper;
 import com.black.core.query.MethodWrapper;
 import com.black.core.servlet.HttpRequestUtil;
-import com.black.core.spring.ApplicationHolder;
+import com.black.core.util.CentralizedExceptionHandling;
 import com.black.core.util.Convert;
+import com.black.core.util.ExceptionUtil;
 import com.black.core.util.StringUtils;
+import com.black.holder.SpringHodler;
+import com.black.spring.ChiefSpringHodler;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.boot.ansi.AnsiColor;
 import org.springframework.boot.ansi.AnsiOutput;
@@ -48,13 +47,13 @@ import static com.black.core.response.Code.HANDLER_FAIL;
 @Adaptation(GetAopInterceptAdapter.class)
 public class AopControllerIntercept implements AopTaskIntercepet, CollectedCilent {
 
-    private final DefaultListableBeanFactory beanFactory;
-
     public static final String TASK_ALIAS = "http-around";
 
     public static final ThreadLocal<Throwable> voidResponseThrowLocal = new ThreadLocal<>();
 
     public static final ThreadLocal<BeforeWriteSession> writeResponseSessionLocal = new ThreadLocal<>();
+
+    public static final ThreadLocal<Class<?>> controllerTypeLocal = new ThreadLocal<>();
 
     public static Class<? extends Annotation> startPageClazz = OpenIbatisPage.class;
 
@@ -75,8 +74,6 @@ public class AopControllerIntercept implements AopTaskIntercepet, CollectedCilen
     private Collection<Object> resolvers;
 
     public AopControllerIntercept(){
-        BeanFactory beanFactory = ApplicationHolder.getBeanFactory();
-        this.beanFactory = (DefaultListableBeanFactory) beanFactory;
         AopControllerStaticCache.setControllerIntercept(this);
     }
 
@@ -185,6 +182,7 @@ public class AopControllerIntercept implements AopTaskIntercepet, CollectedCilen
         }
         Object servletResponse = enhanceResult ? response : result;
         if (hasResponseVoidWritor()){
+            controllerTypeLocal.set(clazz);
             resolveWriteResponse(methodWrapper, classWrapper, args);
         }
         return servletResponse;
@@ -307,12 +305,19 @@ public class AopControllerIntercept implements AopTaskIntercepet, CollectedCilen
         return chainResult;
     }
 
+    public DefaultListableBeanFactory getBeanFactory(){
+        DefaultListableBeanFactory beanFactory = ChiefSpringHodler.getChiefAgencyListableBeanFactory();
+        if (beanFactory == null){
+            beanFactory = SpringHodler.getListableBeanFactory();
+        }
+        return beanFactory;
+    }
 
     private Boolean hasResponseVoidWritor;
     private boolean hasResponseVoidWritor(){
         if (hasResponseVoidWritor == null){
             try {
-                beanFactory.getBean(ResponseVoidWritor.class);
+                getBeanFactory().getBean(ResponseVoidWritor.class);
                 hasResponseVoidWritor = true;
             }catch (Throwable e){
                 hasResponseVoidWritor = false;

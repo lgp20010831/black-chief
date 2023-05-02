@@ -1,5 +1,6 @@
 package com.black.core.spring.component;
 
+import com.black.core.spring.ChiefApplicationRunner;
 import com.black.core.spring.ChiefExpansivelyApplication;
 import com.black.core.spring.EnabledControlRisePotential;
 import com.black.core.spring.annotation.LazyLoading;
@@ -66,6 +67,6 @@ public class EnableFuryComponent implements PostComponentInstance, FilterCompone
 
 
     protected Annotation hasFuryAnnotation(Class<? extends Annotation> annotation, ChiefExpansivelyApplication application){
-        return application.getAnnotationByMainClass(annotation);
+        return ChiefApplicationRunner.getAnnotation(annotation);
     }
 }

@@ -157,10 +157,6 @@ public class SQLMapComponent implements OpenComponent, CollectedCilent, ChainPre
 
     @Override
     public boolean premise() {
-        Class<?> mainClass = ChiefApplicationRunner.getMainClass();
-        if (mainClass != null){
-            return mainClass.isAnnotationPresent(EnabledMapSQLApplication.class);
-        }
-        return false;
+        return ChiefApplicationRunner.isPertain(EnabledMapSQLApplication.class);
     }
 }

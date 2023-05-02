@@ -5,6 +5,7 @@ import com.black.core.sql.unc.*;
 import com.black.core.util.StringUtils;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -112,6 +113,10 @@ public class InsertStatement extends SqlOutStatement {
                 }
                 return false;
             });
+            Map<String, List<SqlVariable>> map = indexVariableCache.get(OperationType.INSERT);
+            if (map != null){
+                map.remove(columnName);
+            }
             if (willDelete.get() != null) {
                 for (SqlVariable variable : variables) {
                     if (variable.getOperationType() == OperationType.INSERT){

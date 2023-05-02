@@ -63,8 +63,8 @@ public class ChiefSqlMapResponsePlugin implements OperationBuilderPlugin, BeanFa
             if (!StringUtils.hasText(tableName)){
                 String tableNameMethodName = annotation.mappingTableNameMethodName();
                 HandlerMethod handlerMethod = findControllerType(operationContext);
-                Object bean = beanFactory.getBean(handlerMethod.getBean().toString());
-                Class<Object> primordialClass = BeanUtil.getPrimordialClass(bean);
+                Object bean = ChiefSwaggerUtils.getBean(handlerMethod, beanFactory);
+                Class<Object> primordialClass = BeanUtil.getPrimordialClass(handlerMethod.getBeanType());
                 ClassWrapper<Object> classWrapper = ClassWrapper.get(primordialClass);
                 MethodWrapper methodWrapper = classWrapper.getSingleMethod(tableNameMethodName);
                 Assert.notNull(methodWrapper, "unknown mapping table name method: " + tableNameMethodName);

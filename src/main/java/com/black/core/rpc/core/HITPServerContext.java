@@ -1,14 +1,10 @@
 package com.black.core.rpc.core;
 
 import com.black.bin.InstanceType;
-import com.black.nio.code.Configuration;
-import com.black.rpc.RpcServer;
-import com.black.rpc.RpcWebServerApplicationContext;
 import com.black.core.chain.*;
 import com.black.core.config.ApplicationConfigurationReader;
 import com.black.core.config.ApplicationConfigurationReaderHolder;
 import com.black.core.factory.manager.FactoryManager;
-import com.black.core.util.CentralizedExceptionHandling;
 import com.black.core.rpc.annotation.EnabledHitpServer;
 import com.black.core.rpc.annotation.HitpAction;
 import com.black.core.spring.ChiefApplicationRunner;
@@ -19,8 +15,11 @@ import com.black.core.spring.annotation.LazyLoading;
 import com.black.core.spring.annotation.LoadSort;
 import com.black.core.spring.driver.ApplicationDriver;
 import com.black.core.tools.BeanUtil;
+import com.black.core.util.CentralizedExceptionHandling;
+import com.black.nio.code.Configuration;
+import com.black.rpc.RpcServer;
+import com.black.rpc.RpcWebServerApplicationContext;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.core.annotation.AnnotationUtils;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -66,8 +65,7 @@ public class HITPServerContext implements OpenComponent, EnabledControlRisePoten
     }
 
     private EnabledHitpServer getAnnotation(){
-        Class<?> mainClass = ChiefApplicationRunner.getMainClass();
-        return AnnotationUtils.getAnnotation(mainClass, EnabledHitpServer.class);
+        return ChiefApplicationRunner.getAnnotation(EnabledHitpServer.class);
     }
 
     @Override
@@ -97,7 +95,6 @@ public class HITPServerContext implements OpenComponent, EnabledControlRisePoten
 
     @Override
     public boolean premise() {
-        Class<?> mainClass = ChiefApplicationRunner.getMainClass();
-        return mainClass != null && AnnotationUtils.getAnnotation(mainClass, EnabledHitpServer.class) != null;
+        return ChiefApplicationRunner.isPertain(EnabledHitpServer.class);
     }
 }

@@ -4,12 +4,8 @@ package com.black.core;
 import com.black.api.swagger.EnabledCastSwaggerToApi;
 import com.black.bin.ApplyProxyFactory;
 import com.black.bin.ProxyMetadata;
-import com.black.mq_v2.annotation.EnabledMqttExt;
-import com.black.mvc.MvcMappingRegister;
-import com.black.nest.NestDictController;
 import com.black.core.annotation.OpenChiefApplication;
 import com.black.core.aop.listener.EnableGlobalAopChainWriedModular;
-
 import com.black.core.aviator.annotation.EnabledGlobalAviatorLayer;
 import com.black.core.cache.ClassSourceCache;
 import com.black.core.data.annotation.EnabledDataTransferStation;
@@ -25,16 +21,18 @@ import com.black.core.mark.annotation.EnabledGlobalMarkHandler;
 import com.black.core.mybatis.plus.EnableAutoAdaptationDynamicllyIbaisPlus;
 import com.black.core.mybatis.source.annotation.EnableDynamicallyMultipleClients;
 import com.black.core.netty.annotation.EnableNettyAsynAdapter;
-import com.black.core.util.IntegratorScanner;
 import com.black.core.query.ClassWrapper;
 import com.black.core.spring.ChiefApplicationRunner;
 import com.black.core.spring.component.DefaultLoadDriver;
 import com.black.core.sql.annotation.EnabledMapSQLApplication;
 import com.black.core.sql.code.mapping.EnabledGlobalMapping;
+import com.black.core.util.IntegratorScanner;
+import com.black.mq_v2.annotation.EnabledMqttExt;
+import com.black.mvc.MvcMappingRegister;
+import com.black.nest.NestDictController;
 import lombok.extern.log4j.Log4j2;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
@@ -76,7 +74,7 @@ import java.util.Map;
 //@EnableWorkflowRefinedModule
 //@EnabledMQttClient("${ldb.mqtt.url}")
 @MapperScan({"com.example.springautothymeleaf.test"})
-@SpringBootApplication
+//@SpringBootApplication
 //@EnabledSqlPreExecution(position = {"sql/trigger.sql"})
 @EnabledGlobalThrowableManagement
 @EnableAutoAdaptationDynamicllyIbaisPlus

@@ -35,8 +35,9 @@ public class ResponseVoidWritor implements ResponseBodyAdvice {
      */
     @Override
     public boolean supports(MethodParameter returnType, Class converterType) {
+        Class<?> controllerType = AopControllerIntercept.controllerTypeLocal.get();
         //获取方法的所在类
-        Class<?> declaringClass = returnType.getDeclaringClass();
+        Class<?> declaringClass = controllerType == null ? returnType.getDeclaringClass() : controllerType;
         Method method = returnType.getMethod();
         Class<?> methodReturnType = method.getReturnType();
         GlobalEnhanceRestController annotation = AnnotationUtils.getAnnotation(declaringClass, GlobalEnhanceRestController.class);
@@ -66,48 +67,53 @@ public class ResponseVoidWritor implements ResponseBodyAdvice {
      */
     @Override
     public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType, Class selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
-        String subtype = selectedContentType.getSubtype();
-        if (!subtype.contains("json") && !subtype.contains("plain")){
-            if (log.isDebugEnabled()) {
-                log.debug("write void response fail, because response Content-type is not json");
+        try {
+            String subtype = selectedContentType.getSubtype();
+            if (!subtype.contains("json") && !subtype.contains("plain")){
+                if (log.isDebugEnabled()) {
+                    log.debug("write void response fail, because response Content-type is not json");
+                }
+                return body;
             }
-            return body;
-        }
-        Class<?> declaringClass = returnType.getDeclaringClass();
-        Class<? extends RestResponse> responseClassType = AopControllerIntercept.getResponseClassType(declaringClass);
-        final ThreadLocal<Throwable> throwableThreadLocal = AopControllerIntercept.voidResponseThrowLocal;
-        Throwable throwable = throwableThreadLocal.get();
-        RestResponse restResponse;
-        if (body instanceof RestResponse){
-            restResponse = (RestResponse) body;
-        }
-        else {
-            if (throwable == null){
-                restResponse = AopControllerIntercept.createRestResponse(responseClassType, GlobalVariablePool.HTTP_CODE_SUCCESSFUL,
-                        true, GlobalVariablePool.HTTP_MSG_SUCCESSFUL, body, null);
-            }else {
-                restResponse = AopControllerIntercept.createRestResponse(responseClassType, HANDLER_FAIL.value(),
-                        false, throwable instanceof RuntimeException ? throwable.getMessage() : GlobalVariablePool.HTTP_MSG_FAIL, throwable, null);
-                throwableThreadLocal.remove();
+            Class<?> declaringClass = returnType.getDeclaringClass();
+            Class<? extends RestResponse> responseClassType = AopControllerIntercept.getResponseClassType(declaringClass);
+            final ThreadLocal<Throwable> throwableThreadLocal = AopControllerIntercept.voidResponseThrowLocal;
+            Throwable throwable = throwableThreadLocal.get();
+            RestResponse restResponse;
+            if (body instanceof RestResponse){
+                restResponse = (RestResponse) body;
             }
+            else {
+                if (throwable == null){
+                    restResponse = AopControllerIntercept.createRestResponse(responseClassType, GlobalVariablePool.HTTP_CODE_SUCCESSFUL,
+                            true, GlobalVariablePool.HTTP_MSG_SUCCESSFUL, body, null);
+                }else {
+                    restResponse = AopControllerIntercept.createRestResponse(responseClassType, HANDLER_FAIL.value(),
+                            false, throwable instanceof RuntimeException ? throwable.getMessage() : GlobalVariablePool.HTTP_MSG_FAIL, throwable, null);
+                    throwableThreadLocal.remove();
+                }
+            }
+
+            ThreadLocal<BeforeWriteSession> responseSessionLocal = AopControllerIntercept.writeResponseSessionLocal;
+            BeforeWriteSession session = responseSessionLocal.get();
+            if (session != null){
+                List<ChiefBeforeWriteResolver> resolvers = session.getResolvers();
+                try {
+                    for (ChiefBeforeWriteResolver resolver : resolvers) {
+                        try {
+                            restResponse = resolver.resolver(restResponse, session.getArgs(), session.getMw(), session.getCw());
+                        }catch (Throwable e){
+                            log.warn("ChiefBeforeWriteResolver resolve fair: {}", e.getMessage());
+                        }
+                    }
+                }finally {
+                    responseSessionLocal.remove();
+                }
+            }
+            return restResponse;
+        }finally {
+            AopControllerIntercept.controllerTypeLocal.remove();
         }
 
-        ThreadLocal<BeforeWriteSession> responseSessionLocal = AopControllerIntercept.writeResponseSessionLocal;
-        BeforeWriteSession session = responseSessionLocal.get();
-        if (session != null){
-            List<ChiefBeforeWriteResolver> resolvers = session.getResolvers();
-            try {
-                for (ChiefBeforeWriteResolver resolver : resolvers) {
-                    try {
-                        restResponse = resolver.resolver(restResponse, session.getArgs(), session.getMw(), session.getCw());
-                    }catch (Throwable e){
-                        log.warn("ChiefBeforeWriteResolver resolve fair: {}", e.getMessage());
-                    }
-                }
-            }finally {
-                responseSessionLocal.remove();
-            }
-        }
-        return restResponse;
     }
 }

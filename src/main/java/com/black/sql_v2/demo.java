@@ -3,15 +3,14 @@ package com.black.sql_v2;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.black.api.JSONTool;
-import com.black.datasource.MybatisPlusDynamicDataSourceBuilder;
-import com.black.nest.NestManager;
-import com.black.role.UserLocal;
 import com.black.core.spring.util.ApplicationUtil;
 import com.black.core.sql.code.cascade.Strategy;
 import com.black.core.util.Av0;
+import com.black.datasource.MybatisPlusDynamicDataSourceBuilder;
+import com.black.nest.NestManager;
+import com.black.role.UserLocal;
 import com.black.sql_v2.print.IoLogResultPrinter;
 import com.black.sql_v2.result.SubsetSearchResultHandler;
-import com.black.sql_v2.with.WithAs;
 
 import java.util.List;
 
@@ -26,15 +25,13 @@ public class demo {
         environment.setInsertBatch(1000);
         environment.parseAndRegister("where[is_deleted = false], set[updated_at = now()], insert[is_deleted = false, inserted_at=now()]");
         environment.registerKeyAndValue(SqlType.INSERT, "create_user", UserLocal.getName());
+        environment.registerKeyAndValue(SqlType.INSERT, "age", 10);
         SubsetSearchResultHandler.strategy = Strategy.GROUP_BY;
 
         Environment optEnvironment = Sql.optEnvironment();
+        optEnvironment.setAutoSetId(true);
     }
 
-    static void withas(){
-        Sql.query("supplier",
-                WithAs.of("supplier_type", "st"), "$A: st.id = r.supplier_type_id");
-    }
 
     static void nest(){
         NestManager.init(MybatisPlusDynamicDataSourceBuilder.class);
@@ -60,6 +57,11 @@ public class demo {
         System.out.println(Sql.insertBatch("img", array));
     }
 
+    static void auto(){
+        Object o = Sql.insert("ayc", Av0.of("name", "lgp"));
+        System.out.println(o);
+    }
+
     static void delete(){
         Sql.delete("img", ofMap("src", "麻豆tv"));
     }
@@ -71,7 +73,8 @@ public class demo {
     public static void main(String[] args) {
         ApplicationUtil.programRunMills(() ->{
             prepare();
-            query2();
+            //query2();
+            auto();
         });
 
         //Sql.opt().save(new Ayc());

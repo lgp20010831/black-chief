@@ -1,11 +1,12 @@
 package com.black.sql;
 
 import com.alibaba.fastjson.JSONObject;
-import com.black.io.in.ObjectInputStream;
+import com.black.core.chain.GroupUtils;
 import com.black.core.sql.SQLSException;
 import com.black.core.sql.code.AliasColumnConvertHandler;
 import com.black.core.sql.code.util.SQLUtils;
 import com.black.core.util.StreamUtils;
+import com.black.io.in.ObjectInputStream;
 import com.black.utils.TypeUtils;
 
 import java.sql.ResultSet;
@@ -15,6 +16,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import static com.black.utils.ServiceUtils.patternGetValue;
+
+@SuppressWarnings("all")
 public class QueryResultSetParser {
 
     protected final ResultSet resultSet;
@@ -30,6 +34,10 @@ public class QueryResultSetParser {
     public QueryResultSetParser setConvertHandler(AliasColumnConvertHandler convertHandler) {
         this.convertHandler = convertHandler;
         return this;
+    }
+
+    public ResultSet getResultSet() {
+        return resultSet;
     }
 
     public void setFinish(Finish finish) {
@@ -140,6 +148,33 @@ public class QueryResultSetParser {
         List<JSONObject> list = jsonList();
         return StreamUtils.mapList(list, json -> JSONObject.toJavaObject(json, type));
     }
+
+
+    public Map<String, Map<String, Object>> singleGroup(String expression){
+        return GroupUtils.singleGroupArray(list(), map -> {
+            return String.valueOf(patternGetValue(map, expression));
+        });
+    }
+
+    public Map<String, List<Map<String, Object>>> listGroup(String expression){
+        return GroupUtils.groupArray(list(), map -> {
+            return String.valueOf(patternGetValue(map, expression));
+        });
+    }
+
+    public <T> Map<String, T> singleJavaGroup(String expression, Class<T> type){
+        return GroupUtils.singleGroupArray(javaList(type), map -> {
+            return String.valueOf(patternGetValue(map, expression));
+        });
+    }
+
+    public <T> Map<String, List<T>> listJavaGroup(String expression, Class<T> type){
+        return GroupUtils.groupArray(javaList(type), map -> {
+            return String.valueOf(patternGetValue(map, expression));
+        });
+    }
+
+
 
     public List<Map<String, Object>> list(){
         try {

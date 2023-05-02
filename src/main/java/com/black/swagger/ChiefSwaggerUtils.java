@@ -5,6 +5,7 @@ import com.black.core.query.FieldWrapper;
 import com.black.core.util.AnnotationUtils;
 import com.black.core.util.StringUtils;
 import io.swagger.annotations.ApiModel;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.web.method.HandlerMethod;
 import springfox.documentation.spi.service.contexts.OperationContext;
 import springfox.documentation.spi.service.contexts.RequestMappingContext;
@@ -12,6 +13,14 @@ import springfox.documentation.spring.web.WebMvcRequestHandler;
 
 public class ChiefSwaggerUtils {
 
+    public static Object getBean(HandlerMethod handlerMethod, BeanFactory beanFactory){
+        Object bean = handlerMethod.getBean();
+        if (bean instanceof String){
+            return beanFactory.getBean(bean.toString());
+        }else {
+            return bean;
+        }
+    }
 
     public static HandlerMethod findControllerType(OperationContext operationContext){
         ClassWrapper<? extends OperationContext> wrapper = ClassWrapper.get(operationContext.getClass());

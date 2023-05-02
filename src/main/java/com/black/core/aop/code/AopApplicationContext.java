@@ -1,5 +1,6 @@
 package com.black.core.aop.code;
 
+import com.black.core.spring.ChiefApplicationRunner;
 import com.black.mq_v2.proxy.aop.AopMqttProxyHybrid;
 import com.black.core.aop.annotation.ImportHybridRange;
 import com.black.core.aop.ibatis.AopIbatisRollBackHybrid;
@@ -70,7 +71,7 @@ public class AopApplicationContext {
 
     protected static void handlerSource(SpringApplication application){
         Class<?> applicationClass = application.getMainApplicationClass();
-        SpringBootApplication springBootApplication = AnnotationUtils.getAnnotation(applicationClass, SpringBootApplication.class);
+        SpringBootApplication springBootApplication = ChiefApplicationRunner.getAnnotation(SpringBootApplication.class);
         String[] basePackages = springBootApplication.scanBasePackages();
         Class<?>[] classes = springBootApplication.scanBasePackageClasses();
         Set<String> packages = new HashSet<>(Arrays.asList(basePackages));

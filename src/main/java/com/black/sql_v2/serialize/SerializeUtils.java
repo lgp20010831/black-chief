@@ -5,11 +5,13 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.CalendarCodec;
+import com.alibaba.fastjson.util.TypeUtils;
 import com.black.bin.InstanceBeanManager;
 import com.black.bin.InstanceType;
 import com.black.core.json.JsonUtils;
 import com.black.core.query.ClassWrapper;
 import com.black.core.query.FieldWrapper;
+import com.black.core.spring.util.ApplicationUtil;
 import com.black.core.sql.code.util.SQLUtils;
 import com.black.core.tools.BeanUtil;
 import com.black.core.util.Av0;
@@ -21,6 +23,7 @@ import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import static com.black.utils.TypeUtils.*;
 
@@ -66,6 +69,7 @@ public class SerializeUtils {
             objectMap.putAll(serialize(obj));
             return (T) objectMap;
         }
+
         if (Collection.class.isAssignableFrom(clazz)){
             Collection<Object> collection = ServiceUtils.createCollection(clazz);
             Collection<Object> objectCollection;
@@ -229,6 +233,14 @@ public class SerializeUtils {
         if (clazz.isAssignableFrom(obj.getClass())){
             return (T) obj;
         }
+
+        LinkedBlockingQueue<SerializeAdvocate> advocateQueue = GlobalSerializerAdvocateManager.getAdvocateQueue();
+        for (SerializeAdvocate advocate : advocateQueue) {
+            if (advocate.support(clazz)) {
+                return (T) advocate.deSerialize(obj.toString(), clazz);
+            }
+        }
+
         T instance = InstanceBeanManager.instance(clazz, InstanceType.REFLEX_AND_BEAN_FACTORY);
         if (instance instanceof SqlSerialize){
             return (T) ((SqlSerialize) instance).deserialize(obj.toString());
@@ -297,6 +309,7 @@ public class SerializeUtils {
                 json.put(name, null);
                 continue;
             }
+
             CustomSerialize annotation = fieldWrapper.getAnnotation(CustomSerialize.class);
             if (annotation != null){
                 AvailCustomSerializer availCustomSerializer = InstanceBeanManager.instance(annotation.value(), InstanceType.BEAN_FACTORY_SINGLE);
@@ -340,8 +353,11 @@ public class SerializeUtils {
             return jsonArray.toJSONString();
         }
 
-        if (value instanceof SqlSerialize){
-            return ((SqlSerialize) value).toSerialize();
+        LinkedBlockingQueue<SerializeAdvocate> advocateQueue = GlobalSerializerAdvocateManager.getAdvocateQueue();
+        for (SerializeAdvocate serializeAdvocate : advocateQueue) {
+            if (serializeAdvocate.support(valueClass)) {
+                return serializeAdvocate.toSerialize(value);
+            }
         }
 
         return value;
@@ -350,11 +366,24 @@ public class SerializeUtils {
     public static void main(String[] args) {
         Map<String, Object> map = serialize(new User());
         System.out.println(map);
-        User user = deserialize(map, User.class);
-        System.out.println(user);
-//
-        User javaObject = JSON.toJavaObject(new JSONObject(map), User.class);
-        System.out.println(javaObject);
+//        ApplicationUtil.programRunMills(() -> {
+//            User javaObject = JSON.toJavaObject(new JSONObject(map), User.class);
+//            System.out.println(javaObject);
+//        });
+//        ApplicationUtil.programRunMills(() ->{
+//            User user = deserialize(map, User.class);
+//            System.out.println(user);
+//        });
+        ApplicationUtil.programRunMills(() -> {
+            User user = com.black.utils.TypeUtils.cast(map, User.class, null);
+            System.out.println(user);
+        });
+        ApplicationUtil.programRunMills(() -> {
+            User user = TypeUtils.cast(map, User.class, null);
+            System.out.println(user);
+        });
+
+
     }
 
     @ToString

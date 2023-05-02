@@ -1,7 +1,5 @@
 package com.black.swagger;
 
-import com.black.datasource.DataSourceBuilderTypeManager;
-import com.black.core.util.CentralizedExceptionHandling;
 import com.black.core.query.ClassWrapper;
 import com.black.core.query.MethodWrapper;
 import com.black.core.sql.action.AutoMapperController;
@@ -11,10 +9,11 @@ import com.black.core.sql.annotation.ImportMapperAndPlatform;
 import com.black.core.sql.code.DataSourceBuilder;
 import com.black.core.sql.code.datasource.DataSourceBuilderManager;
 import com.black.core.sql.code.util.SQLUtils;
-import com.black.core.tools.BeanUtil;
 import com.black.core.util.Assert;
+import com.black.core.util.CentralizedExceptionHandling;
 import com.black.core.util.LazyAutoWried;
 import com.black.core.util.StringUtils;
+import com.black.datasource.DataSourceBuilderTypeManager;
 import com.black.table.TableMetadata;
 import com.black.table.TableUtils;
 import com.fasterxml.classmate.TypeResolver;
@@ -72,9 +71,9 @@ public class ChiefIbatisAdaptivePlugin implements ParameterBuilderPlugin, BeanFa
                 if (!StringUtils.hasText(tableName)){
                     String tableNameMethodName = adaptive.mappingTableNameMethodName();
                     HandlerMethod handlerMethod = findControllerType(parameterContext.getOperationContext());
-                    Object bean = beanFactory.getBean(handlerMethod.getBean().toString());
-                    Class<Object> primordialClass = BeanUtil.getPrimordialClass(bean);
-                    ClassWrapper<Object> classWrapper = ClassWrapper.get(primordialClass);
+                    Object bean = ChiefSwaggerUtils.getBean(handlerMethod, beanFactory);
+                    Class<?> primordialClass = handlerMethod.getBeanType();
+                    ClassWrapper<?> classWrapper = ClassWrapper.get(primordialClass);
                     MethodWrapper methodWrapper = classWrapper.getSingleMethod(tableNameMethodName);
                     Assert.notNull(methodWrapper, "unknown mapping table name method: " + tableNameMethodName);
                     tableName = (String) methodWrapper.invoke(bean);
@@ -176,9 +175,8 @@ public class ChiefIbatisAdaptivePlugin implements ParameterBuilderPlugin, BeanFa
         if (StringUtils.hasText(value)){
             HandlerMethod handlerMethod = findControllerType(parameterContext.getOperationContext());
             Assert.notNull(handlerMethod, "not find handler method");
-            String beanName = handlerMethod.getBean().toString();
-            Object bean = beanFactory.getBean(beanName);
-            ClassWrapper<?> classWrapper = ClassWrapper.get(BeanUtil.getPrimordialClass(bean));
+            Object bean = ChiefSwaggerUtils.getBean(handlerMethod, beanFactory);
+            ClassWrapper<?> classWrapper = ClassWrapper.get(handlerMethod.getBeanType());
             MethodWrapper methodWrapper = classWrapper.getSingleMethod(value);
             return (Class<?>) methodWrapper.invoke(bean);
         }else if (!target.equals(void.class)){
@@ -190,10 +188,7 @@ public class ChiefIbatisAdaptivePlugin implements ParameterBuilderPlugin, BeanFa
     public static ClassWrapper<?> dofindControllerType(OperationContext operationContext, BeanFactory beanFactory){
         HandlerMethod handlerMethod = findControllerType(operationContext);
         Assert.notNull(handlerMethod, "not find handler method");
-        String beanName = handlerMethod.getBean().toString();
-        Object bean = beanFactory.getBean(beanName);
-        ClassWrapper<?> classWrapper = ClassWrapper.get(BeanUtil.getPrimordialClass(bean));
-        return classWrapper;
+        return ClassWrapper.get(handlerMethod.getBeanType());
     }
 
     @Override

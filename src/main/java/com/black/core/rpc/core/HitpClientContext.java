@@ -21,7 +21,6 @@ import com.black.rpc.RpcWebClientApplicationContext;
 import com.black.utils.NameUtil;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.core.annotation.AnnotationUtils;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -77,14 +76,12 @@ public class HitpClientContext implements OpenComponent, EnabledControlRisePoten
     }
 
     private EnabledHitpClient getAnnotation(){
-        Class<?> mainClass = ChiefApplicationRunner.getMainClass();
-        return AnnotationUtils.getAnnotation(mainClass, EnabledHitpClient.class);
+        return ChiefApplicationRunner.getAnnotation(EnabledHitpClient.class);
     }
 
     @Override
     public boolean premise() {
-        Class<?> mainClass = ChiefApplicationRunner.getMainClass();
-        return mainClass != null && AnnotationUtils.getAnnotation(mainClass, EnabledHitpClient.class) != null;
+        return ChiefApplicationRunner.isPertain(EnabledHitpClient.class);
     }
 
     @Override

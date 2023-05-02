@@ -16,11 +16,22 @@ public abstract class AbstractColumnMetadata implements ColumnMetadata{
 
     protected TableMetadata metadata;
 
+    protected boolean autoIncrement = false;
+
     public AbstractColumnMetadata(String name, int size, String typeName, int type) {
         this.name = name;
         this.size = size;
         this.typeName = typeName;
         this.type = type;
+    }
+
+    @Override
+    public boolean autoIncrement() {
+        return autoIncrement;
+    }
+
+    public void setAutoIncrement(boolean autoIncrement) {
+        this.autoIncrement = autoIncrement;
     }
 
     @Override

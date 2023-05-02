@@ -148,8 +148,7 @@ public class AopMarkResolver implements Premise, AopTaskManagerHybrid, AopTaskIn
 
     @Override
     public boolean condition(AbstractAopTaskQueueAdapter aopTaskQueueAdapter) {
-        Class<?> mainClass = ChiefApplicationRunner.getMainClass();
-        return mainClass != null && AnnotationUtils.getAnnotation(mainClass, EnabledGlobalMarkHandler.class) != null;
+        return ChiefApplicationRunner.isPertain(EnabledGlobalMarkHandler.class);
     }
 
 

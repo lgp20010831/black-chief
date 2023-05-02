@@ -1,10 +1,11 @@
 package com.black.sql_v2;
 
-import com.black.json.JsonParser;
 import com.black.core.log.IoLog;
 import com.black.core.sql.code.AliasColumnConvertHandler;
 import com.black.core.sql.code.DataSourceBuilder;
 import com.black.core.sql.code.config.StatementValueSetDisplayConfiguration;
+import com.black.json.JsonParser;
+import com.black.sql_v2.utils.VarcharIdType;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,9 +18,17 @@ public class Environment extends SqlSeqMetadata{
 
     private IoLog log;
 
+    private int increasingRandomRange = 1000 * 1000 * 1000;
+
+    private boolean autoSetId = true;
+
+    private VarcharIdType varcharIdType = VarcharIdType.UUID;
+
     private JsonParser jsonParser;
 
     private int insertBatch;
+
+    private boolean useEnhanceSerializer = true;
 
     private AliasColumnConvertHandler convertHandler;
 

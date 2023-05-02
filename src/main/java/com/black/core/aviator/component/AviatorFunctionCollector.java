@@ -47,7 +47,6 @@ public class AviatorFunctionCollector implements OpenComponent, CollectedCilent,
 
     @Override
     public boolean premise() {
-        Class<?> mainClass = ChiefApplicationRunner.getMainClass();
-        return mainClass != null && mainClass.isAnnotationPresent(EnabledGlobalAviatorLayer.class);
+        return ChiefApplicationRunner.isPertain(EnabledGlobalAviatorLayer.class);
     }
 }

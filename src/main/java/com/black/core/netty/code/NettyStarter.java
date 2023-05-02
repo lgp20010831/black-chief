@@ -148,8 +148,7 @@ public class NettyStarter implements OpenComponent, CollectedCilent, Application
 
         @Override
         public boolean premise() {
-            Class<?> mainClass = ChiefApplicationRunner.getMainClass();
-            return mainClass != null && AnnotationUtils.getAnnotation(mainClass, EnableNettyAsynAdapter.class) != null;
+            return ChiefApplicationRunner.isPertain(EnableNettyAsynAdapter.class);
         }
     }
 }

@@ -10,6 +10,8 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationUtils;
 
 import java.lang.annotation.Annotation;
+import java.util.HashSet;
+import java.util.Set;
 
 @Log4j2
 public class ChiefApplicationRunner implements GenericApplicationListener {
@@ -19,6 +21,8 @@ public class ChiefApplicationRunner implements GenericApplicationListener {
     private static SpringApplication springApplication;
 
     private static Class<?> mainClass;
+
+    private final static Set<Class<?>> mainClasses = new HashSet<>();
 
     public static void openChiefApplication(){
         open = true;
@@ -36,11 +40,26 @@ public class ChiefApplicationRunner implements GenericApplicationListener {
     @Override
     public void onApplicationEvent(ApplicationEvent event) {
         SpringApplication application = (SpringApplication) event.getSource();
+        loadMain(application);
+        if (open == null){
+            open = isPertain(OpenChiefApplication.class);
+        }
+    }
+
+    public static void loadMain(SpringApplication application){
+        Set<Object> allSources = application.getAllSources();
+        for (Object source : allSources) {
+            if (source instanceof Class){
+                mainClasses.add((Class<?>) source);
+            }
+        }
         springApplication = application;
         mainClass = application.getMainApplicationClass();
-        if (open == null){
-            open = AnnotationUtils.getAnnotation(mainClass, OpenChiefApplication.class) != null;
-        }
+        mainClasses.add(mainClass);
+    }
+
+    public static Set<Class<?>> getMainClasses() {
+        return mainClasses;
     }
 
     public static Class<?> getMainClass() {
@@ -55,10 +74,22 @@ public class ChiefApplicationRunner implements GenericApplicationListener {
     }
 
     public static boolean isPertain(Class<? extends Annotation> type){
-        Class<?> mc = getMainClass();
-        if (mc == null) return false;
-        return AnnotationUtils.getAnnotation(mc, type) != null;
+        for (Class<?> clazz : getMainClasses()) {
+            if (AnnotationUtils.getAnnotation(clazz, type) != null){
+                return true;
+            }
+        }
+        return false;
     }
 
+    public static <T extends Annotation> T getAnnotation(Class<T> type){
+        for (Class<?> clazz : getMainClasses()) {
+            T annotation = AnnotationUtils.getAnnotation(clazz, type);
+            if (annotation != null){
+                return annotation;
+            }
+        }
+        return null;
+    }
 
 }

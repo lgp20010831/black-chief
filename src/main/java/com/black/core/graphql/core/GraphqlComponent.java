@@ -95,10 +95,6 @@ public class GraphqlComponent implements OpenComponent, EnabledControlRisePotent
 
     @Override
     public boolean premise() {
-        Class<?> mainClass = ChiefApplicationRunner.getMainClass();
-        if (mainClass != null){
-            return mainClass.isAnnotationPresent(EnabledGraphqlTransfer.class);
-        }
-        return false;
+        return ChiefApplicationRunner.isPertain(EnabledGraphqlTransfer.class);
     }
 }

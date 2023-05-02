@@ -33,7 +33,6 @@ public class AopDataDriver implements AopTaskManagerHybrid, Premise {
 
     @Override
     public boolean condition(AbstractAopTaskQueueAdapter aopTaskQueueAdapter) {
-        Class<?> mainClass = ChiefApplicationRunner.getMainClass();
-        return mainClass != null && AnnotationUtils.getAnnotation(mainClass, EnabledDataTransferStation.class) != null;
+        return ChiefApplicationRunner.isPertain(EnabledDataTransferStation.class);
     }
 }

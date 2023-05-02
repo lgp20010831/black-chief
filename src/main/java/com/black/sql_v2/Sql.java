@@ -74,11 +74,11 @@ public class Sql {
     }
 
 
-    public static String insert(String tableName, Object... params){
+    public static Object insert(String tableName, Object... params){
         return opt().insert(tableName, params);
     }
 
-    public static List<String> insertBatch(String tableName, Object... params){
+    public static List<Object> insertBatch(String tableName, Object... params){
         return opt().insertBatch(tableName, params);
     }
 

@@ -55,7 +55,6 @@ public class TransferStationComponent implements OpenComponent, CollectedCilent,
 
     @Override
     public boolean premise() {
-        Class<?> mainClass = ChiefApplicationRunner.getMainClass();
-        return mainClass != null && AnnotationUtils.getAnnotation(mainClass, EnabledDataTransferStation.class) != null;
+        return ChiefApplicationRunner.isPertain(EnabledDataTransferStation.class);
     }
 }

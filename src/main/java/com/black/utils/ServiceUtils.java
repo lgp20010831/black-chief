@@ -45,6 +45,23 @@ import java.util.function.Function;
 @SuppressWarnings("all")
 public class ServiceUtils {
 
+
+    public static void setProperty(Object bean, String fieldName, Object value){
+        if (bean == null){
+            return;
+        }
+
+        if (bean instanceof Map){
+            ((Map<String, Object>) bean).put(fieldName, value);
+        }else {
+            ClassWrapper<?> classWrapper = BeanUtil.getPrimordialClassWrapper(bean);
+            FieldWrapper fieldWrapper = classWrapper.getField(fieldName);
+            if (fieldWrapper != null){
+                fieldWrapper.setValue(bean, value);
+            }
+        }
+    }
+
     public static Object getByExpression(Object ele, String expression){
         if (ele == null){
             return null;
@@ -52,12 +69,18 @@ public class ServiceUtils {
         if (!StringUtils.hasText(expression)){
             return ele;
         }
-        String[] instructs = expression.split(".");
+        String[] instructs = expression.contains(".") ? expression.split("\\.") : new String[]{expression};
         Object object = ele;
         for (String instruct : instructs) {
             if (object == null){
                 break;
             }
+
+            if (isBeanMethodInstruct(instruct)){
+                object = parseMethod(instruct, object);
+                continue;
+            }
+
             Class<Object> primordialClass = BeanUtil.getPrimordialClass(object);
             if (Collection.class.isAssignableFrom(primordialClass) || primordialClass.isArray()){
                 Integer index = com.black.utils.TypeUtils.castToInt(instruct);
@@ -77,6 +100,18 @@ public class ServiceUtils {
             }
         }
         return object;
+    }
+
+    public static String patternGetValue(Object map, String expression){
+        return ServiceUtils.parseTxt(expression, "${", "}", txt -> {
+            return String.valueOf(ServiceUtils.getByExpression(map, txt));
+        });
+    }
+
+    public static boolean isBeanMethodInstruct(String instruct){
+        int of = instruct.indexOf("(");
+        int ofend = instruct.indexOf(")");
+        return of != -1 && ofend != -1 && ofend > of;
     }
 
     public static String lastName(String... array){
@@ -1223,7 +1258,7 @@ public class ServiceUtils {
         return source;
     }
 
-    public static Object findValue(Map<String, Object> argMap, String entry){
+    public static Object findValue(Object argMap, String entry){
         if (entry == null) return null;
         Object val = argMap;
         for (String e : entry.split("\\.")) {
@@ -1525,6 +1560,59 @@ public class ServiceUtils {
         }else {
             throw new IllegalStateException("error method style: " + txt);
         }
+    }
+
+    public static Object parseMethod(String txt, @NonNull Object source){
+        int of = txt.indexOf("(");
+        int ofend = txt.indexOf(")");
+        while (of != -1 && ofend != -1 && ofend > of){
+            String paramString = txt.substring(of + 1, ofend);
+            String prefix = txt.substring(0, of);
+            StringBuilder methodNameBuilder = new StringBuilder();
+            for (int i = of - 1; i >= 0; i--) {
+                char c = prefix.charAt(i);
+                if (c == ' ' || i == 0){
+                    if (i != 0 && i == of -1){
+                        throw new IllegalStateException("no method name: " + prefix);
+                    }
+                    methodNameBuilder.append(i == 0 ? prefix : prefix.substring(i + 1));
+                    break;
+                }
+            }
+            //source.user.addAge
+            String methodPath = methodNameBuilder.toString();
+            String[] array = methodPath.split("\\.");
+            //addAge
+            String methodName = array[array.length - 1];
+            StringBuilder beanPathBuilder = new StringBuilder();
+            for (int i = 0; i < array.length; i++) {
+                String ele = array[i];
+                if (i != array.length - 1){
+                    beanPathBuilder.append(ele);
+                }
+            }
+            String beanPath = beanPathBuilder.toString();
+            Object bean = findValue(source, beanPath);
+            bean = bean == null ? source : bean;
+            String afterParseBody;
+            String[] paramNames = "".equals(paramString) ? new String[0] : paramString.split(",");
+            Object[] args = new Object[paramNames.length];
+            for (int i = 0; i < paramNames.length; i++) {
+                String paramName = paramNames[i];
+                Object value = findValue(source, paramName);
+                args[i] = value;
+            }
+            Method method = findBeanMethod(methodName, bean, args.length);
+            if (method == null){
+                return null;
+            }else {
+                source = invokeBeanMethod(method, bean, args);
+            }
+            txt = txt.substring(ofend + 1);
+            of = txt.indexOf("(");
+            ofend = txt.indexOf(")");
+        }
+        return source;
     }
 
     public static String parseMethodTxt(String txt, Map<String, Object> source, String nullValue) {

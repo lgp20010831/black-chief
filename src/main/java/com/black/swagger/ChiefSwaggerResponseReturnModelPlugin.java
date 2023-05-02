@@ -1,15 +1,14 @@
 package com.black.swagger;
 
 import com.black.api.ResponseData;
-import com.black.function.Consumer;
-import com.black.javassist.JavassistCtClassManager;
-import com.black.javassist.Utils;
 import com.black.core.aop.servlet.GlobalEnhanceRestController;
 import com.black.core.query.ClassWrapper;
 import com.black.core.query.FieldWrapper;
 import com.black.core.query.MethodWrapper;
-import com.black.core.tools.BeanUtil;
 import com.black.core.util.*;
+import com.black.function.Consumer;
+import com.black.javassist.JavassistCtClassManager;
+import com.black.javassist.Utils;
 import com.black.utils.ServiceUtils;
 import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.classmate.TypeResolver;
@@ -116,9 +115,8 @@ public class ChiefSwaggerResponseReturnModelPlugin implements OperationBuilderPl
         Class<?> target = annotation.target();
         if (StringUtils.hasText(value)){
             HandlerMethod handlerMethod = ChiefSwaggerUtils.findControllerType(operationContext);
-            String beanName = handlerMethod.getBean().toString();
-            Object bean = beanFactory.getBean(beanName);
-            ClassWrapper<?> classWrapper = ClassWrapper.get(BeanUtil.getPrimordialClass(bean));
+            Object bean = ChiefSwaggerUtils.getBean(handlerMethod, beanFactory);
+            ClassWrapper<?> classWrapper = ClassWrapper.get(handlerMethod.getBeanType());
             MethodWrapper methodWrapper = classWrapper.getSingleMethod(value);
             return (Class<?>) methodWrapper.invoke(bean);
         }else if (!target.equals(void.class)){
@@ -129,9 +127,8 @@ public class ChiefSwaggerResponseReturnModelPlugin implements OperationBuilderPl
 
     private Class<?> findResponseClass(OperationContext operationContext){
         HandlerMethod handlerMethod = ChiefSwaggerUtils.findControllerType(operationContext);
-        String beanName = handlerMethod.getBean().toString();
-        Object bean = beanFactory.getBean(beanName);
-        ClassWrapper<Object> cw = ClassWrapper.get(BeanUtil.getPrimordialClass(bean));
+        Object bean = ChiefSwaggerUtils.getBean(handlerMethod, beanFactory);
+        ClassWrapper<?> cw = ClassWrapper.get(handlerMethod.getBeanType());
         GlobalEnhanceRestController annotation = AnnotationUtils.findAnnotation(cw, GlobalEnhanceRestController.class);
         if (annotation != null){
             return annotation.value();

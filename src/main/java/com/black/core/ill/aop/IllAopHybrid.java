@@ -49,10 +49,6 @@ public class IllAopHybrid implements AopTaskManagerHybrid, Premise {
 
     @Override
     public boolean condition(AbstractAopTaskQueueAdapter aopTaskQueueAdapter) {
-        Class<?> mainClass = ChiefApplicationRunner.getMainClass();
-        if(mainClass != null){
-            return AnnotationUtils.getAnnotation(mainClass, EnabledGlobalThrowableManagement.class) != null;
-        }
-        return false;
+        return ChiefApplicationRunner.isPertain(EnabledGlobalThrowableManagement.class);
     }
 }

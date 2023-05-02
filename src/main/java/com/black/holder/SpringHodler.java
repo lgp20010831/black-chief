@@ -1,6 +1,7 @@
 package com.black.holder;
 
 import com.black.core.util.Assert;
+import com.black.spring.ChiefSpringHodler;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationContext;
@@ -39,10 +40,16 @@ public class SpringHodler {
     }
 
     public static BeanFactory getBeanFactory() {
+        if (beanFactory == null){
+            beanFactory = ChiefSpringHodler.getChiefAgencyListableBeanFactory();
+        }
         return beanFactory;
     }
 
     public static ApplicationContext getApplicationContext() {
+        if (applicationContext == null){
+            applicationContext = ChiefSpringHodler.getApplicationContext();
+        }
         return applicationContext;
     }
 }

@@ -45,10 +45,6 @@ public class ApplicationListenerComponent implements OpenComponent, CollectedCil
 
     @Override
     public boolean premise() {
-        Class<?> mainClass = ChiefApplicationRunner.getMainClass();
-        if (mainClass != null){
-            return mainClass.isAnnotationPresent(EnabledApplicationListenerOccur.class);
-        }
-        return false;
+        return ChiefApplicationRunner.isPertain(EnabledApplicationListenerOccur.class);
     }
 }

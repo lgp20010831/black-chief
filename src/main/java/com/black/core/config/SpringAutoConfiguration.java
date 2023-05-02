@@ -132,8 +132,7 @@ public class SpringAutoConfiguration extends AbstractConfiguration implements Ch
 
         @Override
         public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
-            Class<?> mainClass = ChiefApplicationRunner.getMainClass();
-            return mainClass != null && mainClass.isAnnotationPresent(EnableWorkflowRefinedModule.class);
+            return ChiefApplicationRunner.isPertain(EnableWorkflowRefinedModule.class);
         }
     }
 
@@ -227,11 +226,7 @@ public class SpringAutoConfiguration extends AbstractConfiguration implements Ch
 
         @Override
         public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
-            Class<?> mainClass = ChiefApplicationRunner.getMainClass();
-            if (mainClass != null && ChiefApplicationRunner.isOpen()){
-                return mainClass.isAnnotationPresent(EnabledRUPComponent.class);
-            }
-            return false;
+            return ChiefApplicationRunner.isPertain(EnabledRUPComponent.class);
         }
     }
 }

@@ -11,7 +11,6 @@ import com.black.core.spring.instance.DefaultInstanceElementFactory;
 import com.black.core.spring.instance.InstanceFactory;
 import com.black.core.spring.instance.LightnessInstanceFactory;
 import com.black.core.tools.BeanUtil;
-import org.springframework.core.annotation.AnnotationUtils;
 
 public class FactoryManager {
 
@@ -89,17 +88,14 @@ public class FactoryManager {
             return;
         }
         Class<? extends BeanFactory> factoryType = DEFAULT_BEAN_FACTORY_TYPR;
-        Class<?> mainClass = ChiefApplicationRunner.getMainClass();
-        if (mainClass != null){
-            BeanFactoryType beanFactoryType = AnnotationUtils.getAnnotation(mainClass, BeanFactoryType.class);
-            if (beanFactoryType != null){
-                Class<? extends BeanFactory> type = beanFactoryType.value();
-                if (!BeanUtil.isSolidClass(type)){
-                    throw new BeanFactorysException("When specifying the type of bean factory, " +
-                            "it cannot be an interface, abstract class and other unspecified classes");
-                }
-                factoryType = type;
+        BeanFactoryType beanFactoryType = ChiefApplicationRunner.getAnnotation(BeanFactoryType.class);
+        if (beanFactoryType != null){
+            Class<? extends BeanFactory> type = beanFactoryType.value();
+            if (!BeanUtil.isSolidClass(type)){
+                throw new BeanFactorysException("When specifying the type of bean factory, " +
+                        "it cannot be an interface, abstract class and other unspecified classes");
             }
+            factoryType = type;
         }
         beanFactory = instanceFactory.getInstance(factoryType);
     }

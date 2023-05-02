@@ -6,6 +6,8 @@ public interface ColumnMetadata {
 
     int getSize();
 
+    boolean autoIncrement();
+
     String getRemarks();
 
     void setRemarks(String remarks);

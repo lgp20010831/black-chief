@@ -1,6 +1,8 @@
 package com.black.sql_v2;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.black.core.json.JsonUtils;
 import com.black.core.log.IoLog;
 import com.black.core.sql.SQLSException;
 import com.black.core.sql.code.AliasColumnConvertHandler;
@@ -28,6 +30,8 @@ import com.black.sql_v2.sql_statement.JavaSqlStatementHandler;
 import com.black.sql_v2.statement.SqlStatementBuilder;
 import com.black.sql_v2.transaction.NestedTransactionControlManager;
 import com.black.sql_v2.utils.SqlV2Utils;
+import com.black.sql_v2.with.GeneratePrimaryManagement;
+import com.black.sql_v2.with.WaitGenerateWrapper;
 import com.black.table.PrimaryKey;
 import com.black.table.TableMetadata;
 import com.black.table.TableUtils;
@@ -86,6 +90,22 @@ public class SqlExecutor implements NativeSqlAdapter {
         Connection connection = getConnection();
         DataSource dataSource = dataSourceBuilder.getDataSource();
         return DataSourceUtils.isConnectionTransactional(connection, dataSource);
+    }
+
+    public Map<String, Object> serialize(Object bean){
+        if (getEnvironment().isUseEnhanceSerializer()) {
+            return SerializeUtils.serialize(bean);
+        }else {
+            return JsonUtils.letJson(bean);
+        }
+    }
+
+    public <T> T deserialize(Object obj, Class<T> clazz){
+        if (getEnvironment().isUseEnhanceSerializer()) {
+            return SerializeUtils.deserialize(obj, clazz);
+        }else {
+            return JSON.toJavaObject(JsonUtils.letJson(obj), clazz);
+        }
     }
 
     public TableMetadata getTableMetadata(String tableName){
@@ -219,7 +239,7 @@ public class SqlExecutor implements NativeSqlAdapter {
     public <T> void saveAndEffect(String tableName, T param, boolean effect, Object... params){
         List<String> primaryKeyAliasNames = findPrimaryKeyAliasNames(tableName);
         //JSONObject json = JsonUtils.letJson(param);
-        Map<String, Object> json = SerializeUtils.serialize(param);
+        Map<String, Object> json = serialize(param);
         if (ServiceUtils.containKeys(json, primaryKeyAliasNames.toArray(new String[0]))){
             Map<String, Object> effectCondition = createEffectCondition(json, primaryKeyAliasNames);
             if (effect){
@@ -227,7 +247,7 @@ public class SqlExecutor implements NativeSqlAdapter {
                 int count = queryCount(tableName, effectCondition);
                 if (count <= 0){
                     //go insert
-                    insert(tableName, addArray(params, json, true));
+                    insert(tableName, addArray(params, param, true));
                     return;
                 }
             }
@@ -235,7 +255,7 @@ public class SqlExecutor implements NativeSqlAdapter {
             update(tableName, param, addArray(params, effectCondition, true));
         }else {
             //go insert
-            insert(tableName, addArray(params, json, true));
+            insert(tableName, addArray(params, param, true));
         };
     }
 
@@ -258,7 +278,7 @@ public class SqlExecutor implements NativeSqlAdapter {
     }
 
     public <T> void update(String tableName, T setMap, Object... params){
-        prepare(params);
+        String passID = prepare(params).getPassID();
         GlobalEnvironment instance = GlobalEnvironment.getInstance();
         SqlStatementBuilder sqlBuilder = instance.getDefaultUpdateSqlBuilder();
         SqlOutStatement statement = sqlBuilder.build(tableName, false, params);
@@ -268,8 +288,11 @@ public class SqlExecutor implements NativeSqlAdapter {
         if (updateCallBack != null){
             updateCallBack.callback(setMap);
         }
+        //序列化之前进行保存
+        GeneratePrimaryManagement.register(new WaitGenerateWrapper(setMap, environment.getConvertHandler(), passID, tableName));
+
         //JSONObject json = JsonUtils.letJson(setMap);
-        Map<String, Object> json = SerializeUtils.serialize(setMap);
+        Map<String, Object> json = serialize(setMap);
         //处理 setMap 里的值
         Connection connection = getConnection();
         TableMetadata tableMetadata = TableUtils.getTableMetadata(tableName, connection);
@@ -278,23 +301,22 @@ public class SqlExecutor implements NativeSqlAdapter {
     }
 
 
-    public String insert(String tableName, Object... params){
+    public Object insert(String tableName, Object... params){
         return SQLUtils.getSingle(insertBatch(tableName, params));
     }
 
-    public List<String> insertBatch(String tableName, Object... params){
+    public List<Object> insertBatch(String tableName, Object... params){
         prepare(params);
         GlobalEnvironment environment = GlobalEnvironment.getInstance();
         SqlStatementBuilder statementBuilder = environment.getDefaultInsertSqlBuilder();
         SqlOutStatement statement = statementBuilder.build(tableName, false, null);
-        QueryResultSetParser parser = doExecute(statement, params);
-        return parser.stringList();
+        return (List<Object>) doExecute(statement, params);
     }
 
     public QueryResultSetParser queryPrimary(String tableName, Object target, Object... params){
         List<String> aliasNames = findPrimaryKeyAliasNames(tableName);
         //JSONObject json = JsonUtils.letJson(target);
-        Map<String, Object> json = SerializeUtils.serialize(target);
+        Map<String, Object> json = serialize(target);
         Map<String, Object> condition = createEffectCondition(json, aliasNames);
         params = SqlV2Utils.addParams(params, condition);
         return query(tableName, params);
@@ -312,7 +334,7 @@ public class SqlExecutor implements NativeSqlAdapter {
     public QueryResultSetParser query(String tableName, Object... params){
         prepare(params);
         SqlOutStatement statement = createSelectStatement(tableName, false, params);
-        return doExecute(statement, params);
+        return doCastParserExecute(statement, params);
     }
 
     public int queryCount(String tableName, Object... params){
@@ -320,10 +342,14 @@ public class SqlExecutor implements NativeSqlAdapter {
         GlobalEnvironment globalEnvironment = GlobalEnvironment.getInstance();
         SqlStatementBuilder statementBuilder = globalEnvironment.getDefaultSelectCountSqlBuilder();
         SqlOutStatement statement = statementBuilder.build(tableName, false, null);
-        return doExecute(statement, params).intVal();
+        return doCastParserExecute(statement, params).intVal();
     }
 
-    public QueryResultSetParser doExecute(SqlOutStatement sqlOutStatement, Object... params){
+    public QueryResultSetParser doCastParserExecute(SqlOutStatement sqlOutStatement, Object... params){
+        return (QueryResultSetParser) doExecute(sqlOutStatement, params);
+    }
+
+    public Object doExecute(SqlOutStatement sqlOutStatement, Object... params){
         Connection connection = getConnection();
         try {
             return doExecute0(sqlOutStatement, connection, params);
@@ -336,7 +362,7 @@ public class SqlExecutor implements NativeSqlAdapter {
         }
     }
 
-    public QueryResultSetParser doExecute0(SqlOutStatement sqlOutStatement, Connection connection, Object... params){
+    public Object doExecute0(SqlOutStatement sqlOutStatement, Connection connection, Object... params){
         GlobalEnvironment globalEnvironment = GlobalEnvironment.getInstance();
         LinkedBlockingQueue<SqlListener> listeners = globalEnvironment.getListeners();
         IoLog log = environment.getLog();
@@ -351,32 +377,32 @@ public class SqlExecutor implements NativeSqlAdapter {
             for (SqlListener listener : listeners) {
                 sql = listener.postInvokeSql(sql, sqlOutStatement, this);
             }
-            QueryResultSetParser parser = runSql(sqlOutStatement, sql);
-            if (parser != null){
-                parser.setFinish(() -> {
+            Object result = runSql(sqlOutStatement, sql);
+            if (result instanceof QueryResultSetParser){
+                ((QueryResultSetParser) result).setFinish(() -> {
                     closeConnection(connection);
                 });
-                return parser;
+                return (QueryResultSetParser) result;
             }else {
                 closeConnection(connection);
-                return null;
+                return result;
             }
         }finally {
             end();
         }
     }
 
-    public QueryResultSetParser runSql(SqlOutStatement sqlOutStatement, String sql){
+    public Object runSql(SqlOutStatement sqlOutStatement, String sql){
         GlobalEnvironment globalEnvironment = GlobalEnvironment.getInstance();
         IoLog log = environment.getLog();
         log.info("[SQL] -- execute sql -- {}", sql);
-        ResultSet resultSet = null;
+        Object result = null;
         boolean invoke = false;
         LinkedBlockingQueue<SqlRunntimeExecutor> sqlRunntimeExecutors = globalEnvironment.getSqlRunntimeExecutors();
         for (SqlRunntimeExecutor runntimeExecutor : sqlRunntimeExecutors) {
             if (runntimeExecutor.support(sqlOutStatement)) {
                 try {
-                    resultSet = runntimeExecutor.runSql(sqlOutStatement, sql);
+                    result = runntimeExecutor.runSql(sqlOutStatement, sql);
                     invoke = true;
                     break;
                 } catch (Throwable throwable) {
@@ -387,14 +413,21 @@ public class SqlExecutor implements NativeSqlAdapter {
         if (!invoke){
             throw new SQLSException("No processor specified");
         }
-        if (resultSet == null){
+        if (result == null){
             return null;
         }
-        return ResultSetParserCreator.create(sqlOutStatement, resultSet, this);
+        if (result instanceof ResultSet){
+            return ResultSetParserCreator.create(sqlOutStatement, (ResultSet) result, this);
+        }else {
+            return result;
+        }
+
     }
 
     private void end(){
-        JDBCEnvironmentLocal.remove();
+        SqlV2Pack pack = JDBCEnvironmentLocal.getPack();
+        String passID = pack.getPassID();
+        GeneratePrimaryManagement.close(passID);
     }
 
     private SqlV2Pack prepare(Object... params){

@@ -60,7 +60,6 @@ public class HttpActuatorImpl implements OpenComponent, CollectedCilent,
 
     @Override
     public boolean premise() {
-        Class<?> mainClass = ChiefApplicationRunner.getMainClass();
-        return mainClass != null && AnnotationUtils.getAnnotation(mainClass, EnableHttpActuator.class) != null;
+        return ChiefApplicationRunner.isPertain(EnableHttpActuator.class);
     }
 }

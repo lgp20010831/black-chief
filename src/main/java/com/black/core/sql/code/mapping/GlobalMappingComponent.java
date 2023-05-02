@@ -54,11 +54,7 @@ public class GlobalMappingComponent implements OpenComponent, ChainPremise, Coll
 
     @Override
     public boolean premise() {
-        Class<?> mainClass = ChiefApplicationRunner.getMainClass();
-        if (mainClass != null){
-            return AnnotationUtils.getAnnotation(mainClass, EnabledGlobalMapping.class) != null;
-        }
-        return false;
+        return ChiefApplicationRunner.isPertain(EnabledGlobalMapping.class);
     }
 
     @Override

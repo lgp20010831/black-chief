@@ -17,7 +17,7 @@ public class PageSqlListener implements SqlListener{
             try {
                 Page<?> page = PageManager.getPage();
                 String countSql = SqlV2Utils.wrapperSelectCountSql(sql);
-                QueryResultSetParser parser = executor.runSql(statement, countSql);
+                QueryResultSetParser parser = (QueryResultSetParser) executor.runSql(statement, countSql);
                 Assert.notNull(parser, "run count select sql is should be not null");
                 int total = parser.intVal();
                 page.setTotal(total);

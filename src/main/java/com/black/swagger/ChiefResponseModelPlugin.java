@@ -2,7 +2,6 @@ package com.black.swagger;
 
 import com.black.core.query.ClassWrapper;
 import com.black.core.query.MethodWrapper;
-import com.black.core.tools.BeanUtil;
 import com.black.core.util.LazyAutoWried;
 import com.black.core.util.StringUtils;
 import com.fasterxml.classmate.TypeResolver;
@@ -42,9 +41,8 @@ public class ChiefResponseModelPlugin implements OperationBuilderPlugin , BeanFa
         Class<?> target = annotation.target();
         if (StringUtils.hasText(value)){
             HandlerMethod handlerMethod = ChiefSwaggerUtils.findControllerType(operationContext);
-            String beanName = handlerMethod.getBean().toString();
-            Object bean = beanFactory.getBean(beanName);
-            ClassWrapper<?> classWrapper = ClassWrapper.get(BeanUtil.getPrimordialClass(bean));
+            Object bean = ChiefSwaggerUtils.getBean(handlerMethod, beanFactory);
+            ClassWrapper<?> classWrapper = ClassWrapper.get(handlerMethod.getBeanType());
             MethodWrapper methodWrapper = classWrapper.getSingleMethod(value);
             return (Class<?>) methodWrapper.invoke(bean);
         }else if (!target.equals(void.class)){
