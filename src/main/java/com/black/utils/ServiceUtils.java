@@ -45,7 +45,14 @@ import java.util.function.Function;
 @SuppressWarnings("all")
 public class ServiceUtils {
 
-
+    public static boolean equalsAll(Object val, Object... objects){
+        for (Object o : objects) {
+            if (Objects.equals(o, val)) {
+                return true;
+            }
+        }
+        return false;
+    }
     public static void setProperty(Object bean, String fieldName, Object value){
         if (bean == null){
             return;
