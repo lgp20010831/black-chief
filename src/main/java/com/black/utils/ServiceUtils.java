@@ -32,6 +32,7 @@ import lombok.Setter;
 import org.springframework.util.StringUtils;
 
 import java.io.InputStream;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -45,6 +46,17 @@ import java.util.function.Function;
 @SuppressWarnings("all")
 public class ServiceUtils {
 
+    public static boolean topHasAnnotation(Class<?> type, Class<? extends Annotation> annType){
+        Set<Class<?>> superClasses = ClassWrapper.getSuperClasses(type);
+        superClasses.add(type);
+        for (Class<?> superClass : superClasses) {
+            if (superClass.isAnnotationPresent(annType)){
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static boolean equalsAll(Object val, Object... objects){
         for (Object o : objects) {
             if (Objects.equals(o, val)) {
@@ -53,6 +65,23 @@ public class ServiceUtils {
         }
         return false;
     }
+
+    public static Object getProperty(Object bean, String fieldName){
+        if (bean == null){
+            return null;
+        }
+        if(bean instanceof Map){
+            return ((Map<?, ?>) bean).get(fieldName);
+        }else {
+            ClassWrapper<?> classWrapper = BeanUtil.getPrimordialClassWrapper(bean);
+            FieldWrapper fieldWrapper = classWrapper.getField(fieldName);
+            if (fieldWrapper != null){
+                return fieldWrapper.getValue(bean);
+            }
+        }
+        return null;
+    }
+
     public static void setProperty(Object bean, String fieldName, Object value){
         if (bean == null){
             return;
