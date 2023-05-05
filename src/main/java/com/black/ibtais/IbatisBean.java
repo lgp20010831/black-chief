@@ -1,5 +1,6 @@
 package com.black.ibtais;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.core.conditions.AbstractWrapper;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
@@ -7,17 +8,24 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.black.core.json.Trust;
 import com.black.core.sql.HumpColumnConvertHandler;
 import com.black.core.tools.BaseBean;
 import com.black.core.util.StringUtils;
 
+
+import javax.persistence.Transient;
 import java.util.List;
 
 @SuppressWarnings("all")
 public class IbatisBean <T> extends BaseBean<T> {
 
+    @Transient
+    @TableField(exist = false)
     protected BaseMapper<T> mybatisPlusBaseMapper;
 
+    @Transient
+    @TableField(exist = false)
     protected IService<T> mybatisPlusService;
 
     public T object(){

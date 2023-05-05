@@ -84,7 +84,8 @@ public class MapToAttributeValueResolver {
                                 Map<GroupKeys, AttributeValue> globalCache, String value, int level){
         String name = getTopName(text);
         String valueString = getChildNames(text);
-        AttributeValue child = globalCache.computeIfAbsent(new GroupKeys(name, level), g -> {
+        String path = attributeValue.getPath();
+        AttributeValue child = globalCache.computeIfAbsent(new GroupKeys(path, name), g -> {
             return new AttributeValue(name);
         });
         child.setLevel(level);

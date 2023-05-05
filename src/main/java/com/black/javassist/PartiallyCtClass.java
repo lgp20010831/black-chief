@@ -10,6 +10,7 @@ import com.black.scan.ScannerManager;
 import com.black.throwable.IOSException;
 import com.black.utils.ServiceUtils;
 import javassist.*;
+import javassist.bytecode.SignatureAttribute;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
@@ -58,15 +59,50 @@ public class PartiallyCtClass {
         return new PartiallyCtClass(Utils.createClass(path + "." + className));
     }
 
+    public static PartiallyCtClass face(String className){
+        return face(className, Utils.FICTITIOUS_PATH);
+    }
+
+    public static PartiallyCtClass face(String className, String path){
+        log.info("PartiallyCtClass make interface: {}", className);
+        return new PartiallyCtClass(Utils.createInterface(path + "." + className));
+    }
+
+    public void setSuperClassGenericity(Class<?> superClass, Class<?>... genericityTypes){
+        StringJoiner joiner = new StringJoiner(",", superClass.getSimpleName() + "<", ">");
+        for (Class<?> genericityType : genericityTypes) {
+            joiner.add(genericityType.getName());
+        }
+        SignatureAttribute.TypeVariable typeVariable = new SignatureAttribute.TypeVariable(joiner.toString());
+        getCtClass().setGenericSignature(typeVariable.encode());
+        CtConstructor ctor = new CtConstructor( new CtClass[]{}, getCtClass());
+        try {
+            getCtClass().addConstructor(ctor);
+        } catch (CannotCompileException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    public void setInterfaceGenericity(Class<?> superClass, Class<?>... genericityTypes){
+        SignatureAttribute.TypeArgument[] typeArguments = new SignatureAttribute.TypeArgument[genericityTypes.length];
+        for (int i = 0; i < genericityTypes.length; i++) {
+            Class<?> genericityType = genericityTypes[i];
+            typeArguments[i] = new SignatureAttribute.TypeArgument(new SignatureAttribute.ClassType(genericityType.getName()));
+        }
+        SignatureAttribute.ClassSignature ac = new SignatureAttribute.ClassSignature(null, null,
+                // Set interface and its generic params
+                new SignatureAttribute.ClassType[]{new SignatureAttribute.ClassType(superClass.getName(),
+                        typeArguments
+                )});
+
+        getCtClass().setGenericSignature(ac.encode());
+    }
+
     public PartiallyCtClass(CtClass ctClass) {
         this.ctClass = ctClass;
         pool = Utils.getPool();
     }
 
-
-    private void rewriteCtClass(){
-
-    }
 
     public CtMethod getLoadMethod(String name, Class<?>... types){
         try {

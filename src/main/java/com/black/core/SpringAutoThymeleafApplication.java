@@ -33,6 +33,7 @@ import com.black.nest.NestDictController;
 import lombok.extern.log4j.Log4j2;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
@@ -73,8 +74,8 @@ import java.util.Map;
 //@EnabledManyAopMQClients
 //@EnableWorkflowRefinedModule
 //@EnabledMQttClient("${ldb.mqtt.url}")
-@MapperScan({"com.example.springautothymeleaf.test"})
-//@SpringBootApplication
+//@MapperScan({"com.black.core.yml"})
+@SpringBootApplication
 //@EnabledSqlPreExecution(position = {"sql/trigger.sql"})
 @EnabledGlobalThrowableManagement
 @EnableAutoAdaptationDynamicllyIbaisPlus
@@ -102,6 +103,7 @@ public class SpringAutoThymeleafApplication {
         BeanFactory factory = FactoryManager.getBeanFactory();
         ClassWrapper.clearCache();
         MvcMappingRegister.registerSupportAopController(NestDictController.class);
+
         Map<Class<?>, ProxyMetadata> proxyMetadataMap = ApplyProxyFactory.getProxyMetadataMap();
 //        System.out.println(proxyMetadataMap);
 //

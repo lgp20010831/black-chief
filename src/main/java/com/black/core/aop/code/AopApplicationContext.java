@@ -54,6 +54,7 @@ public class AopApplicationContext {
     public static void run(SpringApplication springApplication){
         AopApplicationContext.springApplication = springApplication;
         createInstanceFactory();
+        ChiefApplicationRunner.loadMain(springApplication);
         handlerSource(springApplication);
     }
 

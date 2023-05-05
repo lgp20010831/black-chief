@@ -67,7 +67,6 @@ public class SqlV2Utils {
             return annotation.value();
         }
 
-
         String name = NameUtil.getName(bean);
         if (handler != null){
             name = handler.convertColumn(name);

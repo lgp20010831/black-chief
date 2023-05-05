@@ -2,13 +2,17 @@ package com.black.sql_v2;
 
 import com.black.core.sql.code.DataSourceBuilder;
 import com.black.sql.QueryResultSetParser;
+import com.black.sql_v2.utils.SqlV2Utils;
 import com.black.table.TableMetadata;
+import com.black.utils.CollectionUtils;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static com.black.utils.ServiceUtils.addArray;
 
 @SuppressWarnings("all")
 public class Sql {
@@ -25,6 +29,44 @@ public class Sql {
         return executorCache.keySet();
     }
 
+    //--------------- auto find table name -------------------
+    public <T> void saveBatch(Collection<T> collection, Object... params){
+        opt().saveBatch(collection, params);
+    }
+
+    public <T> void saveAndEffect(T param, boolean effect, Object... params){
+        opt().saveAndEffect(param, effect, params);
+    }
+
+    public <T> void saveAndEffectBatch(Collection<T> collection, boolean effect, Object... params){
+        opt().saveAndEffectBatch(collection, effect, params);
+    }
+
+    public <T> void update(T setMap, Object... params){
+        opt().update(setMap, params);
+    }
+
+    public Object add(Object entity, Object... params){
+        return opt().add(entity, params);
+    }
+
+    public List<Object> addBatch(Object entity, Object... params){
+        return opt().addBatch(entity, params);
+    }
+
+    public QueryResultSetParser select(Object entity, Object... params){
+        return opt().select(entity, params);
+    }
+
+    public int selectCount(Object entity, Object... params){
+        return opt().selectCount(entity, params);
+    }
+
+    public QueryResultSetParser selectPrimary(Object target, Object... params){
+        return opt().selectPrimary(target, params);
+    }
+
+    //--------------- common -------------------
     public static QueryResultSetParser queryPrimary(String tableName, Object target, Object... params){
         return opt().queryPrimary(tableName, target, params);
     }

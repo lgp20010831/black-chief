@@ -158,7 +158,53 @@ public enum Version {
         source.put("updateFieldName", UPDATE_FIELD);
         source.put("insertFieldName", INSERTED_FIELD);
     }),
-
+    MYBATIS_1_4(() -> (config, source, generator) -> {
+        String controllerGenPath = getString(source, CONTROLLER_GEN_PATH);
+        String mapperGenPath = getString(source, MAPPER_GEN_PATH);
+        String implGenPath = getString(source, IMPL_GEN_PATH);
+        String pojoGenPath = getString(source, POJO_GEN_PATH);
+        String className = getString(source, CLASS_NAME_KEY);
+        Class<?> superClass = (Class<?>) source.get(SUPER_CLASS);
+        if (superClass == null || superClass.equals(AbstractCRUDBaseController.class)){
+            superClass = ObjectIbatisFullController.class;
+            source.put(SUPER_CONTROLLER_GEN_PATH, superClass.getName());
+            source.put(SUPER_CLASS_NAME, superClass.getSimpleName());
+            source.put(NEED_GENERIC, true);
+        }else {
+            source.put(NEED_GENERIC, true);
+        }
+        config.config("fast/mybatis_pojo.txt", pojoGenPath, className + ".java");
+        if (!onlyCreatePojo){
+            config.config("fast/mybatis_mapper.txt", mapperGenPath, className + "Mapper.java");
+            config.config("fast/mybatis_impl.txt", implGenPath, className + "Impl.java");
+            config.config("fast/mybatis_action_full_version_4.txt", controllerGenPath, className + "Controller.java");
+        }
+        source.put("implPath", implGenPath);
+        source.put("pojoPath", pojoGenPath);
+        source.put("updateFieldName", UPDATE_FIELD);
+        source.put("insertFieldName", INSERTED_FIELD);
+    }),
+    MYBATIS_1_5(() -> (config, source, generator) -> {
+        String controllerGenPath = getString(source, CONTROLLER_GEN_PATH);
+        String pojoGenPath = getString(source, POJO_GEN_PATH);
+        String className = getString(source, CLASS_NAME_KEY);
+        Class<?> superClass = (Class<?>) source.get(SUPER_CLASS);
+        if (superClass == null || superClass.equals(AbstractCRUDBaseController.class)){
+            superClass = ObjectIbatisFullController.class;
+            source.put(SUPER_CONTROLLER_GEN_PATH, superClass.getName());
+            source.put(SUPER_CLASS_NAME, superClass.getSimpleName());
+            source.put(NEED_GENERIC, true);
+        }else {
+            source.put(NEED_GENERIC, true);
+        }
+        config.config("fast/mybatis_pojo.txt", pojoGenPath, className + ".java");
+        if (!onlyCreatePojo){
+            config.config("fast/mybatis_action_full_version_5.txt", controllerGenPath, className + "Controller.java");
+        }
+        source.put("pojoPath", pojoGenPath);
+        source.put("updateFieldName", UPDATE_FIELD);
+        source.put("insertFieldName", INSERTED_FIELD);
+    }),
     INIT_1_0_FINAL(() -> null),
 
     SQL_V2(() -> (config, source, generator) -> {

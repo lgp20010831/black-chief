@@ -1,10 +1,14 @@
 package com.black.ibtais;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.black.core.tools.BeanUtil;
 import com.black.utils.ReflexHandler;
+
+import java.io.Serializable;
+import java.util.List;
 
 @SuppressWarnings("all")
 public abstract class ObjectIbatisFullController<T> extends IbatisFullParentServlet<T>{
@@ -54,5 +58,15 @@ public abstract class ObjectIbatisFullController<T> extends IbatisFullParentServ
             service = IbtatisUtils.autoFindService(getEntityType());
         }
         return (ServiceImpl<M, T>) service;
+    }
+
+    @Override
+    public T doFindById(Serializable id) {
+        return (T) super.doFindById(id);
+    }
+
+    @Override
+    protected List<T> doFindList(JSONObject body) {
+        return (List<T>) super.doFindList(body);
     }
 }

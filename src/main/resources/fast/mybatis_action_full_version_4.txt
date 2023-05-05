@@ -1,0 +1,66 @@
+package [(${location.generatePath})];
+
+import com.alibaba.fastjson.JSONObject;
+import [(${superPath})];
+import [(${pojoPath})].[(${source.className})];
+import [(${mapperPath})].[(${source.className})]Mapper;
+import [(${implPath})].[(${source.className})]Impl;
+import com.black.core.annotation.ChiefServlet;
+import com.black.core.aop.servlet.OpenIbatisPage;
+import com.black.core.mvc.response.Response;
+import com.black.core.util.LazyAutoWried;
+import io.swagger.annotations.Api;
+import com.black.swagger.v2.V2Swagger;
+import io.swagger.annotations.ApiOperation;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.web.bind.annotation.*;
+
+import java.io.Serializable;
+import java.util.*;
+
+import static com.black.utils.ServiceUtils.*;
+
+@Log4j2
+@Api(tags = "[(${source.remark})]")
+@ChiefServlet("[(${source.lowName})]") @SuppressWarnings("all")
+public class [(${source.className})]Controller extends [(${superName})][# th:if="${needGeneric}"]<[(${source.className})]>[/] {
+
+
+    @LazyAutoWried
+    [(${source.className})]Mapper [(${source.lowName})]Mapper;
+
+    @LazyAutoWried
+    [(${source.className})]Impl [(${source.lowName})]Impl;
+
+    //****************************************************************************************
+    //                               A U T O   C R E A T E
+    //****************************************************************************************
+
+    @OpenIbatisPage
+    @PostMapping("selectList")
+    @V2Swagger("[(${source.lowName})]{}")
+    @ApiOperation(value = "列表查询接口", hidden = true)
+    Object findList(@RequestBody(required = false) @V2Swagger("[(${source.lowName})]{} + {pageSize:每页数量, pageNum:当前页数}") JSONObject body){
+        return doFindList(body);
+    }
+
+    @GetMapping("selectById")
+    @V2Swagger("[(${source.lowName})]{}")
+    @ApiOperation(value = "根据 id 查询接口", hidden = true)
+    [(${source.className})] findById(@RequestParam Serializable id){
+        return doFindById(id);
+    }
+
+    @PostMapping("save")
+    @ApiOperation(value = "修改或者添加, 有主键则修改, 否则添加", response = Response.class, hidden = true)
+    void save0(@RequestBody [(${source.className})] body){
+        doSave1(body);
+    }
+
+    @GetMapping("deleteById")
+    @ApiOperation(value = "根据主键删除接口", response = Response.class, hidden = true)
+    void deleteById0(@RequestParam Serializable id){
+        doDeleteById0(id);
+    }
+
+}

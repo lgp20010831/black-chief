@@ -35,6 +35,7 @@ import com.black.sql_v2.with.WaitGenerateWrapper;
 import com.black.table.PrimaryKey;
 import com.black.table.TableMetadata;
 import com.black.table.TableUtils;
+import com.black.utils.CollectionUtils;
 import com.black.utils.ServiceUtils;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 
@@ -195,6 +196,58 @@ public class SqlExecutor implements NativeSqlAdapter {
         return StreamUtils.mapList(findPrimaryKeyNames(tableName), name -> convertHandler.convertAlias(name));
     }
 
+    //--------------- auto find table name -------------------
+    public <T> void saveBatch(Collection<T> collection, Object... params){
+        if(CollectionUtils.isEmpty(collection)){
+            return;
+        }
+        for (T t : collection) {
+            save(t, params);
+        }
+    }
+
+    public <T> void saveAndEffect(T param, boolean effect, Object... params){
+        String tableName = SqlV2Utils.findTableName(param, environment.getConvertHandler());
+        saveAndEffect(tableName, param, effect, params);
+    }
+
+    public <T> void saveAndEffectBatch(Collection<T> collection, boolean effect, Object... params){
+        for (T t : collection) {
+            saveAndEffect(t, effect, params);
+        }
+    }
+
+    public <T> void update(T setMap, Object... params){
+        String tableName = SqlV2Utils.findTableName(setMap, environment.getConvertHandler());
+        update(tableName, setMap, params);
+    }
+
+    public Object add(Object entity, Object... params){
+        String tableName = SqlV2Utils.findTableName(entity, environment.getConvertHandler());
+        return insert(tableName, addArray(params, entity, true));
+    }
+
+    public List<Object> addBatch(Object entity, Object... params){
+        String tableName = SqlV2Utils.findTableName(entity, environment.getConvertHandler());
+        return insertBatch(tableName, addArray(params, entity, true));
+    }
+
+    public QueryResultSetParser select(Object entity, Object... params){
+        String tableName = SqlV2Utils.findTableName(entity, environment.getConvertHandler());
+        return query(tableName, addArray(params, entity, true));
+    }
+
+    public int selectCount(Object entity, Object... params){
+        String tableName = SqlV2Utils.findTableName(entity, environment.getConvertHandler());
+        return queryCount(tableName, addArray(params, entity, true));
+    }
+
+    public QueryResultSetParser selectPrimary(Object target, Object... params){
+        String tableName = SqlV2Utils.findTableName(target, environment.getConvertHandler());
+        return queryPrimary(tableName, target, params);
+    }
+
+    //--------------- common -------------------
     public void deleteById(String tableName, Object idValue, Object... params){
         String primaryKeyName = findPrimaryKeyName(tableName);
         if (primaryKeyName == null){
@@ -217,6 +270,7 @@ public class SqlExecutor implements NativeSqlAdapter {
             save(tableName, t, params);
         }
     }
+
 
     public void save(Object bean, Object... params){
         String tableName = SqlV2Utils.findTableName(bean, environment.getConvertHandler());

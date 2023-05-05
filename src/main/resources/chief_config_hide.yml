@@ -4,10 +4,10 @@ spring:
       primary: one
       datasource:
         one:
-          driver-class-name: com.mysql.cj.jdbc.Driver
-          url: jdbc:mysql://localhost:3306/hcy?serverTimezone=UTC&stringtype=unspecified
-          username: root
-          password: 123698745zed
+          driver-class-name: org.postgresql.Driver
+          url: jdbc:postgresql://10.20.252.201:5432/ldb_srm?stringtype=unspecified&reWriteBatchedInserts=true
+          username: etouwa
+          password: etouwa@0505
         two:
           driver-class-name: com.mysql.cj.jdbc.Driver
           url: jdbc:mysql://localhost:3306/hcy?serverTimezone=UTC&stringtype=unspecified

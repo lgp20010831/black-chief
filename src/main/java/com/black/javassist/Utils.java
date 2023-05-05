@@ -186,6 +186,11 @@ public class Utils {
             throw new IllegalStateException(e);
         }
     }
+
+    public static CtClass createInterface(String path){
+        return pool.makeInterface(path);
+    }
+
     public static CtClass createClass(String path){
         return createClass(path, null);
     }

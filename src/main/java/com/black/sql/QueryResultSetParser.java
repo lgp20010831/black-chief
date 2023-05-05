@@ -8,13 +8,11 @@ import com.black.core.sql.code.util.SQLUtils;
 import com.black.core.util.StreamUtils;
 import com.black.io.in.ObjectInputStream;
 import com.black.utils.TypeUtils;
+import org.checkerframework.checker.units.qual.K;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.black.utils.ServiceUtils.patternGetValue;
 
@@ -149,6 +147,28 @@ public class QueryResultSetParser {
         return StreamUtils.mapList(list, json -> JSONObject.toJavaObject(json, type));
     }
 
+    public Map<String, String> custom(String keyPattern, String valPattern){
+        List<Map<String, Object>> list = list();
+        Map<String, String> map = new LinkedHashMap<>();
+        for (Map<String, Object> ele : list) {
+            String key = patternGetValue(ele, keyPattern);
+            String val = patternGetValue(ele, valPattern);
+            map.put(key, val);
+        }
+        return map;
+    }
+
+    public Map<String, List<String>> customList(String keyPattern, String valPattern){
+        List<Map<String, Object>> list = list();
+        Map<String, List<String>> map = new LinkedHashMap<>();
+        for (Map<String, Object> ele : list) {
+            String key = patternGetValue(ele, keyPattern);
+            String val = patternGetValue(ele, valPattern);
+            List<String> stringList = map.computeIfAbsent(key, k -> new ArrayList<>());
+            stringList.add(val);
+        }
+        return map;
+    }
 
     public Map<String, Map<String, Object>> singleGroup(String expression){
         return GroupUtils.singleGroupArray(list(), map -> {

@@ -2,6 +2,7 @@ package com.black.sql_v2.handler;
 
 import com.black.core.bean.TrustBeanCollector;
 import com.black.core.json.Trust;
+import com.black.core.tools.BaseBean;
 import com.black.core.tools.BeanUtil;
 import com.black.core.util.AnnotationUtils;
 import com.black.sql.SqlOutStatement;
@@ -33,7 +34,7 @@ public class SelectMapConditionHandler extends AbstractWhereConditionHandler {
             return false;
         }
         Class<Object> primordialClass = BeanUtil.getPrimordialClass(param);
-        return param instanceof Map || TrustBeanCollector.existTrustBean(primordialClass)
+        return param instanceof Map || param instanceof BaseBean || TrustBeanCollector.existTrustBean(primordialClass)
                 || AnnotationUtils.isPertain(primordialClass, Trust.class);
     }
 }
