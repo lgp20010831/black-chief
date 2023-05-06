@@ -156,6 +156,7 @@ public class ExcelWritor {
                     addCellValue(value, dataCell);
                     cellIndex++;
                 }
+                dataIndex++;
             }
             workbook.write(out);
         }catch (Throwable e){
