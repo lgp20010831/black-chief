@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.io.Serializable;
 import java.util.List;
 
-public abstract class AbstractProvideSupportChiefApiController extends AbstractSqlOptServlet{
+public abstract class AbstractProvideSupportChiefApiController extends AbstractLogicProvideServlet{
 
     @OpenSqlPage
     @PostApiProperty(url = "list", request = "$<getTableName>{}", 

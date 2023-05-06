@@ -5,7 +5,7 @@ import com.black.Supplier;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 
-//@Mapper
-//@Repository
+@Mapper
+@Repository
 public interface SupplierMapper extends BaseMapper<Supplier> {
 }

@@ -38,9 +38,8 @@ public class [(${source.className})]Controller extends [(${superName})][# th:if=
 
     @OpenIbatisPage
     @PostMapping("selectList")
-    @V2Swagger("[(${source.lowName})]{}")
     @ApiOperation(value = "列表查询接口", hidden = true)
-    Object findList(@RequestBody(required = false) @V2Swagger("[(${source.lowName})]{} + {pageSize:每页数量, pageNum:当前页数}") JSONObject body){
+    List<[(${source.className})]> findList(@RequestBody(required = false) @V2Swagger("[(${source.lowName})]{} + {pageSize:每页数量, pageNum:当前页数}") JSONObject body){
         return doFindList(body);
     }
 

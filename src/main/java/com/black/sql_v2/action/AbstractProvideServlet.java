@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.io.Serializable;
 import java.util.List;
 
-public abstract class AbstractProvideServlet extends AbstractSqlOptServlet{
+public abstract class AbstractProvideServlet extends AbstractLogicProvideServlet{
 
     @PostMapping("list")
     public Object list(@RequestBody JSONObject json){

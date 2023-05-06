@@ -93,6 +93,10 @@ public class ResponseVoidWritor implements ResponseBodyAdvice {
                     throwableThreadLocal.remove();
                 }
             }
+            Long total = AopControllerIntercept.lazyPageEnhanceLocal.get();
+            if (restResponse.obtainTotal() == null){
+                restResponse.setTotal(total);
+            }
 
             ThreadLocal<BeforeWriteSession> responseSessionLocal = AopControllerIntercept.writeResponseSessionLocal;
             BeforeWriteSession session = responseSessionLocal.get();
@@ -113,6 +117,7 @@ public class ResponseVoidWritor implements ResponseBodyAdvice {
             return restResponse;
         }finally {
             AopControllerIntercept.controllerTypeLocal.remove();
+            AopControllerIntercept.lazyPageEnhanceLocal.remove();
         }
 
     }

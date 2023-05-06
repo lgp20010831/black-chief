@@ -32,7 +32,7 @@ public class SupplierController extends ObjectIbatisFullController<Supplier> {
     @OpenIbatisPage
     @PostMapping("selectList")
     @ApiOperation(value = "列表查询接口", hidden = false)
-    Object findList(@RequestBody(required = false) @V2Swagger("supplier{} + {pageSize:每页数量, pageNum:当前页数}") JSONObject body){
+    List<Supplier> findList(@RequestBody(required = false) @V2Swagger("supplier{} + {pageSize:每页数量, pageNum:当前页数}") JSONObject body){
         return doFindList(body);
     }
 

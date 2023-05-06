@@ -13,7 +13,7 @@ import java.io.Serializable;
 import java.util.List;
 
 
-public class AbstractProvideSupportSwaggerApiController extends AbstractSqlOptServlet{
+public class AbstractProvideSupportSwaggerApiController extends AbstractLogicProvideServlet{
 
     @PostMapping("list")
     @V2Swagger("$<getTableName>{}")

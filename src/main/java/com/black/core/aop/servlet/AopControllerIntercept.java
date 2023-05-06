@@ -13,6 +13,7 @@ import com.black.core.mvc.response.Response;
 import com.black.core.query.ClassWrapper;
 import com.black.core.query.MethodWrapper;
 import com.black.core.servlet.HttpRequestUtil;
+import com.black.core.sql.code.util.SQLUtils;
 import com.black.core.util.CentralizedExceptionHandling;
 import com.black.core.util.Convert;
 import com.black.core.util.ExceptionUtil;
@@ -44,7 +45,7 @@ import static com.black.core.response.Code.HANDLER_FAIL;
 
 @Log4j2
 @ChainClient
-@Adaptation(GetAopInterceptAdapter.class)
+@Adaptation(GetAopInterceptAdapter.class) @SuppressWarnings("all")
 public class AopControllerIntercept implements AopTaskIntercepet, CollectedCilent {
 
     public static final String TASK_ALIAS = "http-around";
@@ -56,6 +57,8 @@ public class AopControllerIntercept implements AopTaskIntercepet, CollectedCilen
     public static final ThreadLocal<Class<?>> controllerTypeLocal = new ThreadLocal<>();
 
     public static Class<? extends Annotation> startPageClazz = OpenIbatisPage.class;
+
+    public static final ThreadLocal<Long> lazyPageEnhanceLocal = new ThreadLocal<>();
 
     public static String pageSizeName = "pageSize";
 
@@ -435,8 +438,12 @@ public class AopControllerIntercept implements AopTaskIntercepet, CollectedCilen
                 }
             }
             return response;
+        }else {
+            List<Object> list = SQLUtils.wrapList(responseResult);
+            PageInfo<Object> info = new PageInfo<>(list);
+            lazyPageEnhanceLocal.set(info.getTotal());
+            return responseResult;
         }
-        throw new RuntimeException("responseResult 不是 response 类型");
     }
 
     protected boolean isPrint(Class<?> clazz){
