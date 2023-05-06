@@ -9,6 +9,8 @@ import com.black.bin.InstanceType;
 import com.black.core.cache.TypeConvertCache;
 import com.black.core.chain.GroupBy;
 import com.black.core.convert.TypeHandler;
+import com.black.core.sql.code.AliasColumnConvertHandler;
+import com.black.holder.SpringHodler;
 import com.black.map.CompareBody;
 import com.black.core.builder.Sort;
 import com.black.core.chain.GroupUtils;
@@ -25,17 +27,24 @@ import com.black.core.util.*;
 import com.black.scan.ChiefScanner;
 import com.black.scan.ScannerManager;
 import com.black.syntax.TextParseUtils;
+import com.black.table.ColumnMetadata;
+import com.black.table.TableMetadata;
+import com.black.table.TableUtils;
 import com.black.throwable.BreakException;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.util.StringUtils;
 
+import javax.sql.DataSource;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.sql.Connection;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -45,6 +54,57 @@ import java.util.function.Function;
 
 @SuppressWarnings("all")
 public class ServiceUtils {
+    public static TableMetadata getTableMetadataBySpring(String tableName){
+        DefaultListableBeanFactory beanFactory = SpringHodler.getNonNullListableBeanFactory();
+        DataSource dataSource = beanFactory.getBean(DataSource.class);
+        Connection connection = DataSourceUtils.getConnection(dataSource);
+        try {
+            return TableUtils.getTableMetadata(tableName, connection);
+        }finally {
+            if (!DataSourceUtils.isConnectionTransactional(connection, dataSource)){
+                DataSourceUtils.releaseConnection(connection, dataSource);
+            }
+        }
+    }
+
+    public static List<Map<String, Object>> replaceListMapKey(List<Map<String, Object>> source, Map<String, String> keyMaps){
+        return StreamUtils.mapList(source, map -> replaceMapKey(map, keyMaps));
+    }
+
+    public static Map<String, Object> replaceMapKey(Map<String, Object> source, Map<String, String> keyMaps){
+        Map<String, Object> result = new LinkedHashMap<>();
+        source.forEach((k, v) -> {
+            result.put(keyMaps.get(k), v);
+        });
+        return result;
+    }
+
+    public static Map<String, String> groupMetadataByName(TableMetadata tableMetadata){
+        return groupMetadataByName(tableMetadata, null);
+    }
+
+    public static Map<String, String> groupMetadataByName(TableMetadata tableMetadata, AliasColumnConvertHandler convertHandler){
+        Collection<ColumnMetadata> columnMetadatas = tableMetadata.getColumnMetadatas();
+        Map<String, String> map = new LinkedHashMap<>();
+        for (ColumnMetadata columnMetadata : columnMetadatas) {
+            map.put(convertHandler == null ? columnMetadata.getName() : convertHandler.convertAlias(columnMetadata.getName()), columnMetadata.getRemarks());
+        }
+        return map;
+    }
+
+    public static Map<String, String> groupMetadataByRemark(TableMetadata tableMetadata){
+        return groupMetadataByRemark(tableMetadata, null);
+    }
+
+    public static Map<String, String> groupMetadataByRemark(TableMetadata tableMetadata, AliasColumnConvertHandler convertHandler){
+        Collection<ColumnMetadata> columnMetadatas = tableMetadata.getColumnMetadatas();
+        Map<String, String> map = new LinkedHashMap<>();
+        for (ColumnMetadata columnMetadata : columnMetadatas) {
+            map.put(columnMetadata.getRemarks(), convertHandler == null ? columnMetadata.getName() : convertHandler.convertAlias(columnMetadata.getName()));
+        }
+        return map;
+    }
+
 
     public static boolean topHasAnnotation(Class<?> type, Class<? extends Annotation> annType){
         Set<Class<?>> superClasses = ClassWrapper.getSuperClasses(type);

@@ -1,7 +1,6 @@
 package com.black.core.yml;
 
 import com.alibaba.fastjson.JSONObject;
-import com.black.Supplier;
 import com.black.core.annotation.ChiefServlet;
 import com.black.core.aop.servlet.OpenIbatisPage;
 import com.black.core.mvc.response.Response;

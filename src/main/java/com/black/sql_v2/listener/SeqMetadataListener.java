@@ -51,6 +51,7 @@ public class SeqMetadataListener implements SqlListener{
             SqlV2Utils.setSeqInStatement(statement, OperationType.UPDATE, setPack.getSeqQueue().toArray(new String[0]));
             setPack.getKeyValueMap().forEach((c, v) -> {
                 String value = MapArgHandler.getString(v);
+                statement.removeUpdateValue(c);
                 statement.writeSet(c, value, false);
                 if (allow){
                     AliasColumnConvertHandler convertHandler = generateWrapper.getConvertHandler();

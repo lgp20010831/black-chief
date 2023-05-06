@@ -26,14 +26,6 @@ public final class ExcelUtils {
         return readAll(file, sheet, titleRow, null);
     }
 
-    public static List<Object> readRow(MultipartFile file, int sheetIndex, int index){
-        try {
-            return readRow(file.getInputStream(), file.getOriginalFilename(), bork -> bork.getSheetAt(sheetIndex), index);
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
 
     public static List<Object> readRow(MultipartFile file, String sheetName, int index){
         try {
@@ -96,7 +88,7 @@ public final class ExcelUtils {
             Row sheetRow = xssfSheet.getRow(titleRow);
             List<String> titleList = new ArrayList<>();
             for (Cell cell : sheetRow) {
-                if (cell.getCellType() == Cell.CELL_TYPE_STRING) {
+                if (cell.getCellTypeEnum() == CellType.STRING) {
                     String title = cell.getStringCellValue();
                     if (readerListener != null){
                         if (!readerListener.postJoinTitle(titleList, title)) {
@@ -127,8 +119,8 @@ public final class ExcelUtils {
     }
 
     public static List<Map<String, Object>> readAll(String sheet,
-                                              String path,
-                                              int titleRow, ExcelReaderListener readerListener){
+                                                    String path,
+                                                    int titleRow, ExcelReaderListener readerListener){
         File file = new File(path);
         try {
             FileInputStream fileInputStream = new FileInputStream(file);
@@ -188,9 +180,9 @@ public final class ExcelUtils {
     }
 
     public static <E> List<E> readObject(Class<E> clazz,
-                                        String sheet,
-                                        String path,
-                                        int titleRow){
+                                         String sheet,
+                                         String path,
+                                         int titleRow){
         try {
 
             FileInputStream fileInputStream = new FileInputStream(path);
@@ -202,7 +194,7 @@ public final class ExcelUtils {
             Row sheetRow = xssfSheet.getRow(titleRow);
             List<String> titleList = new ArrayList<>();
             for (Cell cell : sheetRow) {
-                if (cell.getCellType() == Cell.CELL_TYPE_STRING) {
+                if (cell.getCellTypeEnum() == CellType.STRING) {
                     titleList.add(cell.getStringCellValue());
                 }
             }
@@ -213,10 +205,10 @@ public final class ExcelUtils {
     }
 
     public static <E> List<E> readObject(Class<E> clazz,
-                                   String sheet,
-                                   String path,
-                                   List<String> titleList,
-                                   Set<Integer> excludeRows){
+                                         String sheet,
+                                         String path,
+                                         List<String> titleList,
+                                         Set<Integer> excludeRows){
         try {
 
             FileInputStream fileInputStream = new FileInputStream(path);
@@ -232,9 +224,9 @@ public final class ExcelUtils {
     }
 
     public static <E> List<E> readObject(Class<E> clazz,
-                                   List<String> titleList,
-                                   Sheet xssfSheet,
-                                   Set<Integer> excludeRows){
+                                         List<String> titleList,
+                                         Sheet xssfSheet,
+                                         Set<Integer> excludeRows){
         List<Field> fields = ReflexHandler.getAccessibleFields(clazz);
         Map<String, Field> targetMap = new HashMap<>();
         for (Field field : fields) {
@@ -276,18 +268,18 @@ public final class ExcelUtils {
         Class<?> type = field.getType();
         Object value = null;
         if (cell != null){
-            int cellType = cell.getCellType();
+            CellType cellType = cell.getCellTypeEnum();
             switch (cellType){
-                case Cell.CELL_TYPE_STRING:
+                case STRING:
                     value = cell.getStringCellValue();
                     break;
-                case Cell.CELL_TYPE_BOOLEAN:
+                case BOOLEAN:
                     value = cell.getBooleanCellValue();
                     break;
-                case Cell.CELL_TYPE_NUMERIC:
+                case NUMERIC:
                     value = cell.getNumericCellValue();
                     break;
-                case Cell.CELL_TYPE_FORMULA:
+                case FORMULA:
                     value = cell.getCellFormula();
                     break;
             }
@@ -305,19 +297,20 @@ public final class ExcelUtils {
 
     public static Object getCellValue(Cell cell){
         Object value = null;
+
         if (cell != null){
-            int cellType = cell.getCellType();
+            CellType cellType = cell.getCellTypeEnum();
             switch (cellType){
-                case Cell.CELL_TYPE_STRING:
+                case STRING:
                     value = cell.getStringCellValue();
                     break;
-                case Cell.CELL_TYPE_BOOLEAN:
+                case BOOLEAN:
                     value = cell.getBooleanCellValue();
                     break;
-                case Cell.CELL_TYPE_NUMERIC:
+                case NUMERIC:
                     value = cell.getNumericCellValue();
                     break;
-                case Cell.CELL_TYPE_FORMULA:
+                case FORMULA:
                     value = cell.getCellFormula();
                     break;
             }

@@ -40,6 +40,29 @@ public class JdbcProjectGenerator extends ChiefProjectGenerator{
 
     private final Map<String, Object> environment = new ConcurrentHashMap<>();
 
+    private String pathPrefix = "";
+
+    public void setPathPrefix(String pathPrefix) {
+        pathPrefix = StringUtils.removeIfEndWith(pathPrefix, ".");
+        this.pathPrefix = pathPrefix + ".";
+    }
+
+    public void setControllerGenPath(String controllerGenPath) {
+        this.controllerGenPath = StringUtils.hasText(pathPrefix) ? pathPrefix + controllerGenPath : controllerGenPath;
+    }
+
+    public void setImplGenPath(String implGenPath) {
+        this.implGenPath = StringUtils.hasText(pathPrefix) ? pathPrefix + implGenPath : implGenPath;;
+    }
+
+    public void setPojoGenPath(String pojoGenPath) {
+        this.pojoGenPath = StringUtils.hasText(pathPrefix) ? pathPrefix + pojoGenPath : pojoGenPath;;
+    }
+
+    public void setMapperGenPath(String mapperGenPath) {
+        this.mapperGenPath = StringUtils.hasText(pathPrefix) ? pathPrefix + mapperGenPath : mapperGenPath;;
+    }
+
     public JdbcProjectGenerator(Version version) {
         super(version);
     }

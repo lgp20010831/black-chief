@@ -27,8 +27,12 @@ public class DemoList {
         System.out.println(val);
     }
 
+    static void java(){
+        Java java = new Java();
+        System.out.println(java);
+    }
 
     public static void main(String[] args) throws Throwable{
-        create();
+        java();
     }
 }

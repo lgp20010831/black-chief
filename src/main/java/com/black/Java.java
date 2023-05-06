@@ -2,8 +2,9 @@ package com.black;
 
 import com.black.core.json.Ignore;
 import lombok.Getter;
+import lombok.ToString;
 
-@Getter
+@Getter @SuppressWarnings("all") @ToString
 public class Java extends JsonBean{
 
     //版本号
