@@ -87,7 +87,9 @@ public class ServiceUtils {
         Collection<ColumnMetadata> columnMetadatas = tableMetadata.getColumnMetadatas();
         Map<String, String> map = new LinkedHashMap<>();
         for (ColumnMetadata columnMetadata : columnMetadatas) {
-            map.put(convertHandler == null ? columnMetadata.getName() : convertHandler.convertAlias(columnMetadata.getName()), columnMetadata.getRemarks());
+            String remarks = columnMetadata.getRemarks();
+            String name = columnMetadata.getName();
+            map.put(convertHandler == null ? name : convertHandler.convertAlias(name), com.black.core.util.StringUtils.hasText(remarks) ? remarks : name);
         }
         return map;
     }
@@ -100,7 +102,9 @@ public class ServiceUtils {
         Collection<ColumnMetadata> columnMetadatas = tableMetadata.getColumnMetadatas();
         Map<String, String> map = new LinkedHashMap<>();
         for (ColumnMetadata columnMetadata : columnMetadatas) {
-            map.put(columnMetadata.getRemarks(), convertHandler == null ? columnMetadata.getName() : convertHandler.convertAlias(columnMetadata.getName()));
+            String remarks = columnMetadata.getRemarks();
+            String name = columnMetadata.getName();
+            map.put(com.black.core.util.StringUtils.hasText(remarks) ? remarks : name, convertHandler == null ? name : convertHandler.convertAlias(name));
         }
         return map;
     }

@@ -186,6 +186,8 @@ public enum Version {
     }),
     MYBATIS_1_5(() -> (config, source, generator) -> {
         String controllerGenPath = getString(source, CONTROLLER_GEN_PATH);
+        String mapperGenPath = getString(source, MAPPER_GEN_PATH);
+        String implGenPath = getString(source, IMPL_GEN_PATH);
         String pojoGenPath = getString(source, POJO_GEN_PATH);
         String className = getString(source, CLASS_NAME_KEY);
         Class<?> superClass = (Class<?>) source.get(SUPER_CLASS);
@@ -199,8 +201,11 @@ public enum Version {
         }
         config.config("fast/mybatis_pojo.txt", pojoGenPath, className + ".java");
         if (!onlyCreatePojo){
+            config.config("fast/mybatis_mapper.txt", mapperGenPath, className + "Mapper.java");
+            config.config("fast/mybatis_impl.txt", implGenPath, className + "Impl.java");
             config.config("fast/mybatis_action_full_version_5.txt", controllerGenPath, className + "Controller.java");
         }
+        source.put("implPath", implGenPath);
         source.put("pojoPath", pojoGenPath);
         source.put("updateFieldName", UPDATE_FIELD);
         source.put("insertFieldName", INSERTED_FIELD);

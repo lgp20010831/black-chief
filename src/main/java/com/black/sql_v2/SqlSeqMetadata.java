@@ -17,8 +17,13 @@ public class SqlSeqMetadata {
     }
 
     public void registerKeyAndValue(SqlType type, String column, Object value){
-        SqlSeqPack pack = seqPackCache.computeIfAbsent(type, SqlSeqPack::new);
-        pack.addKeyAndValue(column, value);
+        if (type == SqlType.INSERT_SET){
+            registerKeyAndValue(SqlType.INSERT, column, value);
+            registerKeyAndValue(SqlType.SET, column, value);
+        }else {
+            SqlSeqPack pack = seqPackCache.computeIfAbsent(type, SqlSeqPack::new);
+            pack.addKeyAndValue(column, value);
+        }
     }
 
     public void parseAndRegister(String blendTxt){
@@ -32,7 +37,9 @@ public class SqlSeqMetadata {
                 type = SqlType.SET;
             }else if ("insert".equalsIgnoreCase(name)){
                 type = SqlType.INSERT;
-            }else{
+            }else if ("insert_set".equalsIgnoreCase(name)){
+                type = SqlType.INSERT_SET;
+            }else {
                 continue;
             }
             for (String attribute : blendObject.getAttributes()) {

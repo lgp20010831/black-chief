@@ -2,17 +2,13 @@ package com.black.sql_v2;
 
 import com.black.core.sql.code.DataSourceBuilder;
 import com.black.sql.QueryResultSetParser;
-import com.black.sql_v2.utils.SqlV2Utils;
 import com.black.table.TableMetadata;
-import com.black.utils.CollectionUtils;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
-import static com.black.utils.ServiceUtils.addArray;
 
 @SuppressWarnings("all")
 public class Sql {
@@ -67,6 +63,11 @@ public class Sql {
     }
 
     //--------------- common -------------------
+
+    public static void deleteEffect(String tableName, Object param, Object... params){
+        opt().deleteEffect(tableName, param, params);
+    }
+
     public static QueryResultSetParser queryPrimary(String tableName, Object target, Object... params){
         return opt().queryPrimary(tableName, target, params);
     }

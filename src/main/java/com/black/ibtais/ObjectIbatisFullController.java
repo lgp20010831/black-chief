@@ -69,4 +69,10 @@ public abstract class ObjectIbatisFullController<T> extends IbatisFullParentServ
     protected List<T> doFindList(JSONObject body) {
         return (List<T>) super.doFindList(body);
     }
+
+
+    @Override
+    protected T doSelectSingle0(T body) {
+        return (T) super.doSelectSingle0(body);
+    }
 }

@@ -5,7 +5,6 @@ import [(${superPath})];
 import [(${pojoPath})].[(${source.className})];
 import com.black.core.annotation.ChiefServlet;
 import com.black.core.aop.servlet.OpenIbatisPage;
-import com.black.core.mvc.response.Response;
 import com.black.swagger.ChiefIbatisAdaptive;
 import com.black.swagger.v2.V2Swagger;
 import io.swagger.annotations.Api;
@@ -52,45 +51,45 @@ public class [(${source.className})]Controller extends [(${superName})][# th:if=
     }
 
     @PostMapping("insertBatch")
-    @ApiOperation(value = "批次插入接口", response = Response.class, hidden = true)
+    @ApiOperation(value = "批次插入接口", hidden = true)
     public Object insertBatch(@RequestBody List<[(${source.className})]> array){
         return doInsertBatch0(array);
     }
 
     @PostMapping("insert")
-    @ApiOperation(value = "普通添加一条数据", response = Response.class, hidden = true)
+    @ApiOperation(value = "普通添加一条数据", hidden = true)
     public Object join(@RequestBody [(${source.className})] body){
         return doJoin0(body);
     }
 
     @PostMapping("saveBatch")
-    @ApiOperation(value = "批次: 修改或者添加, 有主键则修改, 否则添加", response = Response.class, hidden = true)
-    public Object saveBatch(@RequestBody  List<[(${source.className})]> array){
-        return doSaveBatch0(array);
+    @ApiOperation(value = "批次: 修改或者添加, 有主键则修改, 否则添加", hidden = true)
+    void saveBatch(@RequestBody  List<[(${source.className})]> array){
+        doSaveBatch0(array);
     }
 
     @PostMapping("save")
-    @ApiOperation(value = "修改或者添加, 有主键则修改, 否则添加", response = Response.class, hidden = true)
-    public Object save0(@RequestBody [(${source.className})] body){
-        return doSave1(body);
+    @ApiOperation(value = "修改或者添加, 有主键则修改, 否则添加", hidden = true)
+    void save0(@RequestBody [(${source.className})] body){
+        doSave1(body);
     }
 
     @PostMapping("delete")
-    @ApiOperation(value = "根据条件 map 删除接口", response = Response.class, hidden = true)
-    public Object delete0(@RequestBody [(${source.className})] body){
-        return doDelete0(body);
+    @ApiOperation(value = "根据条件 map 删除接口", hidden = true)
+    void delete0(@RequestBody [(${source.className})] body){
+        oDelete0(body);
     }
 
     @GetMapping("deleteById")
-    @ApiOperation(value = "根据主键删除接口", response = Response.class, hidden = true)
-    public Object deleteById0(@RequestParam Serializable id){
-        return doDeleteById0(id);
+    @ApiOperation(value = "根据主键删除接口", hidden = true)
+    void deleteById0(@RequestParam Serializable id){
+        doDeleteById0(id);
     }
 
     @PostMapping("deleteAllById")
-    @ApiOperation(value = "根据主键集合删除数据", response = Response.class, hidden = true)
-    public Object deleteAllById0(@RequestBody List<Object> idList){
-        return doDeleteAllById0(idList);
+    @ApiOperation(value = "根据主键集合删除数据", hidden = true)
+    void deleteAllById0(@RequestBody List<Object> idList){
+        doDeleteAllById0(idList);
     }
 
 

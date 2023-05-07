@@ -137,7 +137,7 @@ public class SqlExecutor implements NativeSqlAdapter {
 
     @Override
     public void closeNativeFetchConnection(Connection connection) {
-        ConnectionManagement.closeCurrentConnection(name);
+        closeConnection(connection);
     }
 
     public Connection getConnection(){
@@ -315,6 +315,13 @@ public class SqlExecutor implements NativeSqlAdapter {
 
     protected Map<String, Object> createEffectCondition(Map<String, Object> param, List<String> primaryKeyAliasNames){
         return filterNewMap(param, primaryKeyAliasNames);
+    }
+
+    public void deleteEffect(String tableName, Object param, Object... params){
+        List<String> primaryKeyAliasNames = findPrimaryKeyAliasNames(tableName);
+        Map<String, Object> json = serialize(param);
+        Map<String, Object> effectCondition = createEffectCondition(json, primaryKeyAliasNames);
+        delete(tableName, addArray(params, effectCondition, true));
     }
 
     public void updateById(String tableName, Object setMap, Object idValue, Object... params){

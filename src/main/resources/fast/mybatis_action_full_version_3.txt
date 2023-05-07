@@ -5,7 +5,6 @@ import [(${superPath})];
 import [(${pojoPath})].[(${source.className})];
 import com.black.core.annotation.ChiefServlet;
 import com.black.core.aop.servlet.OpenIbatisPage;
-import com.black.core.mvc.response.Response;
 import io.swagger.annotations.Api;
 import com.black.swagger.v2.V2Swagger;
 import io.swagger.annotations.ApiOperation;
@@ -44,13 +43,13 @@ public class [(${source.className})]Controller extends [(${superName})][# th:if=
     }
 
     @PostMapping("save")
-    @ApiOperation(value = "修改或者添加, 有主键则修改, 否则添加", response = Response.class, hidden = true)
+    @ApiOperation(value = "修改或者添加, 有主键则修改, 否则添加", hidden = true)
     public Object save0(@RequestBody [(${source.className})] body){
         return doSave1(body);
     }
 
     @GetMapping("deleteById")
-    @ApiOperation(value = "根据主键删除接口", response = Response.class, hidden = true)
+    @ApiOperation(value = "根据主键删除接口", hidden = true)
     public Object deleteById0(@RequestParam Serializable id){
         return doDeleteById0(id);
     }

@@ -2,10 +2,11 @@ package com.black.core.aop.servlet;
 
 
 import com.black.core.query.MethodWrapper;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.StringUtils;
 
-@GlobalAround
+@GlobalAround @Log4j2
 public class AroundHandler implements GlobalAroundResolver{
 
     private final ThreadLocal<MethodParser> parserThreadLocal = new ThreadLocal<>();
@@ -30,7 +31,12 @@ public class AroundHandler implements GlobalAroundResolver{
                 }
             }
 
-            return parser.parse(StringUtils.hasText(alias) ? alias : null, wrapper.getMethod(), args);
+            try {
+                return parser.parse(StringUtils.hasText(alias) ? alias : null, wrapper.getMethod(), args);
+            }catch (Throwable e){
+                log.debug("parse AnalyzedMethod args fair: {}", e.getMessage());
+                return args;
+            }
         }
         return args;
     }

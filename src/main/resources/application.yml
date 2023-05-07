@@ -3,7 +3,7 @@ server:
   port: 1003
 spring:
   profiles:
-    active: prod
+    active: home
 ldb:
   mqtt:
     url: ws://10.20.255.225:8083/mqtt
@@ -15,3 +15,5 @@ bean:
 mybatis-plus:
   configuration:
     log-impl: com.black.core.log.IbatisLog
+chief:
+  enabled-visit-database: true

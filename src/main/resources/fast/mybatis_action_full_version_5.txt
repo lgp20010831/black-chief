@@ -3,11 +3,14 @@ package [(${location.generatePath})];
 import com.alibaba.fastjson.JSONObject;
 import [(${superPath})];
 import [(${pojoPath})].[(${source.className})];
+import [(${mapperPath})].[(${source.className})]Mapper;
+import [(${implPath})].[(${source.className})]Impl;
+import com.black.core.util.LazyAutoWried;
 import com.black.core.annotation.ChiefServlet;
 import com.black.core.aop.servlet.OpenIbatisPage;
-import com.black.core.mvc.response.Response;
-import io.swagger.annotations.Api;
+import com.black.swagger.ChiefIbatisAdaptive;
 import com.black.swagger.v2.V2Swagger;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +25,13 @@ import static com.black.utils.ServiceUtils.*;
 @ChiefServlet("[(${source.lowName})]") @SuppressWarnings("all")
 public class [(${source.className})]Controller extends [(${superName})][# th:if="${needGeneric}"]<[(${source.className})]>[/] {
 
+
+    @LazyAutoWried
+    [(${source.className})]Mapper [(${source.lowName})]Mapper;
+
+    @LazyAutoWried
+    [(${source.className})]Impl [(${source.lowName})]Impl;
+
     //****************************************************************************************
     //                               A U T O   C R E A T E
     //****************************************************************************************
@@ -33,23 +43,59 @@ public class [(${source.className})]Controller extends [(${superName})][# th:if=
         return doFindList(body);
     }
 
+    @PostMapping("selectSingle")
+    @ApiOperation(value = "查询一条数据", hidden = true)
+    [(${source.className})] selectSingle(@RequestBody(required = false) [(${source.className})] body){
+        return doSelectSingle0(body);
+    }
+
     @GetMapping("selectById")
-    @V2Swagger("[(${source.lowName})]{}")
     @ApiOperation(value = "根据 id 查询接口", hidden = true)
     [(${source.className})] findById(@RequestParam Serializable id){
         return doFindById(id);
     }
 
+    @PostMapping("insertBatch")
+    @ApiOperation(value = "批次插入接口", hidden = true)
+    void insertBatch(@RequestBody List<[(${source.className})]> array){
+        doInsertBatch0(array);
+    }
+
+    @PostMapping("insert")
+    @ApiOperation(value = "普通添加一条数据", hidden = true)
+    void join(@RequestBody [(${source.className})] body){
+        doJoin0(body);
+    }
+
+    @PostMapping("saveBatch")
+    @ApiOperation(value = "批次: 修改或者添加, 有主键则修改, 否则添加", hidden = true)
+    void saveBatch(@RequestBody  List<[(${source.className})]> array){
+        doSaveBatch0(array);
+    }
+
     @PostMapping("save")
-    @ApiOperation(value = "修改或者添加, 有主键则修改, 否则添加", response = Response.class, hidden = true)
+    @ApiOperation(value = "修改或者添加, 有主键则修改, 否则添加", hidden = true)
     void save0(@RequestBody [(${source.className})] body){
         doSave1(body);
     }
 
+    @PostMapping("delete")
+    @ApiOperation(value = "根据条件 map 删除接口", hidden = true)
+    void delete0(@RequestBody [(${source.className})] body){
+        doDelete0(body);
+    }
+
     @GetMapping("deleteById")
-    @ApiOperation(value = "根据主键删除接口", response = Response.class, hidden = true)
+    @ApiOperation(value = "根据主键删除接口", hidden = true)
     void deleteById0(@RequestParam Serializable id){
         doDeleteById0(id);
     }
+
+    @PostMapping("deleteAllById")
+    @ApiOperation(value = "根据主键集合删除数据", hidden = true)
+    void deleteAllById0(@RequestBody List<Object> idList){
+        doDeleteAllById0(idList);
+    }
+
 
 }

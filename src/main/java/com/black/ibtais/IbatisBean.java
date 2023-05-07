@@ -8,11 +8,10 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.black.core.json.Trust;
 import com.black.core.sql.HumpColumnConvertHandler;
 import com.black.core.tools.BaseBean;
 import com.black.core.util.StringUtils;
-
+import io.swagger.annotations.ApiModelProperty;
 
 import javax.persistence.Transient;
 import java.util.List;
@@ -22,10 +21,12 @@ public class IbatisBean <T> extends BaseBean<T> {
 
     @Transient
     @TableField(exist = false)
+    @ApiModelProperty(hidden = true)
     protected BaseMapper<T> mybatisPlusBaseMapper;
 
     @Transient
     @TableField(exist = false)
+    @ApiModelProperty(hidden = true)
     protected IService<T> mybatisPlusService;
 
     public T object(){

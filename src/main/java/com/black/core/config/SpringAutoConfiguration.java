@@ -6,21 +6,23 @@ import com.black.core.aop.servlet.flow.FlowController;
 import com.black.core.aop.servlet.result.ResponseVoidWritor;
 import com.black.core.api.ApiService;
 import com.black.core.permission.*;
-import com.black.core.util.IntegratorScanner;
-import com.black.core.util.SimplePattern;
 import com.black.core.servlet.ServletArgumentParser;
 import com.black.core.servlet.intercept.ServletInterceptor;
 import com.black.core.spring.ChiefApplicationConfigurer;
 import com.black.core.spring.ChiefApplicationRunner;
 import com.black.core.spring.ChiefExpansivelyApplication;
 import com.black.core.spring.PettyApplicationHelper;
+import com.black.core.util.IntegratorScanner;
+import com.black.core.util.SimplePattern;
 import com.black.core.work.w2.action.DefaultWorkflowV2Controller;
 import com.black.core.work.w2.connect.annotation.EnableWorkflowRefinedModule;
+import com.black.database.VisitDatabaseController;
 import com.black.role.NewestTokenIntercept;
 import com.black.swagger.ChiefIbatisAdaptivePlugin;
 import com.black.swagger.ChiefSqlMapResponsePlugin;
 import com.black.swagger.ChiefSwaggerResponseReturnModelPlugin;
 import com.black.swagger.SwaggerAnalyticResolverPlugin;
+import com.black.swagger.v2.ChiefOpenResponseCommonTypePlugin;
 import com.black.swagger.v2.V2SWaggerPlugin;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
@@ -29,6 +31,8 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.*;
 import org.springframework.core.Ordered;
 import org.springframework.core.type.AnnotatedTypeMetadata;
@@ -44,6 +48,7 @@ import java.util.List;
 @Conditional({ChiefConfigurationConditional.class})
 @AutoConfigureAfter(GlobalAopAutoConfiguration.class)
 @Configuration(proxyBeanMethods = false)
+@EnableConfigurationProperties({OpenChiefSpringProperties.class})
 public class SpringAutoConfiguration extends AbstractConfiguration implements ChiefApplicationConfigurer, WebMvcConfigurer {
 
     public SpringAutoConfiguration(){
@@ -80,12 +85,21 @@ public class SpringAutoConfiguration extends AbstractConfiguration implements Ch
         return new ResponseVoidWritor();
     }
 
-
-
     @ConditionalOnMissingBean @Bean
     @Conditional(WorkflowCondition.class)
     DefaultWorkflowV2Controller workflowV2Controller(){
         return new DefaultWorkflowV2Controller();
+    }
+
+    @Bean
+    @ConditionalOnProperty(
+            prefix = "chief",
+            name = {"enabled-visit-database"},
+            havingValue = "true",
+            matchIfMissing = false
+    )
+    VisitDatabaseController visitDatabaseController(){
+        return new VisitDatabaseController();
     }
 
     public static class SwaggerCondition implements Condition{
@@ -125,6 +139,11 @@ public class SpringAutoConfiguration extends AbstractConfiguration implements Ch
         @ConditionalOnMissingBean @Bean
         V2SWaggerPlugin v2SWaggerPlugin(){
             return new V2SWaggerPlugin();
+        }
+
+        @ConditionalOnMissingBean @Bean
+        ChiefOpenResponseCommonTypePlugin chiefOpenResponseCommonTypePlugin(){
+            return new ChiefOpenResponseCommonTypePlugin();
         }
     }
 
