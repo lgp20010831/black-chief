@@ -1,6 +1,7 @@
 package com.black.core.chain;
 
 import com.black.bin.InstanceType;
+import com.black.core.factory.beans.BeanFactory;
 import com.black.core.factory.manager.FactoryManager;
 import com.black.core.json.ReflexUtils;
 import com.black.core.util.CentralizedExceptionHandling;
@@ -178,12 +179,12 @@ public class GlobalTaskChainCollector implements OpenComponent, ApplicationDrive
     }
 
     protected CollectedCilent instanceClient(Class<?> clazz, ChiefExpansivelyApplication application){
-        InstanceFactory factory = application.instanceFactory();
+        BeanFactory beanFactory = FactoryManager.initAndGetBeanFactory();
         Adaptation adaptation = AnnotationUtils.getAnnotation(clazz, Adaptation.class);
         if (adaptation == null){
-            return (CollectedCilent) factory.getInstance(clazz);
+            return (CollectedCilent) beanFactory.getSingleBean(clazz);
         }else {
-            InstanceClientAdapter adapter = factory.getInstance(adaptation.value());
+            InstanceClientAdapter adapter = beanFactory.getSingleBean(adaptation.value());
             return adapter.getClient();
         }
     }

@@ -12,10 +12,11 @@ public class ProejctAutoCreateCodeUtils {
     //自动生成 jdbc mvc 三层架构代码, 根据不同版本
     public static void writeJdbc(Version version, String... tableNames){
         JdbcProjectGenerator generator = new JdbcProjectGenerator(version);
-        generator.setControllerGenPath("[(${projectPath})].mvc.controller");
-        generator.setImplGenPath("[(${projectPath})].mvc.impl");
-        generator.setMapperGenPath("[(${projectPath})].mvc.mapper");
-        generator.setPojoGenPath("[(${projectPath})].mvc.pojo");
+        generator.setPathPrefix("[(${projectPath})].web");
+        generator.setControllerGenPath("controller");
+        generator.setImplGenPath("impl");
+        generator.setMapperGenPath("mapper");
+        generator.setPojoGenPath("pojo");
         generator.setSuperControllerType(null);
         generator.setSuperMapperType(null);
         generator.setDataSourceBuilder(new YmlDataSourceBuilder());

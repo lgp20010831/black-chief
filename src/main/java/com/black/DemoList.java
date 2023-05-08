@@ -3,30 +3,31 @@ package com.black;
 import com.black.bin.ApplyProxyFactory;
 import com.black.bin.ApplyProxyLayer;
 import com.black.bin.ProxyTemplate;
+import com.black.core.sql.code.YmlDataSourceBuilder;
 import com.black.core.util.Av0;
-import com.black.core.yml.pojo.Ayc;
+
 import com.black.datasource.MybatisPlusDynamicDataSourceBuilder;
 import com.black.project.JdbcProjectGenerator;
 import com.black.project.Version;
+import com.black.sql_v2.Sql;
 import com.black.utils.ServiceUtils;
+import com.black.xml.XmlSql;
 
 import java.lang.reflect.Method;
+import java.util.List;
+import java.util.Map;
 
 public class DemoList {
 
 
-    static void proxy(){
-        Ayc ayc = new Ayc();
-        ayc = ApplyProxyFactory.proxy(ayc, new ApplyProxyLayer() {
-            @Override
-            public Object proxy(Object[] args, Method method, Class<?> beanClass, ProxyTemplate template) throws Throwable {
-                System.out.println("执行前打印");
-                return template.invokeOriginal(args);
-            }
-        });
-
-
+    static void xml(){
+        Sql.configDataSource(new MybatisPlusDynamicDataSourceBuilder());
+        XmlSql.opt().scanAndParse("xml-sql/");
+        List<Map<String, Object>> list = XmlSql.selectByArray("selectSupplier").list();
+        System.out.println(list.size());
     }
+
+
     static void create(){
         JdbcProjectGenerator generator = new JdbcProjectGenerator(Version.MYBATIS_1_5);
         generator.setDataSourceBuilder(new MybatisPlusDynamicDataSourceBuilder());
@@ -51,6 +52,6 @@ public class DemoList {
     }
 
     public static void main(String[] args) throws Throwable{
-        create();
+        xml();
     }
 }

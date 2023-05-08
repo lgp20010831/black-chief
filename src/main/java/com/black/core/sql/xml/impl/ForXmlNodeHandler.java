@@ -6,6 +6,7 @@ import com.black.core.sql.code.MapArgHandler;
 import com.black.core.sql.code.config.GlobalSQLConfiguration;
 import com.black.core.sql.code.datasource.ConnectionManagement;
 import com.black.core.sql.code.util.SQLUtils;
+import com.black.core.sql.xml.PrepareSource;
 import com.black.core.sql.xml.XmlSqlSource;
 import com.black.core.util.StringUtils;
 import com.black.table.TableMetadata;
@@ -19,15 +20,25 @@ import java.util.*;
 public class ForXmlNodeHandler extends AbstractXmlNodeHandler{
 
     @Override
-    protected boolean resolve(XmlSqlSource sqlSource, ElementWrapper ew, GlobalSQLConfiguration configuration) {
+    public String getLabelName() {
+        return "for";
+    }
+
+    @Override
+    public List<String> getAttributeNames() {
+        return Arrays.asList("target", "space", "key", "value", "check");
+    }
+
+    @Override
+    protected boolean resolve(XmlSqlSource sqlSource, ElementWrapper ew, PrepareSource prepareSource) {
         Map<String, Object> argMap = sqlSource.getArgMap();
         String list = getAssertNullAttri(ew, "target");
         Object value = MapArgHandler.getValue(argMap, list);
 
         if (value != null && (value.getClass().isArray() || value instanceof Collection)){
-            processorCollection(SQLUtils.wrapList(value), ew, sqlSource, configuration);
+            processorCollection(SQLUtils.wrapList(value), ew, sqlSource, prepareSource);
         }else if (value instanceof Map){
-            processorMap((Map<String, Object>) value, ew, sqlSource, configuration);
+            processorMap((Map<String, Object>) value, ew, sqlSource, prepareSource);
         }else {
             ew.clearContent();
         }
@@ -37,7 +48,7 @@ public class ForXmlNodeHandler extends AbstractXmlNodeHandler{
     protected void processorCollection(Collection<?> collection,
                                        ElementWrapper ew,
                                        XmlSqlSource sqlSource,
-                                       GlobalSQLConfiguration configuration){
+                                       PrepareSource prepareSource){
         String space = getAssertNullAttri(ew, "space", "");
         String item = getAssertNullAttri(ew, "key", "key");
         final String itemTopic = "#{" + item + "}";
@@ -48,7 +59,7 @@ public class ForXmlNodeHandler extends AbstractXmlNodeHandler{
             Map<String, Object> argMap = sqlSource.getArgMap();
             try {
                 argMap.put(item, obj);
-                processorChild(copy, sqlSource, configuration);
+                processorChild(copy, sqlSource, prepareSource);
                 tempTxt = copy.getStringValue();
                 joiner.add(tempTxt.replace(itemTopic, SQLUtils.getString(obj)));
             }finally {
@@ -62,7 +73,7 @@ public class ForXmlNodeHandler extends AbstractXmlNodeHandler{
     protected void processorMap(Map<String, Object> map,
                                 ElementWrapper ew,
                                 XmlSqlSource sqlSource,
-                                GlobalSQLConfiguration configuration){
+                                PrepareSource prepareSource){
         String mapValue = getAssertNullAttri(ew, "value", "value");
         String mapKey = getAssertNullAttri(ew, "key", "key");
         String space = getAssertNullAttri(ew, "space", "");
@@ -72,7 +83,7 @@ public class ForXmlNodeHandler extends AbstractXmlNodeHandler{
         //验证 map 数据源字段
         List<TableMetadata> metadataList = new ArrayList<>();
         if (StringUtils.hasText(check)){
-            Connection connection = ConnectionManagement.getConnection(configuration.getDataSourceAlias());
+            Connection connection = prepareSource.getConnection();
             for (String name : check.split(",")) {
                 TableMetadata metadata = TableUtils.getTableMetadata(name, connection);
                 if (metadata != null){
@@ -82,7 +93,7 @@ public class ForXmlNodeHandler extends AbstractXmlNodeHandler{
                 }
             }
         }
-        AliasColumnConvertHandler convertHandler = configuration.getConvertHandler();
+        AliasColumnConvertHandler convertHandler = prepareSource.getConvertHandler();
         final String valTopic = "#{" + mapValue + "}";
         String tempTxt;
         for (String k : map.keySet()) {
@@ -99,9 +110,9 @@ public class ForXmlNodeHandler extends AbstractXmlNodeHandler{
                 if (!save){
                     continue;
                 }
-                tempTxt = replaceMapFor(itemTopic, valTopic, ew, sqlSource, mapKey, column, mapValue, v, configuration);
+                tempTxt = replaceMapFor(itemTopic, valTopic, ew, sqlSource, mapKey, column, mapValue, v, prepareSource);
             }else {
-                tempTxt = replaceMapFor(itemTopic, valTopic, ew, sqlSource, mapKey, k, mapValue, v, configuration);
+                tempTxt = replaceMapFor(itemTopic, valTopic, ew, sqlSource, mapKey, k, mapValue, v, prepareSource);
             }
             joiner.add(tempTxt);
         }
@@ -117,13 +128,13 @@ public class ForXmlNodeHandler extends AbstractXmlNodeHandler{
                                    String keyValue,
                                    String mapValue,
                                    Object valueValue,
-                                   GlobalSQLConfiguration configuration){
+                                   PrepareSource prepareSource){
         ElementWrapper copy = ew.createCopy();
         Map<String, Object> argMap = sqlSource.getArgMap();
         try {
             argMap.put(mapKey, keyValue);
             argMap.put(mapValue, valueValue);
-            processorChild(copy, sqlSource, configuration);
+            processorChild(copy, sqlSource, prepareSource);
             String tempTxt = copy.getStringValue();
             tempTxt = tempTxt.replace(keyItemTopic, keyValue);
             tempTxt = tempTxt.replace(valueItemTopic, SQLUtils.getString(valueValue));

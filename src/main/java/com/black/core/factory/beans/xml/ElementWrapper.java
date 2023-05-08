@@ -154,7 +154,7 @@ public class ElementWrapper implements Wrapper<Element> {
     }
 
     public List<ElementWrapper> getsByName(String name){
-        return elements.get(name);
+        return elements.getOrDefault(name, new ArrayList<>());
     }
 
     public List<ElementWrapper> selectNodes(String path){

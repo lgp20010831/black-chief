@@ -1,6 +1,7 @@
 package com.black.core.sql_v2;
 
 import com.black.arg.MethodReflectionIntoTheParameterProcessor;
+import com.black.mvc.SpringBeanRegister;
 import com.black.pattern.MethodInvoker;
 import com.black.pattern.NameAndValue;
 import com.black.core.aop.servlet.ParameterWrapper;
@@ -24,11 +25,14 @@ import com.black.sql_v2.action.AbstractProvideSupportChiefApiController;
 import com.black.sql_v2.javassist.*;
 import com.black.sql_v2.javassist.aop.SqlV2AopUtils;
 import com.black.table.TableUtils;
+import com.black.xml.XmlExecutor;
+import com.black.xml.XmlMapper;
+import com.black.xml.XmlSql;
 
 import java.sql.Connection;
 import java.util.*;
 
-@ChainClient
+@ChainClient @SuppressWarnings("all")
 public class SqlV2ConditionComponent implements OpenComponent, CollectedCilent {
 
     private final IoLog log = LogFactory.getArrayLog();
@@ -38,6 +42,8 @@ public class SqlV2ConditionComponent implements OpenComponent, CollectedCilent {
     private final Set<Object> optConfigurerClients = new HashSet<>();
 
     private final Set<Object> proxyClients = new HashSet<>();
+
+    private final List<Object> xmlMappers = new ArrayList<>();
 
     private int virtualSize = 0;
 
@@ -62,6 +68,22 @@ public class SqlV2ConditionComponent implements OpenComponent, CollectedCilent {
 
         log.info("handlerOptConfig ....");
         handlerOptConfig();
+
+        log.info("handler xmlMappers ....");
+        handlerXmlMappers();
+    }
+
+    private void handlerXmlMappers(){
+        for (Object xmlMapper : xmlMappers) {
+            Class<?> xmlType = (Class<?>) xmlMapper;
+            XmlMapper annotation = xmlType.getAnnotation(XmlMapper.class);
+            String alias = annotation.alias();
+            String[] paths = annotation.value();
+            XmlExecutor xmlExecutor = XmlSql.opt(alias);
+            xmlExecutor.scanAndParse(paths);
+            Object mapper = xmlExecutor.getMapper(xmlType);
+            SpringBeanRegister.registerBean(mapper, false);
+        }
     }
 
 
@@ -215,6 +237,10 @@ public class SqlV2ConditionComponent implements OpenComponent, CollectedCilent {
         register.begin("proxy", cki -> {
             return BeanUtil.isSolidClass(cki) && AnnotationUtils.isPertain(cki, ProxyHybrid.class);
         }).instance(false);
+
+        register.begin("xml", cki -> {
+            return cki.isInterface() && cki.isAnnotationPresent(XmlMapper.class);
+        }).instance(false);
     }
 
     @Override
@@ -229,6 +255,10 @@ public class SqlV2ConditionComponent implements OpenComponent, CollectedCilent {
 
         if ("proxy".equals(resultBody.getAlias())){
             proxyClients.addAll(resultBody.getCollectSource());
+        }
+
+        if ("xml".equals(resultBody.getAlias())){
+            xmlMappers.addAll(resultBody.getCollectSource());
         }
     }
 }

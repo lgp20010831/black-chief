@@ -1,7 +1,6 @@
 package com.black.core.sql.xml.impl;
 
 import com.black.core.factory.beans.xml.ElementWrapper;
-import com.black.core.sql.code.config.GlobalSQLConfiguration;
 import com.black.core.sql.xml.EscapeProcessor;
 import com.black.core.sql.xml.PrepareSource;
 import com.black.core.sql.xml.XmlSqlSource;
@@ -9,11 +8,12 @@ import com.black.core.sql.xml.XmlSqlSource;
 import java.util.Arrays;
 import java.util.List;
 
-public class UpdateXmlNodeHandler extends AbstractXmlNodeHandler{
+
+public class SelectXmlNodeHandler extends AbstractXmlNodeHandler {
 
     @Override
     public String getLabelName() {
-        return "update";
+        return "select";
     }
 
     @Override

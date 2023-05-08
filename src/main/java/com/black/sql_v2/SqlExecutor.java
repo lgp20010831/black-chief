@@ -37,6 +37,7 @@ import com.black.table.TableMetadata;
 import com.black.table.TableUtils;
 import com.black.utils.CollectionUtils;
 import com.black.utils.ServiceUtils;
+import lombok.Setter;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 
 import javax.sql.DataSource;
@@ -50,23 +51,29 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import static com.black.utils.ServiceUtils.*;
 
-@SuppressWarnings("all")
+@SuppressWarnings("all") @Setter
 public class SqlExecutor implements NativeSqlAdapter {
 
-    private final DataSourceBuilder dataSourceBuilder;
+    private DataSourceBuilder dataSourceBuilder;
 
     private final String name;
 
     private Environment environment;
 
     public SqlExecutor(String name){
-        this(null, name);
+        this.name = name;
     }
 
     public SqlExecutor(DataSourceBuilder dataSourceBuilder, String name) {
-
+        this.name = name;
         GlobalEnvironment globalEnvironment = GlobalEnvironment.getInstance();
-        environment = new Environment(globalEnvironment);
+        environment = new Environment();
+        init();
+    }
+
+    public void init(){
+        GlobalEnvironment globalEnvironment = GlobalEnvironment.getInstance();
+        BeanUtil.mappingBean(globalEnvironment, environment);
         if (dataSourceBuilder == null){
             dataSourceBuilder = GlobalEnvironment.getDataSourceBuilder(name);
             if (dataSourceBuilder == null){
@@ -75,12 +82,12 @@ public class SqlExecutor implements NativeSqlAdapter {
         }
         this.dataSourceBuilder = dataSourceBuilder;
         DataSource dataSource = dataSourceBuilder.getDataSource();
-        this.name = name;
+
         ConnectionManagement.registerDataSource(name, dataSource);
         //保证事务
         ConnectionManagement.registerListeners(name,
                 new TransactionSQLManagement.TransactionConnectionListener(name));
-        BeanUtil.mappingBean(globalEnvironment, environment);
+
     }
 
     public boolean isManageConnectionWithSpring(){

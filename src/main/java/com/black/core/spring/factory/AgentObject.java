@@ -102,4 +102,5 @@ public interface AgentObject {
      * @param args 新的参数
      */
     void clear(Object[] args);
+
 }

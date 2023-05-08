@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class XmlEngine {
 
 
-    private static Map<String, XmlNodeHandler> handlerCache = new ConcurrentHashMap<>();
+    private static final Map<String, XmlNodeHandler> handlerCache = new ConcurrentHashMap<>();
 
     public static Map<String, XmlNodeHandler> getHandlerCache() {
         return handlerCache;
@@ -26,13 +26,13 @@ public class XmlEngine {
         return getHandlerCache().get(nodeName);
     }
 
-    public static String processorSql(ElementWrapper wrapper, Map<String, Object> argMap, GlobalSQLConfiguration configuration){
+    public static String processorSql(ElementWrapper wrapper, Map<String, Object> argMap, PrepareSource prepareSource){
         XmlSqlSource xmlSqlSource = new XmlSqlSource();
         xmlSqlSource.setArgMap(argMap);
         XmlNodeHandler xmlNodeHandler = getHandler(wrapper.getName());
         Assert.notNull(xmlNodeHandler, "unknown xml node is [" + wrapper.getName() + "]");
 
-        xmlNodeHandler.doHandler(xmlSqlSource, wrapper, configuration);
+        xmlNodeHandler.doHandler(xmlSqlSource, wrapper, prepareSource);
         String sql = xmlSqlSource.getSql();
 
         //handler ${}

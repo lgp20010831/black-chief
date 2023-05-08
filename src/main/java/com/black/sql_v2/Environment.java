@@ -4,6 +4,7 @@ import com.black.core.log.IoLog;
 import com.black.core.sql.code.AliasColumnConvertHandler;
 import com.black.core.sql.code.DataSourceBuilder;
 import com.black.core.sql.code.config.StatementValueSetDisplayConfiguration;
+import com.black.datasource.DataSourceBuilderTypeManager;
 import com.black.json.JsonParser;
 import com.black.sql_v2.utils.VarcharIdType;
 import lombok.Getter;
@@ -12,9 +13,11 @@ import lombok.Setter;
 @Getter @Setter
 public class Environment extends SqlSeqMetadata{
 
-    private final GlobalEnvironment parent;
+    private GlobalEnvironment parent;
 
     private DataSourceBuilder dataSourceBuilder;
+
+    private Class<? extends DataSourceBuilder> builderClass;
 
     private IoLog log;
 
@@ -34,12 +37,17 @@ public class Environment extends SqlSeqMetadata{
 
     private StatementValueSetDisplayConfiguration displayConfiguration;
 
-    public Environment(GlobalEnvironment parent) {
-        this.parent = parent;
+    public Environment() {
+        this.parent = GlobalEnvironment.getInstance();
         seqPackCache.putAll(parent.getSeqPackCache());
     }
 
     public void clear(){
         seqPackCache.clear();
+    }
+
+    public void setBuilderClass(Class<? extends DataSourceBuilder> builderClass) {
+        this.builderClass = builderClass;
+        dataSourceBuilder = DataSourceBuilderTypeManager.getBuilder(builderClass);
     }
 }

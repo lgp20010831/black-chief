@@ -5,6 +5,7 @@ import com.black.core.log.LogFactory;
 import com.black.core.mvc.FileUtil;
 import com.black.core.util.ClassUtils;
 import com.black.template.Configuration;
+import com.sun.org.apache.bcel.internal.generic.NEW;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -23,6 +24,10 @@ public class ProjectInitGenerator extends ChiefProjectGenerator{
     public static String MVC_NAME = "mvc";
 
     private static final IoLog log = LogFactory.getLog4j();
+
+    public static void run(Class<?> mainClass){
+        new ProjectInitGenerator(Version.INIT_1_0_FINAL, mainClass).init();
+    }
 
     public ProjectInitGenerator(Version version, Class<?> mainClass) {
         super(version);

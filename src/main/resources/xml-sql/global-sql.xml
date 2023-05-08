@@ -1,0 +1,7 @@
+<root>
+    <select id="countSupplier">
+        select * from supplier where 1=1
+    </select>
+
+
+</root>

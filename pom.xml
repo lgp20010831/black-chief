@@ -497,21 +497,21 @@
 
 
         </plugins>
-<!--        <resources>-->
-<!--            <resource>-->
-<!--                <directory>src/main/resources</directory>-->
-<!--                <excludes>-->
-<!--                    <exclude>application.yml</exclude>-->
-<!--                    <exclude>application-home.yml</exclude>-->
-<!--                    <exclude>application-prod.yml</exclude>-->
-<!--                    <exclude>spring-mapper/**</exclude>-->
-<!--                    <exclude>sql/**</exclude>-->
-<!--                    <exclude>**.png</exclude>-->
-<!--                    <exclude>**.xlsm</exclude>-->
-<!--                    <exclude>**.xls</exclude>-->
-<!--                </excludes>-->
-<!--            </resource>-->
-<!--        </resources>-->
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <excludes>
+                    <exclude>application.yml</exclude>
+                    <exclude>application-home.yml</exclude>
+                    <exclude>application-prod.yml</exclude>
+                    <exclude>spring-mapper/**</exclude>
+                    <exclude>sql/**</exclude>
+                    <exclude>**.png</exclude>
+                    <exclude>**.xlsm</exclude>
+                    <exclude>**.xls</exclude>
+                </excludes>
+            </resource>
+        </resources>
     </build>
 
 </project>

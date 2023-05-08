@@ -142,6 +142,10 @@ public class Sql {
     }
 
 
+    public static SqlExecutor lazyOpt(String alias){
+        return executorCache.computeIfAbsent(alias, SqlExecutor::new);
+    }
+
     public static SqlExecutor opt(){
         return opt(DEFAULT_ALIAS);
     }

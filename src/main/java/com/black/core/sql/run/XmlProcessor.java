@@ -10,6 +10,7 @@ import com.black.core.sql.code.MapArgHandler;
 import com.black.core.sql.code.MapperXmlApplicationContext;
 import com.black.core.sql.code.config.GlobalSQLConfiguration;
 import com.black.core.sql.code.datasource.ConnectionManagement;
+import com.black.core.sql.xml.PrepareSource;
 import com.black.core.sql.xml.XmlEngine;
 import com.black.core.sql.xml.XmlManager;
 import com.black.core.sql.xml.XmlUtils;
@@ -46,7 +47,8 @@ public class XmlProcessor extends SqlRunner implements RunSupport{
         Assert.notNull(xmlBind, "not find bind mapper on method: " + mw.getName());
         Map<String, Object> argMap = MapArgHandler.parse(args, mw);
         ElementWrapper copy = xmlBind.createCopy();
-        String sql = XmlEngine.processorSql(copy, argMap, configuration);
+        PrepareSource prepareSource = new PrepareSource(connection, configuration.getConvertHandler());
+        String sql = XmlEngine.processorSql(copy, argMap, prepareSource);
         String compressSql = XmlUtils.removeLineFeed(sql);
         Log log = configuration.getLog();
         if (log != null && log.isDebugEnabled()) {
