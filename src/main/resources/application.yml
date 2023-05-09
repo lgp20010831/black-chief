@@ -24,4 +24,6 @@ sql:
       environment:
         auto-set-id: false
     master_v2:
-      mapperPaths: xml-sql/
+      mapperPaths: xml-sql/,iu
+mapping:
+  df = is_deleted = false

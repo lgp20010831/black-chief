@@ -14,13 +14,13 @@ import java.util.function.Function;
 
 public class ExcelContext<T extends Configuration> {
 
-    private final Configuration configuration;
+    private final T configuration;
 
     private InputStream excelInputStream;
 
     private Function<Workbook, Sheet> sheetFunction;
 
-    public ExcelContext(Configuration configuration, Class<T> type) {
+    public ExcelContext(T configuration) {
         this.configuration = configuration;
     }
 

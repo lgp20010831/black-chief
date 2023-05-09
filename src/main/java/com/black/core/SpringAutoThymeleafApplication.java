@@ -30,6 +30,7 @@ import com.black.core.util.IntegratorScanner;
 import com.black.mq_v2.annotation.EnabledMqttExt;
 import com.black.mvc.MvcMappingRegister;
 import com.black.nest.NestDictController;
+import com.black.xml.XmlSql;
 import lombok.extern.log4j.Log4j2;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
@@ -93,6 +94,7 @@ public class SpringAutoThymeleafApplication {
 
 
     public static void main(String[] args) throws Exception {
+
         ChiefApplicationRunner.openChiefApplication();
         DefaultLoadDriver.openColorLog();
         //SpringRunnerPrint.closePrint();

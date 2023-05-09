@@ -26,7 +26,7 @@ public class ForXmlNodeHandler extends AbstractXmlNodeHandler{
 
     @Override
     public List<String> getAttributeNames() {
-        return Arrays.asList("target", "space", "key", "value", "check");
+        return Arrays.asList("target", "space", "key", "value", "check", "prefix", "suffix");
     }
 
     @Override
@@ -50,10 +50,12 @@ public class ForXmlNodeHandler extends AbstractXmlNodeHandler{
                                        XmlSqlSource sqlSource,
                                        PrepareSource prepareSource){
         String space = getAssertNullAttri(ew, "space", "");
-        String item = getAssertNullAttri(ew, "key", "key");
+        String prefix = getAssertNullAttri(ew, "prefix", "");
+        String suffix = getAssertNullAttri(ew, "suffix", "");
+        String item = getAssertNullAttri(ew, "key", "item");
         final String itemTopic = "#{" + item + "}";
         String tempTxt;
-        StringJoiner joiner = new StringJoiner(space);
+        StringJoiner joiner = new StringJoiner(space, prefix, suffix);
         for (Object obj : collection) {
             ElementWrapper copy = ew.createCopy();
             Map<String, Object> argMap = sqlSource.getArgMap();
@@ -74,12 +76,14 @@ public class ForXmlNodeHandler extends AbstractXmlNodeHandler{
                                 ElementWrapper ew,
                                 XmlSqlSource sqlSource,
                                 PrepareSource prepareSource){
-        String mapValue = getAssertNullAttri(ew, "value", "value");
-        String mapKey = getAssertNullAttri(ew, "key", "key");
+        String mapValue = getAssertNullAttri(ew, "value", "val");
+        String mapKey = getAssertNullAttri(ew, "key", "item");
+        String prefix = getAssertNullAttri(ew, "prefix", "");
+        String suffix = getAssertNullAttri(ew, "suffix", "");
         String space = getAssertNullAttri(ew, "space", "");
         String check = getAssertNullAttri(ew, "check", "");
         final String itemTopic = "#{" + mapKey + "}";
-        StringJoiner joiner = new StringJoiner(space);
+        StringJoiner joiner = new StringJoiner(space, prefix, suffix);
         //验证 map 数据源字段
         List<TableMetadata> metadataList = new ArrayList<>();
         if (StringUtils.hasText(check)){

@@ -5,7 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.black.core.util.StringUtils;
 import lombok.Data;
 
-@Data
+@Data @SuppressWarnings("all")
 public class OversimplifyJsonParser implements JsonParser {
 
     private char jsonStart = '{';

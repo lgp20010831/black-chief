@@ -24,6 +24,7 @@ import com.black.swagger.ChiefSwaggerResponseReturnModelPlugin;
 import com.black.swagger.SwaggerAnalyticResolverPlugin;
 import com.black.swagger.v2.ChiefOpenResponseCommonTypePlugin;
 import com.black.swagger.v2.V2SWaggerPlugin;
+import com.black.visit.VisitCompileController;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -70,6 +71,10 @@ public class SpringAutoConfiguration extends AbstractConfiguration implements Ch
 
     @Bean SimplePattern simplePattern()                 {return new IntegratorScanner();}
 
+    @ConditionalOnMissingBean @Bean
+    VisitCompileController visitCompileController(){
+        return new VisitCompileController();
+    }
 
     @ConditionalOnMissingBean
     @Bean ApiService apiServiceController(){

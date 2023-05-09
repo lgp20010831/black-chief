@@ -12,7 +12,7 @@ public class ExcelBuilder {
             default:
                 throw new IllegalStateException("ill excel type:" + type);
         }
-        return new ExcelContext(configuration, type.getConfigType());
+        return new ExcelContext(configuration);
     }
 
 

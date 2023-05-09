@@ -9,6 +9,8 @@ import com.black.core.sql.xml.XmlSqlSource;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class IfXmlNodeHandler extends AbstractXmlNodeHandler {
 
@@ -46,5 +48,24 @@ public class IfXmlNodeHandler extends AbstractXmlNodeHandler {
             return false;
         }
         return true;
+    }
+
+    private String prepareItem(String item){
+        item = item.replace("and", "&&");
+        item = item.replace("!= null", "notNull");
+        return null;
+    }
+
+    public static void main(String[] args) {
+        String str = "hello xxx != null and ddd != null";
+        Pattern compile = Pattern.compile("\\s*\\D+\\s(!= null| !=null)");
+        Matcher matcher = compile.matcher(str);
+        int count = 0;
+        while (matcher.find()){
+            System.out.println("第" + (++count) + "次找到");
+            //start()返回上一个匹配项的起始索引
+            //end()返回上一个匹配项的末尾索引。
+            System.out.println(str.substring(matcher.start(),matcher.end()));
+        }
     }
 }

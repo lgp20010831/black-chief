@@ -98,6 +98,7 @@ public class FactoryManager {
             factoryType = type;
         }
         beanFactory = instanceFactory.getInstance(factoryType);
+        beanFactory.registerBean(instanceFactory);
     }
 
 
