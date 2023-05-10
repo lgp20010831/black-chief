@@ -1,10 +1,9 @@
 <root>
 
-    <sql id="df">is_deleted = false</sql>
 
     <select id="countSupplier">
         select * from supplier where 1=1
-        <if test="isNotNull(name)">
+        <if test="notNull(name)">
             and name = ^{name} and ${df}
             <else>
                 and name is null
@@ -16,7 +15,6 @@
         <for target="map" space="and" prefix="and" suffix="xxx">
             #{item} = #{val}
         </for>
-        <include id="df"/>
     </select>
 
 

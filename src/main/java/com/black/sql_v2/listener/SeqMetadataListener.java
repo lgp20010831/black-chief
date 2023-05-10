@@ -4,6 +4,7 @@ import com.black.core.sql.code.AliasColumnConvertHandler;
 import com.black.core.sql.code.MapArgHandler;
 import com.black.core.sql.code.util.SQLUtils;
 import com.black.core.sql.unc.OperationType;
+import com.black.function.Supplier;
 import com.black.sql.InsertStatement;
 import com.black.sql.SqlOutStatement;
 import com.black.sql.UpdateStatement;
@@ -34,13 +35,14 @@ public class SeqMetadataListener implements SqlListener{
             List<Object> list = attachment == null ? null : SQLUtils.wrapList(attachment);
             SqlV2Utils.setSeqInStatement(statement, OperationType.INSERT, pack.getSeqQueue().toArray(new String[0]));
             pack.getKeyValueMap().forEach((c, v) -> {
+                v = getValue(v);
                 String value = MapArgHandler.getString(v);
                 statement.removeInsertValue(c);
                 statement.insertValue(c, value, false);
                 if (list != null){
                     String alias = aliasColumnConvertHandler.convertAlias(c);
                     for (Object ele : list) {
-                        ServiceUtils.setProperty(ele, alias, value);
+                        ServiceUtils.setProperty(ele, alias, v);
                     }
                 }
             });
@@ -50,6 +52,7 @@ public class SeqMetadataListener implements SqlListener{
             SqlSeqPack setPack = environment.getPack(SqlType.SET);
             SqlV2Utils.setSeqInStatement(statement, OperationType.UPDATE, setPack.getSeqQueue().toArray(new String[0]));
             setPack.getKeyValueMap().forEach((c, v) -> {
+                v = getValue(v);
                 String value = MapArgHandler.getString(v);
                 statement.removeUpdateValue(c);
                 statement.writeSet(c, value, false);
@@ -57,7 +60,7 @@ public class SeqMetadataListener implements SqlListener{
                     AliasColumnConvertHandler convertHandler = generateWrapper.getConvertHandler();
                     Object bean = generateWrapper.getBean();
                     String alias = convertHandler.convertAlias(c);
-                    ServiceUtils.setProperty(bean, alias, value);
+                    ServiceUtils.setProperty(bean, alias, v);
                 }
             });
         }
@@ -66,9 +69,26 @@ public class SeqMetadataListener implements SqlListener{
             SqlSeqPack pack = environment.getPack(SqlType.WHERE);
             SqlV2Utils.setSeqInStatement(statement, OperationType.SELECT, pack.getSeqQueue().toArray(new String[0]));
             pack.getKeyValueMap().forEach((c, v) -> {
+                v = getValue(v);
                 statement.writeEq(c, MapArgHandler.getString(v), false);
             });
         }
+    }
+
+    private Object getValue(Object target){
+        if (target instanceof Supplier){
+            try {
+                return ((Supplier<?>) target).get();
+            } catch (Throwable e) {
+                throw new IllegalStateException(e);
+            }
+        }
+
+        if (target instanceof java.util.function.Supplier){
+            return ((java.util.function.Supplier<?>) target).get();
+        }
+
+        return target;
     }
 
 

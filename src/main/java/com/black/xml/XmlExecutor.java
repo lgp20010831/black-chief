@@ -147,15 +147,6 @@ public class XmlExecutor {
         return "select".equalsIgnoreCase(wrapper.getName());
     }
 
-
-    public static void main(String[] args) throws IOException {
-        PathMatchingResourcePatternResolver patternResolver = new PathMatchingResourcePatternResolver();
-        Resource[] resources = patternResolver.getResources("classpath*:xml-sql/**/**/**.xml");
-        for (Resource resource : resources) {
-            System.out.println(resource.getFilename());
-        }
-    }
-
     public <T> T getMapper(Class<T> type){
         return (T) proxyCache.computeIfAbsent(type, t -> createProxy(t));
     }

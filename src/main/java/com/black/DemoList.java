@@ -6,13 +6,17 @@ import com.black.bin.ProxyTemplate;
 import com.black.core.sql.code.YmlDataSourceBuilder;
 import com.black.core.util.Av0;
 
+import com.black.core.util.IoUtil;
 import com.black.datasource.MybatisPlusDynamicDataSourceBuilder;
 import com.black.project.JdbcProjectGenerator;
 import com.black.project.Version;
 import com.black.sql_v2.Sql;
+import com.black.utils.IoUtils;
 import com.black.utils.ServiceUtils;
 import com.black.xml.XmlSql;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
@@ -51,7 +55,14 @@ public class DemoList {
         System.out.println(java);
     }
 
+    static void read() throws IOException {
+        InputStream inputStream = ServiceUtils.getNonNullResource("static/info.0.log");
+        byte[] buf = IoUtils.readBytes(inputStream);
+        System.out.println(buf);
+    }
+
     public static void main(String[] args) throws Throwable{
-        xml();
+        read();
+
     }
 }

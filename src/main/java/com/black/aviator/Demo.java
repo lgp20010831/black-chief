@@ -2,6 +2,7 @@ package com.black.aviator;
 
 import com.black.aviator.annotation.BooleanExpress;
 import com.black.aviator.annotation.ObjectExpress;
+import com.black.core.util.Av0;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -22,7 +23,7 @@ public class Demo {
         return "name: " + name + "卧槽";
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IllegalAccessException, NoSuchMethodException {
 
 //        Po po = new Po();
 //        po.setName("lgp");
@@ -31,11 +32,17 @@ public class Demo {
 //        Object item = SyntaxResolverManager.resolverItem(e, map, null);
 //        //System.out.println(AviatorManager.getInstance().execute(e, ));
 //        System.out.println(item);
-        System.out.println(AviatorManager.execute("2 > 1 ? (3 > 2 ? '是3' : '是2') : '是1'", null));
+        AviatorManager.getInstance().addInstanceFunctions("po", Po.class);
+        System.out.println(AviatorManager.execute("let square = lambda(x) -> x*2 end; for x in range(0, 10) { p(square(x)); }", Av0.js("poi", new Po())));
     }
 
     @Getter @Setter
     public static class Po{
         private String name;
+
+    protected String make(String name){
+        this.name = name;
+        return name;
+    }
     }
 }

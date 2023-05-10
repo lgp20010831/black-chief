@@ -10,8 +10,11 @@ import com.black.vfs.VFS;
 import com.black.vfs.VfsScanner;
 import com.googlecode.aviator.AviatorEvaluator;
 import com.googlecode.aviator.AviatorEvaluatorInstance;
+import com.googlecode.aviator.Feature;
+import com.googlecode.aviator.Options;
 import com.googlecode.aviator.runtime.function.AbstractFunction;
 
+import java.math.MathContext;
 import java.util.Map;
 import java.util.Set;
 
@@ -54,6 +57,20 @@ public class AviatorManager {
                 instance.addFunction((AbstractFunction)ReflexUtils.instance(type));
             }
         }
+
+        //计算精度
+        instance.setOption(Options.MATH_CONTEXT, MathContext.DECIMAL128);
+        //当无法找到属性返回空
+        instance.setOption(Options.NIL_WHEN_PROPERTY_NOT_FOUND, true);
+        instance.setOption(Options.FEATURE_SET, Feature.asSet(Feature.Assignment,
+                Feature.ForLoop,
+                Feature.WhileLoop,
+                Feature.ExceptionHandle,
+                Feature.Lambda,
+                Feature.NewInstance,
+                Feature.StaticFields,
+                Feature.StaticMethods,
+                Feature.Let));
     }
 
 
