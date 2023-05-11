@@ -4,8 +4,8 @@ import com.black.core.aop.code.AopTaskIntercepet;
 import com.black.core.aop.code.HijackObject;
 import com.black.core.sql.annotation.OpenTransactional;
 import com.black.core.sql.code.TransactionSQLManagement;
+import com.black.core.util.AnnotationUtils;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.core.annotation.AnnotationUtils;
 
 import java.lang.reflect.Method;
 
@@ -27,12 +27,12 @@ public class SQLTransactionIntercept implements AopTaskIntercepet {
 
     OpenTransactional getTransactional(HijackObject hijackObject){
         Method method = hijackObject.getMethod();
-        OpenTransactional annotation = AnnotationUtils.getAnnotation(method, OpenTransactional.class);
+        OpenTransactional annotation = AnnotationUtils.findAnnotation(method, OpenTransactional.class);
         if (annotation == null){
-            annotation = AnnotationUtils.getAnnotation(hijackObject.getClazz(), OpenTransactional.class);
+            annotation = AnnotationUtils.findAnnotation(hijackObject.getClazz(), OpenTransactional.class);
         }
         if (annotation == null){
-            annotation = AnnotationUtils.getAnnotation(method.getDeclaringClass(), OpenTransactional.class);
+            annotation = AnnotationUtils.findAnnotation(method.getDeclaringClass(), OpenTransactional.class);
         }
         return annotation;
     }

@@ -8,7 +8,8 @@ import com.black.core.aop.code.AopTaskIntercepet;
 import com.black.core.aop.code.AopTaskManagerHybrid;
 import com.black.core.sql.annotation.OpenTransactional;
 import com.black.core.sql.annotation.UnsupportTransactional;
-import org.springframework.core.annotation.AnnotationUtils;
+import com.black.core.util.AnnotationUtils;
+
 
 @AopHybrid(SQLPremise.class)
 @HybridSort(14501)
@@ -20,9 +21,9 @@ public class SQLAopTransactionHybrid implements AopTaskManagerHybrid {
     public AopMatchTargetClazzAndMethodMutesHandler obtainMatcher() {
         AopMethodDirectAgent agent = AopMethodDirectAgent.getInstance();
         agent.register(this, (targetClazz, method) -> {
-            return AnnotationUtils.getAnnotation(method, UnsupportTransactional.class) == null &&
-                    (AnnotationUtils.getAnnotation(method.getDeclaringClass(), OpenTransactional.class) != null ||
-                    AnnotationUtils.getAnnotation(method, OpenTransactional.class) != null);
+            return AnnotationUtils.findAnnotation(method, UnsupportTransactional.class) == null &&
+                    (AnnotationUtils.findAnnotation(method.getDeclaringClass(), OpenTransactional.class) != null ||
+                    AnnotationUtils.findAnnotation(method, OpenTransactional.class) != null);
         });
         return agent.getHandler(this);
     }

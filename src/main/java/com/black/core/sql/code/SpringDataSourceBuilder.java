@@ -1,5 +1,6 @@
 package com.black.core.sql.code;
 
+import com.black.datasource.SpringDataSourceWrapper;
 import com.black.holder.SpringHodler;
 import com.black.core.factory.beans.MainConstructor;
 import com.black.core.util.Assert;
@@ -26,6 +27,7 @@ public class SpringDataSourceBuilder implements DataSourceBuilder {
             beanFactory = (DefaultListableBeanFactory) SpringHodler.getBeanFactory();
         }
         Assert.notNull(beanFactory, "can not find bean factory");
-        return beanFactory.getBean(DataSource.class);
+        DataSource dataSource = beanFactory.getBean(DataSource.class);
+        return new SpringDataSourceWrapper(dataSource);
     }
 }

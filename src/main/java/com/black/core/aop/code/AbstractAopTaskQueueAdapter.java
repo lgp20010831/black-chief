@@ -9,7 +9,7 @@ import org.springframework.aop.framework.adapter.AdvisorAdapterRegistry;
 import org.springframework.aop.framework.adapter.GlobalAdvisorAdapterRegistry;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
-
+import org.springframework.core.Ordered;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.Set;
 
 public abstract class AbstractAopTaskQueueAdapter implements AopTaskChain, GlobalCollectStage,
-        GlobalAopMamatchingDispatcher, AopGlobalAdvisor, ApplicationListener<ContextRefreshedEvent> {
+        GlobalAopMamatchingDispatcher, AopGlobalAdvisor, ApplicationListener<ContextRefreshedEvent>, Ordered {
 
     /** 缓存所有记录下的 advice */
     protected final Set<Advice> examinationAdvices = new HashSet<>();
@@ -106,5 +106,10 @@ public abstract class AbstractAopTaskQueueAdapter implements AopTaskChain, Globa
 
     protected void obtainPointCut(){
         pointcut = GlobalAopPointCutHodler.getInstance(this);
+    }
+
+    @Override
+    public int getOrder() {
+        return Ordered.HIGHEST_PRECEDENCE;
     }
 }

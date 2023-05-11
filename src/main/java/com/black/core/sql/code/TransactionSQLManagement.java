@@ -1,11 +1,9 @@
 package com.black.core.sql.code;
 
-import com.black.core.log.IoLog;
 import com.black.core.sql.SQLSException;
 import com.black.core.sql.code.config.GlobalSQLConfiguration;
 import com.black.core.sql.code.datasource.ConnectionManagement;
 import com.black.core.sql.code.log.Log;
-import com.black.core.sql.code.log.Log4jSqlLog;
 import com.black.core.sql.code.log.SystemLog;
 import com.black.core.util.Callables;
 import com.black.utils.LocalSet;
@@ -75,8 +73,8 @@ public class TransactionSQLManagement {
         }catch (Throwable ex){
             for (TransactionHandler handler : handlers) {
                 if (loop.get(handler.getAlias())) {
-                    if (log.isInfoEnabled()) {
-                        log.info("transaction interceptor do rollback: [{}]", handler.getAlias());
+                    if (log.isDebugEnabled()) {
+                        log.debug("transaction interceptor do rollback: [{}]", handler.getAlias());
                     }
                     handler.rollback();
                 }

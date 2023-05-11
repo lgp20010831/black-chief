@@ -2,6 +2,7 @@ package com.black.core.spring;
 
 import com.black.bin.InstanceBeanManager;
 import com.black.bin.InstanceType;
+import com.black.core.factory.beans.BeanFactory;
 import com.black.core.factory.manager.FactoryManager;
 import com.black.core.json.NotNull;
 import com.black.core.spring.annotation.ClosableSort;
@@ -469,6 +470,8 @@ public abstract class AbstractEmbedApplication implements ChiefExpansivelyApplic
     protected void initFactory(){
         instanceFactory = obtainInstanceFactory();
         instanceFactory.registerInstance(AbstractEmbedApplication.class, this);
+        BeanFactory beanFactory = FactoryManager.getBeanFactory();
+        beanFactory.registerBean(this);
     }
 
     public InstanceFactory obtainInstanceFactory(){
