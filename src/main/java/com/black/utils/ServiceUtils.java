@@ -34,6 +34,7 @@ import com.black.throwable.BreakException;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
+import org.checkerframework.checker.units.qual.K;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.util.StringUtils;
@@ -54,6 +55,18 @@ import java.util.function.Function;
 
 @SuppressWarnings("all")
 public class ServiceUtils {
+
+    public static boolean isAllNull(Object param, List<String> names){
+        boolean isAllNull = true;
+        for (String name : names) {
+            if (getProperty(param, name) != null){
+                isAllNull = false;
+                break;
+            }
+        }
+        return isAllNull;
+    }
+
     public static TableMetadata getTableMetadataBySpring(String tableName){
         DefaultListableBeanFactory beanFactory = SpringHodler.getNonNullListableBeanFactory();
         DataSource dataSource = beanFactory.getBean(DataSource.class);
@@ -372,6 +385,15 @@ public class ServiceUtils {
             }
         }
         return null;
+    }
+
+    public static  Map<String, Object> filterNewMapV2(Object param, List<String> names){
+        Map<String, Object> newMap = new LinkedHashMap<>();
+        for (String name : names) {
+            Object v = getProperty(param, name);
+            newMap.put(name, v);
+        }
+        return newMap;
     }
 
     public static <K,V> Map<K, V> filterNewMap(Map<K, V> param, List<K> names){

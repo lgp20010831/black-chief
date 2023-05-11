@@ -1,8 +1,10 @@
 package com.black;
 
+import com.alibaba.fastjson.JSONObject;
 import com.black.bin.ApplyProxyFactory;
 import com.black.bin.ApplyProxyLayer;
 import com.black.bin.ProxyTemplate;
+import com.black.core.spring.util.ApplicationUtil;
 import com.black.core.sql.code.YmlDataSourceBuilder;
 import com.black.core.util.Av0;
 
@@ -18,6 +20,7 @@ import com.black.xml.XmlSql;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -27,8 +30,16 @@ public class DemoList {
     static void xml(){
         Sql.configDataSource(new MybatisPlusDynamicDataSourceBuilder());
         XmlSql.opt().scanAndParse("xml-sql/");
-        List<Map<String, Object>> list = XmlSql.selectByArray("selectSupplier").list();
-        System.out.println(list.size());
+        JSONObject map = Av0.js("age", 3,
+                "state", 1,
+                "list", Arrays.asList("山", "东", "济南"),
+                "map", Av0.of("phone", "123")
+        );
+        ApplicationUtil.programRunMills(() -> {
+            List<Map<String, Object>> list = XmlSql.select("countSupplier", map).list();
+            System.out.println(list.size());
+        });
+
     }
 
 
@@ -62,7 +73,7 @@ public class DemoList {
     }
 
     public static void main(String[] args) throws Throwable{
-        read();
+        xml();
 
     }
 }

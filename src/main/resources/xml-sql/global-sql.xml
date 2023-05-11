@@ -3,18 +3,29 @@
 
     <select id="countSupplier">
         select * from supplier where 1=1
-        <if test="notNull(name)">
-            and name = ^{name} and ${df}
+        <if test="name != null">
+            and name = ^{name}
             <else>
                 and name is null
             </else>
         </if>
-        <for target="list" space="," prefix="and in(" suffix=")">
+        <for target="list" space="," prefix="and name in(" suffix=")">
             #{item}
         </for>
-        <for target="map" space="and" prefix="and" suffix="xxx">
+        <for target="map" space="and" prefix="and">
             #{item} = #{val}
         </for>
+        <switch target="age" prefix="and">
+            <case test="1" then="code='1'"/>
+            <case test="2" then="code='2'"/>
+            <case test="3" then="code='3'"/>
+            <case test="4" then="code='4'"/>
+            <default then="code is null"/>
+        </switch>
+        <case prefix="and">
+            <when test="state==1" then="code='5'"/>
+            <else then="code is null"/>
+        </case>
     </select>
 
 

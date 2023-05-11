@@ -14,6 +14,7 @@ import javassist.bytecode.*;
 import javassist.bytecode.annotation.*;
 import lombok.NonNull;
 
+import java.lang.reflect.Field;
 import java.util.*;
 
 @SuppressWarnings("all")
@@ -28,6 +29,16 @@ public class Utils {
     static {
         pool = ClassPool.getDefault();
         pool.appendClassPath(new LoaderClassPath(Thread.currentThread().getContextClassLoader()));
+    }
+
+    public static Map<String, CtClass> getPoolCache(){
+        try {
+            Field field = ClassPool.class.getDeclaredField("classes");
+            field.setAccessible(true);
+            return (Map<String, CtClass>) field.get(getPool());
+        } catch (Throwable e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     public static ClassPool getPool() {

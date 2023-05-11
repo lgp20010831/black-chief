@@ -60,4 +60,27 @@ public class XmlUtils {
         return location;
     }
 
+    public static String compressSql(String sql){
+        StringBuilder builder = new StringBuilder();
+        boolean beforeBlank = false;
+        boolean beforeWrap = false;
+        for (char c : sql.toCharArray()) {
+            if (c == '\n' || c == '\t'){
+                if (!beforeWrap){
+                    builder.append(" ");
+                    beforeWrap = true;
+                }
+            }else if (c == ' '){
+                if (!beforeBlank){
+                    builder.append(c);
+                    beforeBlank = true;
+                }
+            }else {
+                builder.append(c);
+                beforeWrap = false;
+                beforeBlank = false;
+            }
+        }
+        return builder.toString();
+    }
 }

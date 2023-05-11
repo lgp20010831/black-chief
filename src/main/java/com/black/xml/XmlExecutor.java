@@ -112,8 +112,7 @@ public class XmlExecutor {
     }
 
     public QueryResultSetParser select(String id, Map<String, Object> env){
-        ElementWrapper wrapper = findBind(id);
-        String sql = XmlEngine.processorSql(wrapper, env, prepare());
+        String sql = invoke(id, env);
         log.info("[XML] invoke query sql ===> {}", sql);
         ResultSet resultSet = SQLUtils.runQuery(sql, getConnection());
         QueryResultSetParser parser = new QueryResultSetParser(resultSet);
@@ -127,9 +126,8 @@ public class XmlExecutor {
     }
 
     public void update(String id, Map<String, Object> env){
-        ElementWrapper wrapper = findBind(id);
         try {
-            String sql = XmlEngine.processorSql(wrapper, env, prepare());
+            String sql = invoke(id, env);
             log.info("[XML] invoke update sql ===> {}", sql);
             SQLUtils.executeSql(sql, getConnection());
         }finally {
@@ -139,7 +137,11 @@ public class XmlExecutor {
 
     protected String invoke(String id, Map<String, Object> env){
         ElementWrapper wrapper = findBind(id);
-        return XmlEngine.processorSql(wrapper, env, prepare());
+        long start = System.currentTimeMillis();
+        String sql = XmlEngine.processorSql(wrapper, env, prepare());
+        sql = XmlUtils.compressSql(sql);
+        log.trace("[XML] --> xml resolve sql take: {} ms", System.currentTimeMillis() - start);
+        return sql;
     }
 
     protected boolean isSelect(String id){
