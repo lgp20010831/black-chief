@@ -67,6 +67,10 @@ public class SqlV2Utils {
             return annotation.value();
         }
 
+        if (MybatisEnv.isMybatisEnv()){
+            return MybatisTableNameHandler.getIbatisTableName(primordialClass);
+        }
+
         String name = NameUtil.getName(bean);
         if (handler != null){
             name = handler.convertColumn(name);

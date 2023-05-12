@@ -2,6 +2,7 @@ package com.black.core.sql.code;
 
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.Getter;
+import lombok.NonNull;
 
 import javax.sql.DataSource;
 
@@ -14,7 +15,8 @@ public class DefaultDataSourceBuilder implements DataSourceBuilder {
     private final String driverClassName;
     private final String url;
 
-    public DefaultDataSourceBuilder(String username, String password, String driverClassName, String url) {
+    public DefaultDataSourceBuilder(@NonNull String username, @NonNull String password,
+                                    @NonNull String driverClassName, @NonNull String url) {
         this.username = username;
         this.password = password;
         this.driverClassName = driverClassName;

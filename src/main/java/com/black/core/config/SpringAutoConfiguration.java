@@ -71,6 +71,12 @@ public class SpringAutoConfiguration extends AbstractConfiguration implements Ch
 
     @Bean SimplePattern simplePattern()                 {return new IntegratorScanner();}
 
+    @ConditionalOnProperty(
+            prefix = "chief",
+            name = {"enabled-visit-compile"},
+            havingValue = "true",
+            matchIfMissing = false
+    )
     @ConditionalOnMissingBean @Bean
     VisitCompileController visitCompileController(){
         return new VisitCompileController();

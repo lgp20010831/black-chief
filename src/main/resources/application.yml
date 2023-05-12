@@ -18,12 +18,12 @@ mybatis-plus:
 chief:
   enabled-visit-database: true
 sql:
-  config:
+  other:
     one:
       mapperPaths: xml-sql/
       environment:
         auto-set-id: false
-    master_v2:
+    two:
       mapperPaths: xml-sql/,iu
 mapping:
   df = is_deleted = false

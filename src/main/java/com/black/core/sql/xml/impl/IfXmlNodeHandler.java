@@ -8,6 +8,7 @@ import com.black.core.sql.code.config.GlobalSQLConfiguration;
 import com.black.core.sql.xml.PrepareSource;
 import com.black.core.sql.xml.XmlSqlSource;
 import com.black.core.sql.xml.XmlUtils;
+import com.black.core.util.StringUtils;
 import com.black.core.util.TextUtils;
 
 import java.util.Arrays;
@@ -27,14 +28,14 @@ public class IfXmlNodeHandler extends AbstractXmlNodeHandler {
 
     @Override
     public List<String> getAttributeNames() {
-        return Arrays.asList("test");
+        return Arrays.asList("test", "then");
     }
 
     @Override
     protected boolean resolve(XmlSqlSource sqlSource, ElementWrapper ew, PrepareSource prepareSource) {
         String attrVal = getAssertNullAttri(ew, "test");
+        String then = getAssertNullAttri(ew, "then", "");
         Map<String, Object> argMap = sqlSource.getArgMap();
-        String value = ew.getStringValue();
         attrVal = XmlUtils.prepareConditionItem(attrVal);
         log.debug("[IF] --> execute conditional expression: {}", attrVal);
         if (!ConditionSelector.excCondition(attrVal, argMap)) {
@@ -53,6 +54,11 @@ public class IfXmlNodeHandler extends AbstractXmlNodeHandler {
                 ew.clearContent();
             }
             return false;
+        }else {
+            if (StringUtils.hasText(then)){
+                ew.clearContent();
+                ew.setText(then);
+            }
         }
         return true;
     }

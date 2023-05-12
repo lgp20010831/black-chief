@@ -1,5 +1,7 @@
 package com.black.core.config;
 
+import com.black.core.sql.code.DataSourceBuilder;
+import com.black.core.sql.code.DefaultDataSourceBuilder;
 import com.black.core.util.Utils;
 import com.black.sql_v2.Environment;
 import com.black.sql_v2.GlobalEnvironment;
@@ -35,7 +37,11 @@ public class SqlAutoAssembleConfiguration implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        Map<String, SqlAndXmlProperties> sqlMap = properties.getConfig();
+        String driverClass = properties.getDriverClass();
+        if (driverClass != null){
+            configDefSql(properties);
+        }
+        Map<String, SqlAndXmlProperties> sqlMap = properties.getOther();
         if (Utils.isEmpty(sqlMap)){
             return;
         }
@@ -44,6 +50,13 @@ public class SqlAutoAssembleConfiguration implements InitializingBean {
         for (String alias : sqlMap.keySet()) {
             SqlAndXmlProperties sqlAndXmlProperties = sqlMap.get(alias);
             Environment environment = sqlAndXmlProperties.getEnvironment();
+            String otherDriverClass = sqlAndXmlProperties.getDriverClass();
+            if (otherDriverClass != null){
+                DataSourceBuilder dataSourceBuilder = createDataSourceBuilder(sqlAndXmlProperties);
+                if (environment != null){
+                    environment.setDataSourceBuilder(dataSourceBuilder);
+                }
+            }
             SqlExecutor sqlExecutor = Sql.lazyOpt(alias);
             sqlExecutor.setEnvironment(environment);
             sqlExecutor.init();
@@ -55,18 +68,51 @@ public class SqlAutoAssembleConfiguration implements InitializingBean {
         }
     }
 
+    protected DataSourceBuilder createDataSourceBuilder(SqlAndXmlProperties properties){
+        String driverClass = properties.getDriverClass();
+        String url = properties.getUrl();
+        String username = properties.getUsername();
+        String password = properties.getPassword();
+        return new DefaultDataSourceBuilder(username, password, driverClass, url);
+    }
+
+    private void configDefSql(SqlIntegrationProperties properties){
+        String driverClass = properties.getDriverClass();
+        String url = properties.getUrl();
+        String username = properties.getUsername();
+        String password = properties.getPassword();
+        DefaultDataSourceBuilder builder = new DefaultDataSourceBuilder(username, password, driverClass, url);
+        Sql.configDataSource(Sql.DEFAULT_ALIAS, builder);
+    }
+
     @Data
     @ConfigurationProperties(prefix = "sql")
     public static class SqlIntegrationProperties {
 
         private int insertBatch = 2000;
 
-        private Map<String, SqlAndXmlProperties> config;
+        private String driverClass;
+
+        private String username;
+
+        private String password;
+
+        private String url;
+
+        private Map<String, SqlAndXmlProperties> other;
 
     }
 
     @Data
     public static class SqlAndXmlProperties{
+
+        private String driverClass;
+
+        private String username;
+
+        private String password;
+
+        private String url;
 
         @NestedConfigurationProperty
         private Environment environment = new Environment();

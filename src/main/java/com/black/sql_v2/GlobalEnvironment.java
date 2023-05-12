@@ -2,6 +2,7 @@ package com.black.sql_v2;
 
 import com.black.bin.InstanceBeanManager;
 import com.black.bin.InstanceType;
+import com.black.datasource.IntelligentRecognitionDataSourceBuilder;
 import com.black.datasource.ProduceElementDataSourceDiscriminateManager;
 import com.black.datasource.SqlControllerElementResolver;
 import com.black.json.JsonParser;
@@ -76,7 +77,7 @@ public class GlobalEnvironment extends SqlSeqMetadata{
         log = LogFactory.getArrayLog();
         log.debug("[SQL] -- sql global environment initializing...");
         jsonParser = new OversimplifyJsonParser();
-        dataSourceBuilder = new SpringDataSourceBuilder();
+        dataSourceBuilder = new IntelligentRecognitionDataSourceBuilder();
         convertHandler = new HumpColumnConvertHandler();
         defaultSelectSqlBuilder = new DefaultSelectSqlStatementBuilder();
         defaultInsertSqlBuilder = new InsertSqlStatementBuilder();

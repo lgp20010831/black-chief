@@ -66,6 +66,7 @@ public class SqlExecutor implements NativeSqlAdapter {
 
     public SqlExecutor(DataSourceBuilder dataSourceBuilder, String name) {
         this.name = name;
+        this.dataSourceBuilder = dataSourceBuilder;
         GlobalEnvironment globalEnvironment = GlobalEnvironment.getInstance();
         environment = new Environment();
         init();
@@ -74,13 +75,13 @@ public class SqlExecutor implements NativeSqlAdapter {
     public void init(){
         GlobalEnvironment globalEnvironment = GlobalEnvironment.getInstance();
         BeanUtil.mappingBean(globalEnvironment, environment);
+
         if (dataSourceBuilder == null){
             dataSourceBuilder = GlobalEnvironment.getDataSourceBuilder(name);
             if (dataSourceBuilder == null){
                 dataSourceBuilder = globalEnvironment.getDataSourceBuilder();
             }
         }
-        this.dataSourceBuilder = dataSourceBuilder;
         DataSource dataSource = dataSourceBuilder.getDataSource();
 
         ConnectionManagement.registerDataSource(name, dataSource);
