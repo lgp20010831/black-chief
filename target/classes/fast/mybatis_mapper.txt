@@ -1,9 +1,0 @@
-package [(${location.generatePath})];
-
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import [(${pojoPath})].[(${source.className})];
-import org.springframework.stereotype.Repository;
-
-@Repository
-public interface [(${source.className})]Mapper extends BaseMapper<[(${source.className})]> {
-}

@@ -11,6 +11,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.sql.Connection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
@@ -126,6 +127,11 @@ public class JdbcProjectGenerator extends ChiefProjectGenerator{
             source.put(SUPER_CLASS_NAME, controllerType.getSimpleName());
             source.put(SUPER_MAPPER_NAME, superMapperType == null ? null :  superMapperType.getSimpleName());
             source.put(SUPER_MAPPER_GEN_PATH, superMapperType == null ? null : superMapperType.getName());
+            List<Object> objects = getSourceList();
+            int argIndex = 0;
+            for (Object obj : objects) {
+                source.put("arg$" + argIndex++, obj);
+            }
             Version version = getVersion();
             Supplier<VersionConfigurer> configurerSupplier = version.getConfigurerSupplier();
             VersionConfigurer versionConfigurer = configurerSupplier.get();

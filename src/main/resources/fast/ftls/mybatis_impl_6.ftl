@@ -1,0 +1,10 @@
+package ${location.generatePath};
+
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import ${pojoPath}.${source.className};
+import ${mapperPath}.${source.className}Mapper;
+import org.springframework.stereotype.Service;
+
+@Service
+public class ${source.className}Impl extends ServiceImpl<#if true>< ${source.className}Mapper, ${source.className}></#if> {
+}

@@ -1,3 +1,0 @@
-type [(${data.pojoClassName})]{[# th:each="field,fieldStat : ${data.fields}"]
-    [(${field.name})]: [# th:if="${field.isString}"]String[/][# th:unless="${field.isString}"][(${field.type})][/] [/]
-}

@@ -18,8 +18,19 @@ public class ${source.className} extends IbatisBean<${source.className}>{
     private static final long serialVersionUID = 1L;
 
 <#list source.tableMetadata.columnMetadatas as field>
-    @ApiModelProperty("${field.remarks}")
-    ${field.fieldAnnotation}<#if field.javaFieldName == 'id'>@TableId</#if>
+    <#if inSwagger>@ApiModelProperty("${field.remarks}")</#if>
+    <#assign isId=false/>
+    <#list source.primaryKeys as pks>
+        <#if pks=field.name>
+            <#assign isId=true/>
+    @TableId
+            <#break />
+        </#if>
+    </#list>
+    <#if isId=false>
+    ${field.fieldAnnotation}
+    </#if>
     private ${field.javaTypeName} ${field.javaFieldName};
+
 </#list>
 }

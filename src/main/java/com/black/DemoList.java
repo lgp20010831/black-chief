@@ -1,18 +1,14 @@
 package com.black;
 
 import com.alibaba.fastjson.JSONObject;
-import com.black.bin.ApplyProxyFactory;
-import com.black.bin.ApplyProxyLayer;
-import com.black.bin.ProxyTemplate;
 import com.black.core.spring.util.ApplicationUtil;
-import com.black.core.sql.code.YmlDataSourceBuilder;
 import com.black.core.util.Av0;
-
-import com.black.core.util.IoUtil;
 import com.black.core.util.LazyAutoWried;
 import com.black.datasource.MybatisPlusDynamicDataSourceBuilder;
 import com.black.ftl.FtlResolver;
+import com.black.project.DEMO;
 import com.black.project.JdbcProjectGenerator;
+import com.black.project.ProjectEnvironmentalGuess;
 import com.black.project.Version;
 import com.black.sql_v2.Sql;
 import com.black.utils.IoUtils;
@@ -21,7 +17,6 @@ import com.black.xml.XmlSql;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -52,7 +47,12 @@ public class DemoList {
 
 
     static void create(){
-        JdbcProjectGenerator generator = new JdbcProjectGenerator(Version.MYBATIS_1_5);
+        DEMO.onlyCreatePojo = true;
+        JdbcProjectGenerator generator = new JdbcProjectGenerator(Version.SQL_V4);
+        ProjectEnvironmentalGuess guess = new ProjectEnvironmentalGuess();
+        guess.setInSwagger(false);
+        guess.setSimpleController(false);
+        generator.addSources(guess);
         generator.setDataSourceBuilder(new MybatisPlusDynamicDataSourceBuilder());
         generator.setPathPrefix("com.black.core.yml");
         generator.setControllerGenPath("controller");
@@ -81,7 +81,7 @@ public class DemoList {
     }
 
     public static void main(String[] args) throws Throwable{
-        xml();
+        create();
 
     }
 }

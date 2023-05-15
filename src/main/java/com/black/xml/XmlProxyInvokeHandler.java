@@ -27,6 +27,7 @@ public class XmlProxyInvokeHandler implements AgentLayer {
         this.xmlExecutor = xmlExecutor;
     }
 
+
     @Override
     public Object proxy(AgentObject layer) throws Throwable {
         IoLog log = xmlExecutor.getLog();
