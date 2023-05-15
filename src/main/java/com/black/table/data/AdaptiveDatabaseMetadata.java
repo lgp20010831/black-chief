@@ -2,6 +2,7 @@ package com.black.table.data;
 
 import com.black.core.sql.SQLSException;
 import com.black.core.sql.lock.LockType;
+import com.black.core.util.Assert;
 import com.black.table.DatabaseMetadataObtainor;
 import com.black.table.TableMetadata;
 
@@ -9,21 +10,33 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class AdaptiveDatabaseMetadata implements DatabaseMetadataObtainor{
 
-    private static DatabaseMetadataObtainor mysql8Obtainor;
 
-    private static DatabaseMetadataObtainor postgresqlObtainor;
-
-    private static SqlServerDatabaseMetadata sqlServerDatabaseMetadata;
+    private static final LinkedBlockingQueue<DatabaseMetadataObtainor> metadataObtainors = new LinkedBlockingQueue<>();
 
     static {
-        mysql8Obtainor = new Mysql8DatabaseMetadata();
-        postgresqlObtainor = new PostgresqlDatabaseMetadata();
-        sqlServerDatabaseMetadata = new SqlServerDatabaseMetadata();
+        metadataObtainors.add(new Mysql8DatabaseMetadata());
+        metadataObtainors.add(new PostgresqlDatabaseMetadata());
+        metadataObtainors.add(new SqlServerDatabaseMetadata());
+    }
+
+    public static void addDatabase(DatabaseMetadataObtainor... metadataObtainor){
+        metadataObtainors.addAll(Arrays.asList(metadataObtainor));
+    }
+
+    public static LinkedBlockingQueue<DatabaseMetadataObtainor> getMetadataObtainors() {
+        return metadataObtainors;
+    }
+
+    @Override
+    public String getProductName() {
+        throw new UnsupportedOperationException("unsupport");
     }
 
     @Override
@@ -48,8 +61,9 @@ public class AdaptiveDatabaseMetadata implements DatabaseMetadataObtainor{
 
     @Override
     public void clearCache() {
-        mysql8Obtainor.clearCache();
-        postgresqlObtainor.clearCache();
+        for (DatabaseMetadataObtainor obtainor : metadataObtainors) {
+            obtainor.clearCache();
+        }
     }
 
     @Override
@@ -71,16 +85,18 @@ public class AdaptiveDatabaseMetadata implements DatabaseMetadataObtainor{
         try {
             DatabaseMetaData metaData = connection.getMetaData();
             String productName = metaData.getDatabaseProductName();
-            switch (productName){
-                case "MySQL":
-                    return mysql8Obtainor;
-                case "PostgreSQL":
-                    return postgresqlObtainor;
-                case "Microsoft SQL Server":
-                    return sqlServerDatabaseMetadata;
-                default:
-                    throw new UnsupportedOperationException("不支持当前数据库: " + productName);
+            Assert.notNull(productName, "current product is not support getDatabaseProductName()");
+            DatabaseMetadataObtainor target = null;
+            for (DatabaseMetadataObtainor obtainor : metadataObtainors) {
+                if (productName.equals(obtainor.getProductName())){
+                    target = obtainor;
+                    break;
+                }
             }
+            if (target == null){
+                throw new UnsupportedOperationException("不支持当前数据库: " + productName);
+            }
+            return target;
         } catch (SQLException e) {
             throw new SQLSException(e);
         }

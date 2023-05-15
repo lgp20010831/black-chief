@@ -1,6 +1,7 @@
 package com.black.template;
 
 import com.black.core.api.ApiUtil;
+import com.black.template.core.TemplateResolver;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
@@ -35,12 +36,11 @@ public class TemplateExecutor {
 
     public void execute(Configuration configuration, Map<String, Object> environment){
         List<Configuration.Location> locations = configuration.getLocations();
-        TemplateEngine templateEngine = configuration.getTemplateEngine();
+        TemplateResolver templateResolver = configuration.getTemplateResolver();
         environment.put("config", configuration);
-        Context context = ApiUtil.createContext(environment);
         for (Configuration.Location location : locations) {
-            context.setVariable("location", location);
-            String buffer = templateEngine.process(location.templatePath, context);
+            environment.put("location", location);
+            String buffer = templateResolver.resolve(location.templatePath, environment);
 
             try {
                 fileResolver.resolver(location.fileName, location.generatePath, location.isResource, buffer);

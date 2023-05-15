@@ -1,9 +1,15 @@
 package com.black.sql_v2.period;
 
+import com.black.core.query.ClassWrapper;
+import com.black.core.tools.BeanUtil;
 import com.black.core.util.StringUtils;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NonNull;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author 李桂鹏
@@ -11,6 +17,48 @@ import lombok.NonNull;
  */
 @SuppressWarnings("all")
 public class PatternTextUtils {
+
+    public static List<String> getPropertyKeys(Object ele){
+        if (ele instanceof Map){
+            return new ArrayList<>(((Map<String, ?>) ele).keySet());
+        }else {
+            ClassWrapper<?> classWrapper = BeanUtil.getPrimordialClassWrapper(ele);
+            return new ArrayList<>(classWrapper.getFieldNames());
+        }
+    }
+
+    public static String getArrayElement(String text, String split, int index){
+        if (text == null){
+            return null;
+        }
+        String[] array = text.split(split);
+        if (index >= array.length){
+            index = 0;
+        }
+        return array[index];
+    }
+
+    public static String[] splits(String txt, String... delimiter){
+        if (!StringUtils.hasText(txt)){
+            return new String[0];
+        }
+        for (String del : delimiter) {
+            if (txt.contains(del)){
+                return txt.split(del);
+            }
+        }
+        return new String[]{txt};
+    }
+
+
+    public static boolean containProperty(Object bean, String name){
+        if (bean instanceof Map){
+            return ((Map<?, ?>) bean).containsKey(name);
+        }else {
+            ClassWrapper<?> classWrapper = BeanUtil.getPrimordialClassWrapper(bean);
+            return classWrapper.getField(name) != null;
+        }
+    }
 
     public static String addFlag(String str, int start, int end, String prefix, String suffix){
         StringBuilder builder = new StringBuilder();
@@ -30,6 +78,7 @@ public class PatternTextUtils {
         if (!StringUtils.hasText(start) || !StringUtils.hasText(end)){
             throw new IllegalStateException("start and end must has char");
         }
+        txt = txt + " ";
         StringBuilder builder = new StringBuilder();
         StringBuilder tokenBuilder = new StringBuilder();
         FLAG flag = FLAG.COMMON;
@@ -130,7 +179,7 @@ public class PatternTextUtils {
 
             }
         }
-        return builder.toString();
+        return builder.toString().substring(0, builder.length() - 1);
     }
 
     private static void clearBuilder(StringBuilder builder){

@@ -45,7 +45,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import java.util.List;
 
 @Log4j2 @SuppressWarnings("all")
-@Import(SqlAutoAssembleConfiguration.class)
+@Import({SqlAutoAssembleConfiguration.class, FtlAutoConfiguration.class})
 @AutoConfigureOrder(Ordered.HIGHEST_PRECEDENCE)
 @Conditional({ChiefConfigurationConditional.class})
 @AutoConfigureAfter(GlobalAopAutoConfiguration.class)

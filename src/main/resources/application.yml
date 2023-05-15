@@ -3,7 +3,7 @@ server:
   port: 1003
 spring:
   profiles:
-    active: prod
+    active: home
 ldb:
   mqtt:
     url: ws://10.20.255.225:8083/mqtt
@@ -25,5 +25,8 @@ sql:
         auto-set-id: false
     two:
       mapperPaths: xml-sql/,iu
+ftl:
+  paths: xml-sql/
+  nullDefaultValue: 无数据
 mapping:
   df = is_deleted = false

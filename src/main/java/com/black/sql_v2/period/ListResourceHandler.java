@@ -21,7 +21,9 @@ import static com.black.utils.ServiceUtils.patternGetValue;
 @SuppressWarnings("all")
 public interface ListResourceHandler {
 
-    List<Map<String, Object>> list();
+    default List<Map<String, Object>> list(){
+        return null;
+    }
 
     default List<JSONObject> jsonList(){
         return StreamUtils.mapList(list(), JsonUtils::letJson);

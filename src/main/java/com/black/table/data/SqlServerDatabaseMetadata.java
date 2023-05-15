@@ -11,6 +11,11 @@ public class SqlServerDatabaseMetadata extends AbstractDatabaseMetadata{
 
 
     @Override
+    public String getProductName() {
+        return "Microsoft SQL Server";
+    }
+
+    @Override
     public Set<String> getTableNames(Connection connection) {
         try {
             Set<String> ts = new HashSet<>();

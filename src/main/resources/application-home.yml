@@ -1,7 +1,7 @@
 spring:
   datasource:
     dynamic:
-      primary: one
+      primary: two
       datasource:
         one:
           driver-class-name: com.mysql.cj.jdbc.Driver
@@ -10,9 +10,9 @@ spring:
           password: 123698745zed
         two:
           driver-class-name: com.mysql.cj.jdbc.Driver
-          url: jdbc:mysql://localhost:3306/hcy?serverTimezone=UTC&stringtype=unspecified
+          url: jdbc:mysql://localhost:3306/demo?serverTimezone=UTC&stringtype=unspecified
           username: root
-          password: 123698745zed
+          password:
 
 automaticRunner:
   enabled: true

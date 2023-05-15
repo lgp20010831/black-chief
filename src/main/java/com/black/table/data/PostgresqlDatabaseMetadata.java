@@ -66,6 +66,11 @@ public class PostgresqlDatabaseMetadata extends AbstractDatabaseMetadata{
     }
 
     @Override
+    public String getProductName() {
+        return "PostgreSQL";
+    }
+
+    @Override
     public Set<String> getTableNames(Connection connection) {
         Statement statement = null;
         try {

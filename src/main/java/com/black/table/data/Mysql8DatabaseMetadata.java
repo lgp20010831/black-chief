@@ -55,6 +55,12 @@ public class Mysql8DatabaseMetadata extends AbstractDatabaseMetadata {
         }
     }
 
+
+    @Override
+    public String getProductName() {
+        return "MySQL";
+    }
+
     @Override
     public TableMetadata getTableMetadata(String name, Connection connection) {
         if (tableMetadataCache.containsKey(name)) {

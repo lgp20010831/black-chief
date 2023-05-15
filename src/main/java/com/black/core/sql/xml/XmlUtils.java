@@ -25,6 +25,24 @@ public class XmlUtils {
         return item;
     }
 
+
+    public static String compressSpaces(String str){
+        StringBuilder builder = new StringBuilder();
+        boolean spaceList = false;
+        for (char c : str.toCharArray()) {
+            if (c == ' '){
+                if (!spaceList){
+                    spaceList = true;
+                    builder.append(c);
+                }
+            }else {
+                spaceList = false;
+                builder.append(c);
+            }
+        }
+        return builder.toString();
+    }
+
     public static String compressSql(String sql){
         StringBuilder builder = new StringBuilder();
         boolean beforeBlank = false;

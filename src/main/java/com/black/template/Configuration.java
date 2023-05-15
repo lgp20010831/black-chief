@@ -1,6 +1,8 @@
 package com.black.template;
 
 import com.black.core.util.StringUtils;
+import com.black.template.core.TemplateResolver;
+import com.black.template.core.ThymeleafTemplateResolver;
 import lombok.Getter;
 import lombok.NonNull;
 import org.thymeleaf.TemplateEngine;
@@ -20,33 +22,23 @@ public class Configuration {
 
     String resourcePrefix = null;
 
-    TemplateEngine templateEngine;
+    TemplateResolver templateResolver;
 
     String resolvablePatterns = null;
 
-    public TemplateEngine getTemplateEngine() {
-        if (templateEngine == null){
-            templateEngine = new TemplateEngine();
-            final ClassLoaderTemplateResolver templateResolver = new ClassLoaderTemplateResolver();
-            templateResolver.setOrder(1);
-            if (resolvablePatterns != null){
-                templateResolver.setResolvablePatterns(Collections.singleton(resolvablePatterns));
-            }
-            templateResolver.setSuffix(".txt");
-            templateResolver.setTemplateMode(TemplateMode.TEXT);
-            templateResolver.setCharacterEncoding("UTF-8");
-            templateResolver.setCacheable(false);
-            templateEngine.addTemplateResolver(templateResolver);
+    public TemplateResolver getTemplateResolver() {
+        if (templateResolver == null){
+            templateResolver = new ThymeleafTemplateResolver();
         }
-        return templateEngine;
+        return templateResolver;
     }
 
     public void setClassPrefix(String classPrefix) {
         this.classPrefix = classPrefix;
     }
 
-    public void setTemplateEngine(TemplateEngine templateEngine) {
-        this.templateEngine = templateEngine;
+    public void setTemplateResolver(TemplateResolver templateResolver) {
+        this.templateResolver = templateResolver;
     }
 
     public void setResourcePrefix(String resourcePrefix) {

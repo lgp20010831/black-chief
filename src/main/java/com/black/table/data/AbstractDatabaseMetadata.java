@@ -16,6 +16,8 @@ public abstract class AbstractDatabaseMetadata implements DatabaseMetadataObtain
 
     protected final Map<String, TableMetadata> tableMetadataCache = new ConcurrentHashMap<>();
 
+
+
     @Override
     public void lock(Connection connection, String tableName, LockType type) {
         throw new UnsupportedOperationException("lock");

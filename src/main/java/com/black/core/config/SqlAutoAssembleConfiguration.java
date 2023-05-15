@@ -41,6 +41,13 @@ public class SqlAutoAssembleConfiguration implements InitializingBean {
         if (driverClass != null){
             configDefSql(properties);
         }
+
+        List<String> mapperPaths = properties.getMapperPaths();
+        if (!Utils.isEmpty(mapperPaths)){
+            XmlSql.opt().scanAndParse(mapperPaths.toArray(new String[0]));
+        }
+
+
         Map<String, SqlAndXmlProperties> sqlMap = properties.getOther();
         if (Utils.isEmpty(sqlMap)){
             return;
@@ -98,6 +105,8 @@ public class SqlAutoAssembleConfiguration implements InitializingBean {
         private String password;
 
         private String url;
+
+        private List<String> mapperPaths;
 
         private Map<String, SqlAndXmlProperties> other;
 

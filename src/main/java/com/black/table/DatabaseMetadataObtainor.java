@@ -10,6 +10,8 @@ import java.util.Set;
 
 public interface DatabaseMetadataObtainor {
 
+    String getProductName();
+
     TableMetadata getTableMetadata(String tableName, Connection connection);
 
     List<TableMetadata> getTableMetadatas(Connection connection);

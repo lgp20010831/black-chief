@@ -69,6 +69,7 @@ public class TextParseUtils {
         if (!StringUtils.hasText(start) || !StringUtils.hasText(end)){
             throw new IllegalStateException("start and end must has char");
         }
+        txt = txt + " ";
         StringBuilder builder = new StringBuilder();
         StringBuilder tokenBuilder = new StringBuilder();
         FLAG flag = FLAG.COMMON;
@@ -162,7 +163,7 @@ public class TextParseUtils {
 
             }
         }
-        return builder.toString();
+        return builder.toString().substring(0, builder.length() - 1);
     }
 
     private static void clearBuilder(StringBuilder builder){
