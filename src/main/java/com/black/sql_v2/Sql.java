@@ -26,39 +26,39 @@ public class Sql {
     }
 
     //--------------- auto find table name -------------------
-    public <T> void saveBatch(Collection<T> collection, Object... params){
+    public static <T> void saveBatch(Collection<T> collection, Object... params){
         opt().saveBatch(collection, params);
     }
 
-    public <T> void saveAndEffect(T param, boolean effect, Object... params){
+    public static <T> void saveAndEffect(T param, boolean effect, Object... params){
         opt().saveAndEffect(param, effect, params);
     }
 
-    public <T> void saveAndEffectBatch(Collection<T> collection, boolean effect, Object... params){
+    public static <T> void saveAndEffectBatch(Collection<T> collection, boolean effect, Object... params){
         opt().saveAndEffectBatch(collection, effect, params);
     }
 
-    public <T> void update(T setMap, Object... params){
+    public static <T> void update(T setMap, Object... params){
         opt().update(setMap, params);
     }
 
-    public Object add(Object entity, Object... params){
+    public static Object add(Object entity, Object... params){
         return opt().add(entity, params);
     }
 
-    public List<Object> addBatch(Object entity, Object... params){
+    public static List<Object> addBatch(Object entity, Object... params){
         return opt().addBatch(entity, params);
     }
 
-    public QueryResultSetParser select(Object entity, Object... params){
+    public static QueryResultSetParser select(Object entity, Object... params){
         return opt().select(entity, params);
     }
 
-    public int selectCount(Object entity, Object... params){
+    public static int selectCount(Object entity, Object... params){
         return opt().selectCount(entity, params);
     }
 
-    public QueryResultSetParser selectPrimary(Object target, Object... params){
+    public static QueryResultSetParser selectPrimary(Object target, Object... params){
         return opt().selectPrimary(target, params);
     }
 

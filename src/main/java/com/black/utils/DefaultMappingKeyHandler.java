@@ -1,5 +1,6 @@
 package com.black.utils;
 
+import com.black.core.query.ClassWrapper;
 import com.black.core.util.StringUtils;
 import lombok.extern.log4j.Log4j2;
 
@@ -26,7 +27,6 @@ public class DefaultMappingKeyHandler implements MappingKeyHandler{
 
         return StringUtils.linkStr(parameterType.getName(), "-- convert to -->", methodParameterType.getName());
     }
-
     @Override
     public String[] uniqueIdentificationSupers(Class<?> methodParameterType, Class<?> parameterType) {
         if (methodParameterType == null)
@@ -46,6 +46,13 @@ public class DefaultMappingKeyHandler implements MappingKeyHandler{
         for (;;){
             if(superClazz == null){
                 break;
+            }
+            if(ClassWrapper.isBasic(superClazz.getName())){
+                supers.add(ClassWrapper.pack(superClazz.getName()));
+            }
+
+            if (ClassWrapper.isBasicWrapper(superClazz.getName())){
+                supers.add(ClassWrapper.unpacking(superClazz.getSimpleName()));
             }
             supers.add(superClazz);
             supers.addAll(Arrays.asList(superClazz.getInterfaces()));

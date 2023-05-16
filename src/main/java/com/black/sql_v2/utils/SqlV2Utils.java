@@ -58,7 +58,11 @@ public class SqlV2Utils {
         }
 
         if (bean instanceof Collection){
-            return null;
+            List<Object> objects = SQLUtils.wrapList(bean);
+            if (objects.isEmpty()){
+                return null;
+            }
+            return findTableName(objects.get(0));
         }
 
         Class<Object> primordialClass = BeanUtil.getPrimordialClass(bean);

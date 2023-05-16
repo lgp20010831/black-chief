@@ -1,6 +1,7 @@
 package com.black;
 
 import com.alibaba.fastjson.JSONObject;
+import com.black.core.convert.v2.TypeEngine;
 import com.black.core.spring.util.ApplicationUtil;
 import com.black.core.util.Av0;
 import com.black.core.util.LazyAutoWried;
@@ -13,6 +14,7 @@ import com.black.project.Version;
 import com.black.sql_v2.Sql;
 import com.black.utils.IoUtils;
 import com.black.utils.ServiceUtils;
+import com.black.utils.TypeUtils;
 import com.black.xml.XmlSql;
 
 import java.io.IOException;
@@ -27,7 +29,9 @@ public class DemoList {
     static FtlResolver resolver;
 
     static void ftl(){
-
+        TypeEngine engine = TypeEngine.getInstance();
+        engine.parseClass(TypeUtils.class, true);
+        System.out.println(engine.convert(int.class, "4"));
     }
 
     static void xml(){
@@ -81,7 +85,7 @@ public class DemoList {
     }
 
     public static void main(String[] args) throws Throwable{
-        create();
+        ftl();
 
     }
 }

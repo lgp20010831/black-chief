@@ -1,10 +1,14 @@
 package com.black.core.convert;
 
 
+import com.black.core.convert.v2.TypeEngine;
+import com.black.core.query.ClassWrapper;
 import com.black.core.tools.BeanUtil;
 import com.black.utils.MappingKeyHandler;
 import com.black.utils.ProxyUtil;
 import com.black.utils.ReflexHandler;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.core.annotation.AnnotationUtils;
 
@@ -13,8 +17,11 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-@Log4j2
+@Log4j2 @SuppressWarnings("all")
 public final class TypeHandler {
+
+    @Setter @Getter
+    private boolean enginePriority = true;
 
     private final MappingKeyHandler keyHandler;
 
@@ -31,12 +38,14 @@ public final class TypeHandler {
     }
 
     public void parse(Collection<Object> objs){
+        TypeEngine engine = TypeEngine.getInstance();
         for (Object obj : objs) {
             Class<Object> primordialClass = BeanUtil.getPrimordialClass(obj);
             if (!isParsed(primordialClass)){
                 doParse(obj);
                 parseType.add(primordialClass);
             }
+            engine.parseObj(obj, false);
         }
     }
 
@@ -49,20 +58,34 @@ public final class TypeHandler {
         List<Method> methods = ReflexHandler.getAccessibleMethods(obj);
         Set<Method> collect = methods.stream().filter(this::filterMethod).collect(Collectors.toSet());
         for (Method method : collect) {
-            String entry = keyHandler.uniqueIdentification( method.getReturnType(), method.getParameterTypes()[0]);
-            if (entryWithMethod.containsKey(entry)) {
-                TypeMethodWrapper wrapper = entryWithMethod.get(entry);
-                if (save(method, wrapper.getMethod())){
-                    entryWithMethod.remove(entry);
-                }else {
-                    if (log.isDebugEnabled()) {
-                        log.debug("filter low priority method:{}", method);
-                    }
-                    continue;
-                }
+            Class<?> returnType = method.getReturnType();
+            Class<?> parameterType = method.getParameterTypes()[0];
+            Set<Class<?>> rts = new HashSet<>();
+            rts.add(returnType);
+            if(ClassWrapper.isBasic(returnType.getName())){
+                rts.add(ClassWrapper.pack(returnType.getName()));
             }
-            TypeMethodWrapper typeMethodWrapper = new TypeMethodWrapper(method, obj, entry);
-            entryWithMethod.put(entry, typeMethodWrapper);
+
+            if (ClassWrapper.isBasicWrapper(returnType.getName())){
+                rts.add(ClassWrapper.unpacking(returnType.getSimpleName()));
+            }
+            for (Class<?> rt : rts) {
+                String entry = keyHandler.uniqueIdentification( rt, parameterType);
+                if (entryWithMethod.containsKey(entry)) {
+                    TypeMethodWrapper wrapper = entryWithMethod.get(entry);
+                    if (save(method, wrapper.getMethod())){
+                        entryWithMethod.remove(entry);
+                    }else {
+                        if (log.isDebugEnabled()) {
+                            log.debug("filter low priority method:{}", method);
+                        }
+                        continue;
+                    }
+                }
+                TypeMethodWrapper typeMethodWrapper = new TypeMethodWrapper(method, obj, entry);
+                entryWithMethod.put(entry, typeMethodWrapper);
+            }
+
         }
     }
 
@@ -95,6 +118,24 @@ public final class TypeHandler {
         if (targetType.isAssignableFrom(value.getClass())){
             return value;
         }
+        TypeEngine instance = TypeEngine.getInstance();
+        if (isEnginePriority()){
+            try {
+                return instance.convert(targetType, value);
+            }catch (RuntimeException e){
+                return convert0(targetType, value);
+            }
+
+        }else {
+            try {
+                return convert0(targetType, value);
+            }catch (RuntimeException e){
+                return instance.convert(targetType, value);
+            }
+        }
+    }
+
+    private Object convert0(Class<?> targetType, Object value){
         Class<Object> primordialClass = ProxyUtil.getPrimordialClass(value);
         //生成条目
         String[] entries = keyHandler.uniqueIdentificationSupers(targetType, primordialClass);

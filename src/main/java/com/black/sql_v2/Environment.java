@@ -25,6 +25,8 @@ public class Environment extends SqlSeqMetadata{
 
     private boolean autoSetId = true;
 
+    private boolean enabledGeneratePrimary = false;
+
     private VarcharIdType varcharIdType = VarcharIdType.UUID;
 
     private JsonParser jsonParser;

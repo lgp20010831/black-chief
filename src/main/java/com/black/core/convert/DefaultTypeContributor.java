@@ -7,11 +7,13 @@ import com.black.core.json.JsonUtils;
 import com.black.core.spring.instance.InstanceFactory;
 import com.black.core.sql.code.util.SQLUtils;
 import com.black.core.work.utils.WorkUtils;
+import com.black.utils.TypeUtils;
 import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -29,17 +31,22 @@ public class DefaultTypeContributor {
     }
 
     @ConversionWay
-    Integer basicConvertInteger(@NonNull String param){
-        return Integer.parseInt(param);
+    Timestamp objCastToTimestamp(Object obj){
+        return TypeUtils.castToTimestamp(obj);
     }
 
     @ConversionWay
-    Date basicConvertDate(String dateFormat) throws ParseException {
-        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(dateFormat);
+    Integer basicConvertInteger(@NonNull Object param){
+        return TypeUtils.castToInt(param);
     }
 
     @ConversionWay
-    <T> JSONObject basicConvertJson(T pojo){
+    Date basicConvertDate(Object dateFormat) throws ParseException {
+        return TypeUtils.castToDate(dateFormat);
+    }
+
+    @ConversionWay
+    JSONObject basicConvertJson(Object pojo){
         return JsonUtils.toJson(pojo);
     }
 
@@ -49,77 +56,29 @@ public class DefaultTypeContributor {
     }
 
     @ConversionWay
-    Double changeDouble(BigDecimal bigDecimal){
-        return bigDecimal.doubleValue();
-    }
-
-    @ConversionWay
-    Double intToDouble(Integer i){
-        return new Double(i);
-    }
-
-    @ConversionWay
-    int toInt(Integer i){
-        return i;
-    }
-
-    @ConversionWay
-    int toInt(String s){
-        return s == null ? 0 : Integer.parseInt(s);
-    }
-
-    @ConversionWay
-    int toInt(Double s){
-        return s == null ? 0 : Integer.parseInt(s.toString());
-    }
-
-    @ConversionWay
-    double toD(Double d){
-        return d;
-    }
-
-    @ConversionWay
-    long toLong(Long l){
-        return l;
-    }
-
-    @ConversionWay
-    short tos(String val){return toS(val);}
-
-    @ConversionWay
-    Short toS(String val){
-        return Short.valueOf(val);
-    }
-
-    @ConversionWay
-    float tof(String val){
-        return toF(val);
-    }
-
-    @ConversionWay
-    Float toF(String val){
-        return Float.valueOf(val);
-    }
-
-    @ConversionWay
-    double tod(String val){
-        return toD(val);
-    }
-
-    @ConversionWay
-    Double toD(String val){
-        return Double.valueOf(val);
+    Double changeDouble(Object val){
+        return TypeUtils.castToDouble(val);
     }
 
 
     @ConversionWay
-    Boolean toBol(String val){
-        return toBool(val);
+    Long toLong(Object l){
+        return TypeUtils.castToLong(l);
     }
 
     @ConversionWay
-    boolean toBool(String value){
-        return Boolean.parseBoolean(value);
+    Short toS(Object val){
+        return TypeUtils.castToShort(val);
+    }
+
+    @ConversionWay
+    Float tof(Object val){
+        return TypeUtils.castToFloat(val);
+    }
+
+    @ConversionWay
+    Boolean toBol(Object val){
+        return TypeUtils.castToBoolean(val);
     }
 
     @ConversionWay(priority = 100)
@@ -153,24 +112,14 @@ public class DefaultTypeContributor {
     }
 
     @ConversionWay
-    String conJsonToStr(JSONObject json){
-        return json.toString();
-    }
-
-    @ConversionWay
-    Float itf(Integer i){
-        return i.floatValue();
-    }
-
-    @ConversionWay
-    boolean toB(Boolean b){
-        return b;
-    }
-
-    @ConversionWay
     Set<Object> toSs(Object obj){
         List<Object> list = SQLUtils.wrapList(obj);
         return new HashSet<>(list);
+    }
+
+    @ConversionWay
+    LinkedHashMap<String, Object> toLinkMap(Object obj){
+        return new LinkedHashMap<>(JsonUtils.letJson(obj));
     }
 
 }
