@@ -1,6 +1,7 @@
 package com.black.core.convert;
 
 
+import com.black.core.convert.v2.Force;
 import com.black.core.convert.v2.TypeEngine;
 import com.black.core.query.ClassWrapper;
 import com.black.core.tools.BeanUtil;
@@ -45,7 +46,7 @@ public final class TypeHandler {
                 doParse(obj);
                 parseType.add(primordialClass);
             }
-            engine.parseObj(obj, false);
+            engine.parseObj(obj, AnnotationUtils.getAnnotation(primordialClass, Force.class) != null);
         }
     }
 

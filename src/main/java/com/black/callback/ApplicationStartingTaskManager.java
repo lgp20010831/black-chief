@@ -18,8 +18,14 @@ import java.util.function.Consumer;
 public class ApplicationStartingTaskManager implements SpringApplicationRunListener {
     public static final LinkedBlockingQueue<Consumer<Class<?>>> taskQueue = new LinkedBlockingQueue<>();
 
+    public static final LinkedBlockingQueue<Consumer<Set<Class<?>>>> batchTaskQueue = new LinkedBlockingQueue<>();
+
     public static void addTask(Consumer<Class<?>> task){
         taskQueue.add(task);
+    }
+
+    public static void addBatchTask(Consumer<Set<Class<?>>> consumer){
+        batchTaskQueue.add(consumer);
     }
 
     public static boolean isChiefEnv(){
@@ -53,6 +59,10 @@ public class ApplicationStartingTaskManager implements SpringApplicationRunListe
                     log.info("processor clazz fair: {}", e.getMessage());
                 }
             }
+        }
+
+        for (Consumer<Set<Class<?>>> consumer : batchTaskQueue) {
+            consumer.accept(classes);
         }
     }
 }

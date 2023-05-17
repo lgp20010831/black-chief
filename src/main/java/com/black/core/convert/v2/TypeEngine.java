@@ -10,6 +10,7 @@ import com.black.core.tools.BeanUtil;
 import com.black.core.util.StreamUtils;
 import lombok.Data;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
@@ -31,6 +32,8 @@ public class TypeEngine {
     private static final List<Function<Method, Integer>> getSortFunctions = new ArrayList<>();
 
     private static TypeEngine engine;
+
+    private BringRearTypeHandler bringRearTypeHandler;
 
     private final Map<GroupKeys, MethodHandler> duplicateCache = new ConcurrentHashMap<>();
 
@@ -65,14 +68,21 @@ public class TypeEngine {
         if (type.isAssignableFrom(primordialClass)){
             return (T) value;
         }
-        MethodHandler handler;
-        if (useCache){
-            GroupKeys groupKeys = new GroupKeys(type, primordialClass);
-            handler = cache.computeIfAbsent(groupKeys, gk -> matchHandler(type, value));
-        }else {
-            handler = matchHandler(type, value);
+        try {
+            MethodHandler handler;
+            if (useCache){
+                GroupKeys groupKeys = new GroupKeys(type, primordialClass);
+                handler = cache.computeIfAbsent(groupKeys, gk -> matchHandler(type, value));
+            }else {
+                handler = matchHandler(type, value);
+            }
+            return (T) handler.invoke(value);
+        }catch (RuntimeException e){
+            if (bringRearTypeHandler != null){
+                return bringRearTypeHandler.convert(value, type);
+            }
+            throw e;
         }
-        return (T) handler.invoke(value);
     }
 
     private MethodHandler matchHandler(Class<?> type, Object value){
@@ -90,7 +100,10 @@ public class TypeEngine {
     }
 
     public void parseClass(Class<?> source, boolean force){
-        parse(source, InstanceBeanManager.instance(source, InstanceType.REFLEX_AND_BEAN_FACTORY), force);
+        boolean forInstance = checkClassForInstance(source);
+        parse(source, forInstance ?
+                InstanceBeanManager.instance(source, InstanceType.REFLEX_AND_BEAN_FACTORY) :
+                null, force);
     }
 
     public void parse(Class<?> source, Object instance, boolean force){
@@ -109,6 +122,17 @@ public class TypeEngine {
         }
         for (MethodWrapper methodWrapper : methods) {
             Method method = methodWrapper.get();
+            boolean isStatic = Modifier.isStatic(method.getModifiers());
+            if (instance == null){
+                //如果实例为空, 则只读取 static 方法
+                if (!isStatic){
+                    continue;
+                }
+                //静态方法必须为公开的
+                if(!Modifier.isPublic(method.getModifiers())){
+                    continue;
+                }
+            }
             if (!eligible(method)){
                 continue;
             }
@@ -127,7 +151,7 @@ public class TypeEngine {
                     continue;
                 }
             }
-            boolean isStatic = Modifier.isStatic(method.getModifiers());
+
             MethodHandler handler = new MethodHandler(method, isStatic ? null : instance, parameterType);
             duplicateCache.put(groupKeys, handler);
         }
@@ -150,5 +174,15 @@ public class TypeEngine {
         int count = method.getParameterCount();
         Class<?> returnType = method.getReturnType();
         return count == 1 && !returnType.equals(void.class);
+    }
+
+    private boolean checkClassForInstance(Class<?> clazz){
+        Constructor<?>[] constructors = clazz.getConstructors();
+        for (Constructor<?> constructor : constructors) {
+            if (Modifier.isPublic(constructor.getModifiers())){
+                return true;
+            }
+        }
+        return false;
     }
 }

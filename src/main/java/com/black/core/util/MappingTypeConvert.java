@@ -36,11 +36,4 @@ public class MappingTypeConvert {
     @ConversionWay
     String[] toArray(List<String> set){return set.toArray(new String[0]);}
 
-    @ConversionWay
-    int toi(String s){return Integer.parseInt(s);}
-
-    @ConversionWay
-    boolean cb(Boolean b){
-        return b != null && b;
-    }
 }

@@ -1,6 +1,9 @@
 package com.black;
 
 import com.alibaba.fastjson.JSONObject;
+import com.black.asm.Demo;
+import com.black.core.cache.TypeConvertCache;
+import com.black.core.convert.TypeHandler;
 import com.black.core.convert.v2.TypeEngine;
 import com.black.core.spring.util.ApplicationUtil;
 import com.black.core.util.Av0;
@@ -20,6 +23,7 @@ import com.black.xml.XmlSql;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -29,9 +33,8 @@ public class DemoList {
     static FtlResolver resolver;
 
     static void ftl(){
-        TypeEngine engine = TypeEngine.getInstance();
-        engine.parseClass(TypeUtils.class, true);
-        System.out.println(engine.convert(int.class, "4"));
+        TypeHandler handler = TypeConvertCache.initAndGet();
+        System.out.println(handler.convert(Demo.User.class, new JSONObject()));
     }
 
     static void xml(){

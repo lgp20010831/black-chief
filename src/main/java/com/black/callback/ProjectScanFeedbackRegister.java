@@ -43,6 +43,7 @@ public class ProjectScanFeedbackRegister implements SpringApplicationRunListener
                 Set<Class<?>> source = ClassSourceCache.getSource(range);
                 if (source == null){
                     source = scanner.load(range);
+                    ClassSourceCache.registerSource(range, source);
                 }
                 if (GlobalCallBackLogManager.printLog)
                 log.debug("[ProjectScanFeedbackRegister] run task -- executor: {}", callback);
