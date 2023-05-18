@@ -9,6 +9,7 @@ import com.black.bin.InstanceType;
 import com.black.core.cache.TypeConvertCache;
 import com.black.core.chain.GroupBy;
 import com.black.core.convert.TypeHandler;
+import com.black.core.sql.HumpColumnConvertHandler;
 import com.black.core.sql.code.AliasColumnConvertHandler;
 import com.black.holder.SpringHodler;
 import com.black.map.CompareBody;
@@ -55,6 +56,30 @@ import java.util.function.Function;
 
 @SuppressWarnings("all")
 public class ServiceUtils {
+
+    public static <C extends Collection<Map<String, Object>>> C convertList(C c){
+        return convertList(c, new HumpColumnConvertHandler());
+    }
+
+    public static <C extends Collection<Map<String, Object>>> C convertList(C c, AliasColumnConvertHandler convertHandler){
+        List<Map<String, Object>> list = new ArrayList<>();
+        for (Map<String, Object> map : c) {
+            list.add(convertMap(map, convertHandler));
+        }
+        return (C) list;
+    }
+
+    public static Map<String, Object> convertMap(Map<String, Object> map){
+        return convertMap(map, new HumpColumnConvertHandler());
+    }
+
+    public static Map<String, Object> convertMap(Map<String, Object> map, AliasColumnConvertHandler convertHandler){
+        LinkedHashMap<String, Object> linkedHashMap = new LinkedHashMap<>();
+        map.forEach((k, v) -> {
+            linkedHashMap.put(convertHandler.convertAlias(k), v);
+        });
+        return linkedHashMap;
+    }
 
     public static boolean isAllNull(Object param, List<String> names){
         boolean isAllNull = true;

@@ -2,17 +2,22 @@ package com.black.xml;
 
 import com.black.core.factory.beans.xml.XmlMessage;
 import com.black.core.factory.beans.xml.XmlWrapper;
+import com.black.core.json.Trust;
 import com.black.core.log.IoLog;
 import com.black.core.log.LogFactory;
+import com.black.core.tools.BaseBean;
 import com.black.core.util.StreamUtils;
 import com.black.core.util.StringUtils;
+import com.black.sql_v2.serialize.SerializeUtils;
 import com.black.throwable.IOSException;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author 李桂鹏
@@ -82,5 +87,31 @@ public class XmlUtils {
             }
         }
         return builder.toString();
+    }
+
+    public static Map<Object, Object> castIndexMap(Object... params){
+        Map<Object, Object> map = new LinkedHashMap<>();
+        int i = 1;
+        for (Object param : params) {
+            map.put(i++, param);
+        }
+        return map;
+    }
+
+    public static Map<String, Object> makeEnv(Object... params){
+        Map<String, Object> env = new LinkedHashMap<>();
+        for (Object param : params) {
+            if (param == null){
+                continue;
+            }
+            Class<?> paramClass = param.getClass();
+            if (param instanceof Map){
+                env.putAll((Map<? extends String, ?>) param);
+            }else if (param instanceof BaseBean || paramClass.isAnnotationPresent(Trust.class)){
+                env.putAll(SerializeUtils.serialize(param));
+            }
+        }
+        env.putAll(XmlSql.castParams(params));
+        return env;
     }
 }

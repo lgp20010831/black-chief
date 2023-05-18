@@ -271,6 +271,7 @@ public class Utils {
             }
             CtMethod ctMethod = new CtMethod(simpleFieldType(returnType), name, ctClasses, ctClass);
             ctMethod.setBody(body);
+
             ctMethod.setModifiers(Modifier.PUBLIC);
             ConstPool constPool = ctClass.getClassFile().getConstPool();
             if (annotationCallback != null){

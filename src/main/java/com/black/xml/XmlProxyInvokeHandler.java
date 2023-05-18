@@ -36,11 +36,12 @@ public class XmlProxyInvokeHandler implements AgentLayer {
         String id = method.getName();
         Object[] args = layer.getArgs();
         args = args == null ? new Object[0] : args;
+        Map<Object, Object> indexMap = XmlUtils.castIndexMap(args);
         Map<String, Object> env = MapArgHandler.parse(args, mw);
         boolean select = xmlExecutor.isSelect(id);
         SQLMethodType methodType = select ? SQLMethodType.QUERY : SQLMethodType.UPDATE;
         try {
-            String sql = xmlExecutor.invoke(id, env);
+            String sql = xmlExecutor.invoke(id, env, indexMap);
             PrepareSource prepareSource = xmlExecutor.prepare();
             log.info("[XML] invoke {} sql ===> {}", select ? "query" : "update", sql);
             ResultSet resultSet = null;

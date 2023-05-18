@@ -26,7 +26,17 @@ public class XmlEngine {
         return getHandlerCache().get(nodeName);
     }
 
-    public static String processorSql(ElementWrapper wrapper, Map<String, Object> argMap, PrepareSource prepareSource){
+    public static String processorSql(ElementWrapper wrapper, Map<String, Object> argMap,  PrepareSource prepareSource){
+        String sql = prepareSql(wrapper, argMap, prepareSource);
+
+        //handler ${}
+        sql = GlobalMapping.parseAndObtain(sql);
+
+        //handler #{}
+        return MapArgHandler.parseSql(sql, argMap);
+    }
+
+    public static String prepareSql(ElementWrapper wrapper, Map<String, Object> argMap,  PrepareSource prepareSource){
         XmlSqlSource xmlSqlSource = new XmlSqlSource();
         xmlSqlSource.setArgMap(argMap);
         XmlNodeHandler xmlNodeHandler = getHandler(wrapper.getName());
@@ -34,11 +44,6 @@ public class XmlEngine {
 
         xmlNodeHandler.doHandler(xmlSqlSource, wrapper, prepareSource);
         String sql = xmlSqlSource.getSql();
-
-        //handler ${}
-        sql = GlobalMapping.parseAndObtain(sql);
-
-        //handler #{}
-        return MapArgHandler.parseSql(sql, argMap);
+        return sql;
     }
 }

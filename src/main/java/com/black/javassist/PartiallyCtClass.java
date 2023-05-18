@@ -231,10 +231,11 @@ public class PartiallyCtClass {
     }
 
 
-    public void addMethod(String name, Class<?> returnType, String body, Class<?>... paramTypes){
+    public CtMethod addMethod(String name, Class<?> returnType, String body, Class<?>... paramTypes){
         String prepareBody = prepareBody(body);
         CtMethod ctMethod = Utils.createMethod(name, returnType, prepareBody, ctClass, null, paramTypes);
         addMethod(ctMethod);
+        return ctMethod;
     }
 
     public boolean containMethod(String name){

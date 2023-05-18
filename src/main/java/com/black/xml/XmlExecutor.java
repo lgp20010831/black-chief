@@ -5,11 +5,14 @@ import com.black.core.factory.beans.xml.XmlWrapper;
 import com.black.core.factory.manager.FactoryManager;
 import com.black.core.log.IoLog;
 import com.black.core.spring.factory.ReusingProxyFactory;
+import com.black.core.sql.code.mapping.GlobalMapping;
 import com.black.core.sql.code.util.SQLUtils;
+import com.black.core.sql.run.RunSqlParser;
 import com.black.core.sql.xml.PrepareSource;
 import com.black.core.sql.xml.XmlEngine;
 import com.black.core.sql.xml.XmlManager;
 import com.black.core.util.Assert;
+import com.black.sql.Query;
 import com.black.sql.QueryResultSetParser;
 import com.black.sql_v2.Sql;
 import com.black.sql_v2.SqlExecutor;
@@ -107,12 +110,10 @@ public class XmlExecutor {
         return wrapper;
     }
 
-    public QueryResultSetParser selectByArray(String id, Object... params){
-        return select(id, XmlSql.castParams(params));
-    }
-
-    public QueryResultSetParser select(String id, Map<String, Object> env){
-        String sql = invoke(id, env);
+    public QueryResultSetParser select(String id, Object... params){
+        Map<Object, Object> indexMap = XmlUtils.castIndexMap(params);
+        Map<String, Object> env = XmlUtils.makeEnv(params);
+        String sql = invoke(id, env, indexMap);
         log.info("[XML] invoke query sql ===> {}", sql);
         ResultSet resultSet = SQLUtils.runQuery(sql, getConnection());
         QueryResultSetParser parser = new QueryResultSetParser(resultSet);
@@ -120,14 +121,11 @@ public class XmlExecutor {
         return parser;
     }
 
-
-    public void updateByArray(String id, Object... params){
-        update(id, XmlSql.castParams(params));
-    }
-
-    public void update(String id, Map<String, Object> env){
+    public void update(String id, Object... params){
         try {
-            String sql = invoke(id, env);
+            Map<Object, Object> indexMap = XmlUtils.castIndexMap(params);
+            Map<String, Object> env = XmlUtils.makeEnv(params);
+            String sql = invoke(id, env, indexMap);
             log.info("[XML] invoke update sql ===> {}", sql);
             SQLUtils.executeSql(sql, getConnection());
         }finally {
@@ -135,10 +133,22 @@ public class XmlExecutor {
         }
     }
 
-    protected String invoke(String id, Map<String, Object> env){
+    protected String invoke(String id, Map<String, Object> env, Map<Object, Object> indexMap){
         ElementWrapper wrapper = findBind(id);
         long start = System.currentTimeMillis();
-        String sql = XmlEngine.processorSql(wrapper, env, prepare());
+        //获取预处理 sql
+        String sql = XmlEngine.prepareSql(wrapper, env, prepare());
+
+        //处理 ${}
+        sql = GlobalMapping.parseAndObtain(sql);
+
+        //处理 ?1, ?2
+        sql = Query.doParseSql(sql, indexMap);
+
+        //处理 #{}  ^{} ?[]
+        sql = RunSqlParser.parseSql(sql, env);
+
+        //压缩 sql
         sql = XmlUtils.compressSql(sql);
         log.trace("[XML] --> xml resolve sql take: {} ms", System.currentTimeMillis() - start);
         return sql;

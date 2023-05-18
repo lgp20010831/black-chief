@@ -24,7 +24,7 @@ public class SwitchNodeHandler extends AbstractXmlNodeHandler {
 
     @Override
     public List<String> getAttributeNames() {
-        return Arrays.asList("case[test,then]", "def[then]", "prefix", "suffix");
+        return Arrays.asList("target, case[test,then]", "def[then]", "prefix", "suffix");
     }
 
     @Override
@@ -38,7 +38,7 @@ public class SwitchNodeHandler extends AbstractXmlNodeHandler {
         //拿到所有 csaes
         List<ElementWrapper> cases = ew.getsByName("case");
         //拿到 def
-        ElementWrapper def = ew.getByName("default");
+        ElementWrapper def = ew.getByName("def");
         String append = null;
         boolean invoke = false;
         for (ElementWrapper caseWrapper : cases) {

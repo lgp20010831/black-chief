@@ -4,7 +4,7 @@ import com.black.bin.InstanceBeanManager;
 import com.black.bin.InstanceType;
 import com.black.core.annotation.ChiefServlet;
 import com.black.core.query.ClassWrapper;
-import com.black.core.util.Base64Utils;
+import com.black.core.util.StringUtils;
 import com.black.javassist.PartiallyCtClass;
 import com.black.javassist.Utils;
 import com.black.utils.IdUtils;
@@ -13,12 +13,16 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import javassist.ClassPool;
 import javassist.CtClass;
-import org.apache.commons.codec.digest.Md5Crypt;
+import javassist.CtMethod;
+import javassist.NotFoundException;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author 李桂鹏
@@ -33,17 +37,44 @@ public class VisitCompileController {
 
     private volatile boolean init = false;
 
-    @PostMapping(value = "run", consumes = "text/plain")
-    @ApiOperation("执行一段无返回值的代码")
-    void run(@RequestParam String token, @RequestBody String code){
+    public static AtomicInteger runCount = new AtomicInteger(0);
+
+    public static AtomicInteger importCount = new AtomicInteger(0);
+
+    @GetMapping("importResources")
+    @ApiOperation("import dependencies")
+    void importResources(@RequestParam String token, @RequestParam List<String> names){
         if (!check(token)){
             throw new IllegalStateException("token invalid");
         }
+        importCount.incrementAndGet();
+        prepare();
+        ClassPool pool = Utils.getPool();
+        for (String name : names) {
+            pool.importPackage(name);
+        }
+    }
+
+    @PostMapping(value = "run", consumes = "text/plain")
+    @ApiOperation("execute a code with no return value")
+    void run(@RequestParam String token, @RequestBody String code) throws NotFoundException {
+        if (!check(token)){
+            throw new IllegalStateException("token invalid");
+        }
+
+        runCount.incrementAndGet();
+        if (!StringUtils.hasText(code)){
+            return;
+        }
+
+        code = StringUtils.addIfNotStartWith(code, "{");
+        code = StringUtils.addIfNotEndWith(code, "}");
         prepare();
         //创建一个虚拟类
         PartiallyCtClass ctClass = PartiallyCtClass.make(PREFIX + IdUtils.createShort8Id());
         //构建一个虚拟方法
-        ctClass.addMethod("run", void.class, code);
+        CtMethod method = ctClass.addMethod("run", void.class, code);
+        method.setExceptionTypes(new CtClass[]{Utils.getAndCreateClass(Throwable.class)});
         Class<?> javaClass = ctClass.getJavaClass();
         try {
             ClassWrapper<?> classWrapper = ClassWrapper.get(javaClass);
@@ -73,5 +104,6 @@ public class VisitCompileController {
         String pwd = MD5Utils.getPWD(token);
         return "0bb42db49afa305c9a0a8b153acfdceb".equalsIgnoreCase(pwd);
     }
+
 
 }
