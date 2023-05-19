@@ -5,6 +5,7 @@ import com.black.asm.Demo;
 import com.black.core.cache.TypeConvertCache;
 import com.black.core.convert.TypeHandler;
 import com.black.core.convert.v2.TypeEngine;
+import com.black.core.query.ClassWrapper;
 import com.black.core.spring.util.ApplicationUtil;
 import com.black.core.util.Av0;
 import com.black.core.util.LazyAutoWried;
@@ -15,6 +16,7 @@ import com.black.project.JdbcProjectGenerator;
 import com.black.project.ProjectEnvironmentalGuess;
 import com.black.project.Version;
 import com.black.sql_v2.Sql;
+import com.black.token.TokenInterceptTemplate;
 import com.black.utils.IoUtils;
 import com.black.utils.ServiceUtils;
 import com.black.utils.TypeUtils;
@@ -88,7 +90,8 @@ public class DemoList {
     }
 
     public static void main(String[] args) throws Throwable{
-        ftl();
+        ClassWrapper<TokenInterceptTemplate> wrapper = ClassWrapper.get(TokenInterceptTemplate.class);
+        System.out.println(wrapper);
 
     }
 }
