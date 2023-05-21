@@ -2,7 +2,8 @@ package com.black.graphql;
 
 import com.black.core.aop.servlet.ParameterWrapper;
 import com.black.core.query.MethodWrapper;
-import org.mountcloud.graphql.response.GraphqlResponse;
+import com.black.graphql.core.response.GraphqlResponse;
+
 
 public interface GraphqlHandler {
 

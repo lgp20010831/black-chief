@@ -1,11 +1,13 @@
 package com.black.core.util;
 
 import com.alibaba.fastjson.JSONObject;
+import com.black.sql_v2.period.AttributeHandler;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class Body extends JSONObject {
+@SuppressWarnings("all")
+public class Body extends JSONObject implements AttributeHandler {
 
     public Body() {
         super(true);
@@ -54,6 +56,11 @@ public class Body extends JSONObject {
         for (int i = 0; i < ks.length; i++) {
             put(ks[i], vs[i]);
         }
+        return this;
+    }
+
+    @Override
+    public JSONObject getFormData() {
         return this;
     }
 }

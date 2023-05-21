@@ -1,11 +1,11 @@
 package com.black.graphql.handler;
 
 import com.alibaba.fastjson.JSONObject;
-import com.black.graphql.GraphqlHandler;
 import com.black.core.json.ReflexUtils;
 import com.black.core.query.MethodWrapper;
 import com.black.core.tools.BeanUtil;
-import org.mountcloud.graphql.response.GraphqlResponse;
+import com.black.graphql.GraphqlHandler;
+import com.black.graphql.core.response.GraphqlResponse;
 
 import java.util.Map;
 

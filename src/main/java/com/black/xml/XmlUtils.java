@@ -7,7 +7,6 @@ import com.black.core.log.IoLog;
 import com.black.core.log.LogFactory;
 import com.black.core.tools.BaseBean;
 import com.black.core.util.StreamUtils;
-import com.black.core.util.StringUtils;
 import com.black.sql_v2.serialize.SerializeUtils;
 import com.black.throwable.IOSException;
 import org.springframework.core.io.Resource;
@@ -30,6 +29,40 @@ public class XmlUtils {
 
     private static PathMatchingResourcePatternResolver resolver =
             new PathMatchingResourcePatternResolver(Thread.currentThread().getContextClassLoader());
+
+
+    public static List<XmlWrapper> getFtlResources(String location){
+        location = checkFtlLocation(location);
+        log.info("[XML] resolve ftl location: {}", location);
+        try {
+            Resource[] resources = resolver.getResources(location);
+            return StreamUtils.mapList(Arrays.asList(resources), resource -> {
+                try {
+                    log.info("[XML] read ftl file: {}", resource.getFilename());
+                    return new XmlWrapper(new XmlMessage(resource.getInputStream()));
+                } catch (IOException e) {
+                    throw new IOSException(e);
+                }
+            });
+        } catch (IOException e) {
+            throw new IOSException(e);
+        }
+    }
+
+    private static String checkFtlLocation(String location){
+        if (!location.endsWith(".ftl")){
+            if (location.endsWith("/")){
+                location = location + "**/**.ftl";
+            }else {
+                location = location + "/**/**.ftl";
+            }
+        }
+
+        if (!location.startsWith("classpath*:") && !location.startsWith("classpath:")){
+            location = "classpath*:" + location;
+        }
+        return location;
+    }
 
     public static List<XmlWrapper> getXmlResources(String location){
         location = checkLocation(location);

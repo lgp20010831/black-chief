@@ -933,7 +933,7 @@ public abstract class AbstractBeanFactory implements BeanFactory {
         Collection<BeanFactoryProcessor> beanFactoryProcessors = getBeanFactoryProcessors();
 
         //Scan own attributes
-        wriedClassFields(definitional.getClassWrapper(), bean);
+        //wriedClassFields(definitional.getClassWrapper(), bean);
 
         //Scan all its parent classes to realize attribute injection
         Set<Class<?>> superClasses = definitional.getSuperClasses();

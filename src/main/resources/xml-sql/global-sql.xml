@@ -1,6 +1,5 @@
 <root>
 
-
     <select id="countSupplier">
         select * from supplier where 1=1
         <if test="name != null" >
@@ -27,6 +26,4 @@
             <else then="code is null"/>
         </case>
     </select>
-
-
 </root>

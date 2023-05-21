@@ -7,6 +7,15 @@ import com.black.core.query.ClassWrapper;
 import com.black.core.query.ConstructorWrapper;
 import com.black.core.query.ExecutableWrapper;
 import com.black.core.query.MethodWrapper;
+import com.black.core.tools.BeanUtil;
+import com.black.utils.NameUtil;
+import com.black.utils.ReflectionUtils;
+import com.black.utils.ServiceUtils;
+
+import java.lang.reflect.Parameter;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 public class DefaultBeanMethodHandler implements BeanMethodHandler {
 
@@ -20,8 +29,39 @@ public class DefaultBeanMethodHandler implements BeanMethodHandler {
     public Object handler(MethodWrapper method, ParameterWrapper parameter, Object bean, BeanFactory factory, Object previousValue) {
         if (previousValue == null){
             try {
+                Parameter param = parameter.get();
+                Class<?>[] genericVals = ReflectionUtils.getMethodParamterGenericVals(param);
+                Class<?> type = parameter.getType();
+                if (Collection.class.isAssignableFrom(type)){
+                    if (genericVals.length != 1){
+                        throw new BeanFactorysException("When attempting to inject a collection property, " +
+                                "its generic type must be specified");
+                    }
+                    Class<?> rawType = genericVals[0];
+                    List<?> list = factory.getBean(rawType);
+                    Collection<Object> collection = ServiceUtils.createCollection(type);
+                    collection.addAll(list);
+                    return collection;
+                }else if (Map.class.isAssignableFrom(type)){
+                    if (genericVals.length != 2){
+                        throw new BeanFactorysException("When attempting to inject a map property, " +
+                                "its generic type must be specified");
+                    }
+                    Class<?> rawType = genericVals[1];
+                    Class<?> keyType = genericVals[0];
+                    List<?> list = factory.getBean(rawType);
+                    Map<Object, Object> map = ServiceUtils.createMap(type);
+                    for (Object ele : list) {
+                        if (keyType.equals(String.class)){
+                            map.put(NameUtil.getName(ele), ele);
+                        }else {
+                            map.put(BeanUtil.getPrimordialClass(ele), ele);
+                        }
+                    }
+                    return map;
+                }
 
-                return factory.getSingleBean(parameter.getType());
+                return factory.getSingleBean(type);
             }catch (BeanFactorysException ex){
                 throw new BeanFactorysException("An exception occurred while trying to " +
                         "create a parameter from the factory while parsing an object method " +

@@ -1,14 +1,14 @@
 package com.black.graphql.handler;
 
-import com.black.graphql.GraphqlHandler;
-import com.black.graphql.GraphqlObject;
-import com.black.graphql.Utils;
-import com.black.graphql.annotation.HttpHeaders;
 import com.black.core.aop.servlet.ParameterWrapper;
 import com.black.core.query.ClassWrapper;
 import com.black.core.query.MethodWrapper;
 import com.black.core.util.StringUtils;
-import org.mountcloud.graphql.GraphqlClient;
+import com.black.graphql.GraphqlHandler;
+import com.black.graphql.GraphqlObject;
+import com.black.graphql.Utils;
+import com.black.graphql.annotation.HttpHeaders;
+import com.black.graphql.core.GraphqlClient;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -4,9 +4,9 @@ import com.black.core.factory.beans.BeanFactorysException;
 import com.black.core.factory.beans.xml.XmlBeanFactory;
 import com.black.core.tools.BeanUtil;
 import com.black.core.util.StreamUtils;
-import com.black.vfs.VFS;
+import com.black.scan.ChiefScanner;
+import com.black.scan.ScannerManager;
 import com.black.vfs.VfsLoadException;
-import com.black.vfs.VfsScanner;
 import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -17,7 +17,7 @@ import java.util.Set;
 @Log4j2
 public class VfsBeanFactory extends XmlBeanFactory {
 
-    private final VfsScanner loader;
+    private final ChiefScanner loader;
 
     private VfsBeanFactory(){
         this(null);
@@ -25,7 +25,11 @@ public class VfsBeanFactory extends XmlBeanFactory {
 
     public VfsBeanFactory(DefaultListableBeanFactory springFactory){
         super(springFactory);
-        loader = VFS.findVfsScanner();
+        loader = ScannerManager.getScanner();
+    }
+
+    public ChiefScanner getLoader() {
+        return loader;
     }
 
     public void load(String path){

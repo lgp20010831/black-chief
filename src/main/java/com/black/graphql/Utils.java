@@ -1,9 +1,8 @@
 package com.black.graphql;
 
 
-
 import com.black.core.util.StringUtils;
-import org.mountcloud.graphql.request.result.ResultAttributtes;
+import com.black.graphql.core.request.result.ResultAttributtes;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;

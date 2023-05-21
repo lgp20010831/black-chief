@@ -6,7 +6,7 @@ import com.black.core.convert.v2.TypeEngine;
 import com.black.core.convert.v2.TypeUtilsBringRearTypeHandler;
 import com.black.core.factory.manager.FactoryManager;
 import com.black.utils.DefaultMappingKeyHandler;
-import com.black.utils.TypeUtils;
+import com.black.utils.TypeUtilsByConvert;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -41,7 +41,7 @@ public class TypeConvertCache {
             registerTypeHandler(handler);
             //handler engine
             TypeEngine engine = TypeEngine.getInstance();
-            engine.parseClass(TypeUtils.class, true);
+            engine.parseClass(TypeUtilsByConvert.class, true);
             engine.setBringRearTypeHandler(new TypeUtilsBringRearTypeHandler());
         }
         return handler;

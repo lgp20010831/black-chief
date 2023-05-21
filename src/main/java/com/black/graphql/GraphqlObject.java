@@ -1,20 +1,20 @@
 package com.black.graphql;
 
-import com.black.graphql.annotation.Query;
 import com.black.core.aop.servlet.ParameterWrapper;
 import com.black.core.config.ApplicationConfigurationReaderHolder;
 import com.black.core.http.code.HttpUtils;
 import com.black.core.query.MethodWrapper;
+import com.black.graphql.annotation.Mutation;
+import com.black.graphql.annotation.Query;
+import com.black.graphql.core.GraphqlClient;
+import com.black.graphql.core.request.GraphqlRequest;
+import com.black.graphql.core.request.mutation.DefaultGraphqlMutation;
+import com.black.graphql.core.request.mutation.GraphqlMutation;
+import com.black.graphql.core.request.query.DefaultGraphqlQuery;
+import com.black.graphql.core.request.query.GraphqlQuery;
+import com.black.graphql.core.response.GraphqlResponse;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
-import org.mountcloud.graphql.GraphqlClient;
-import com.black.graphql.annotation.Mutation;
-import org.mountcloud.graphql.request.GraphqlRequest;
-import org.mountcloud.graphql.request.mutation.DefaultGraphqlMutation;
-import org.mountcloud.graphql.request.mutation.GraphqlMutation;
-import org.mountcloud.graphql.request.query.DefaultGraphqlQuery;
-import org.mountcloud.graphql.request.query.GraphqlQuery;
-import org.mountcloud.graphql.response.GraphqlResponse;
 
 import java.io.IOException;
 import java.lang.reflect.Method;

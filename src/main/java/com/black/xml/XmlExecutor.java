@@ -17,10 +17,7 @@ import com.black.sql.QueryResultSetParser;
 import com.black.sql_v2.Sql;
 import com.black.sql_v2.SqlExecutor;
 import lombok.Getter;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.util.*;
@@ -38,6 +35,8 @@ public class XmlExecutor {
     private final Map<Class<?>, Object> proxyCache = new ConcurrentHashMap<>();
 
     private final String name;
+
+    private boolean supportFtl = true;
 
     private final SqlExecutor executor;
 
@@ -76,6 +75,10 @@ public class XmlExecutor {
             }
             try {
                 List<XmlWrapper> xmlResources = XmlUtils.getXmlResources(classPath);
+                if (isSupportFtl()){
+                    List<XmlWrapper> ftlResources = XmlUtils.getFtlResources(classPath);
+                    wrappers.addAll(ftlResources);
+                }
                 wrappers.addAll(xmlResources);
             }finally {
                 handledXmlPaths.add(classPath);

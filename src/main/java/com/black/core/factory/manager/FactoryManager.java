@@ -3,7 +3,7 @@ package com.black.core.factory.manager;
 import com.black.core.factory.beans.BeanFactory;
 import com.black.core.factory.beans.BeanFactorysException;
 import com.black.core.factory.beans.component.BeanFactoryType;
-import com.black.core.factory.beans.xml.XmlBeanFactory;
+import com.black.core.factory.beans.config_collect520.ResourceCollectionBeanFactory;
 import com.black.core.spring.ChiefApplicationRunner;
 import com.black.core.spring.factory.DefaultProxyFactory;
 import com.black.core.spring.factory.ReusingProxyFactory;
@@ -20,7 +20,7 @@ public class FactoryManager {
 
     private static ReusingProxyFactory proxyFactory;
 
-    private static final Class<? extends BeanFactory> DEFAULT_BEAN_FACTORY_TYPR = XmlBeanFactory.class;
+    private static final Class<? extends BeanFactory> DEFAULT_BEAN_FACTORY_TYPR = ResourceCollectionBeanFactory.class;
 
     public static InstanceFactory initAndGetInstanceFactory() {
         init();

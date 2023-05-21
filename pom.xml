@@ -449,6 +449,7 @@
                                     <include>org.javassist:javassist</include>
 <!--                                    <include>io.minio:minio</include>-->
                                     <include>org.ow2.asm:asm</include>
+
                                 </includes>
                                 <excludes>
                                     <exclude>sql/**</exclude>

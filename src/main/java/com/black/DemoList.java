@@ -4,28 +4,33 @@ import com.alibaba.fastjson.JSONObject;
 import com.black.asm.Demo;
 import com.black.core.cache.TypeConvertCache;
 import com.black.core.convert.TypeHandler;
-import com.black.core.convert.v2.TypeEngine;
-import com.black.core.query.ClassWrapper;
+import com.black.core.factory.beans.AgentRequired;
+import com.black.core.factory.beans.config_collect520.Collect;
 import com.black.core.spring.util.ApplicationUtil;
 import com.black.core.util.Av0;
 import com.black.core.util.LazyAutoWried;
 import com.black.datasource.MybatisPlusDynamicDataSourceBuilder;
 import com.black.ftl.FtlResolver;
+import com.black.graphql.Graphqls;
 import com.black.project.DEMO;
 import com.black.project.JdbcProjectGenerator;
 import com.black.project.ProjectEnvironmentalGuess;
 import com.black.project.Version;
+import com.black.servlet.Post;
 import com.black.sql_v2.Sql;
-import com.black.token.TokenInterceptTemplate;
+import com.black.sql_v2.handler.SqlStatementHandler;
 import com.black.utils.IoUtils;
 import com.black.utils.ServiceUtils;
-import com.black.utils.TypeUtils;
 import com.black.xml.XmlSql;
+import com.black.xml.engine.impl.XmlNodeHandler;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -90,8 +95,63 @@ public class DemoList {
     }
 
     public static void main(String[] args) throws Throwable{
-        ClassWrapper<TokenInterceptTemplate> wrapper = ClassWrapper.get(TokenInterceptTemplate.class);
-        System.out.println(wrapper);
+        gra();
+    }
 
+
+    //{"query":"{userList(user:{name:\"lgp\",age:2}){name  age}}"}
+    static void gra(){
+        System.out.println(Graphqls.query("http://localhost:8080/api", "userList")
+                        .addObjectParam("user", new User("lgp", 2))
+                .addResults("name, age")
+                .getRequestMessage());
+        JSONObject json = Graphqls.query("http://localhost:8080/api", "userList")
+                .addResults("name, age")
+                .fetch();
+        System.out.println(json);
+    }
+    @Data @AllArgsConstructor
+    static class User{
+        String name;
+
+        int age;
+    }
+
+    @Data
+    @AgentRequired
+    public static class Cd{
+
+        @Collect(scope = "com.black.xml.engine.impl")
+        List<XmlNodeHandler> nodeHandlers;
+
+        void say(@Collect(scope = "com.black.sql_v2.handler") Map<Class<?>, SqlStatementHandler> handlerMap){
+            System.out.println(handlerMap);
+        }
+    }
+
+
+
+    static abstract class PostJson implements Post {
+
+        abstract Object fetch(JSONObject body);
+
+    }
+
+
+    static class servlet{
+
+        PostJson getUser = new PostJson(){
+
+            @Override
+            Object fetch(JSONObject body) {
+
+                return null;
+            }
+        };
+
+        @PostMapping("getUser")
+        Object getUser(@RequestBody JSONObject body){
+            return Sql.query("user").list();
+        }
     }
 }

@@ -1,12 +1,13 @@
 package com.black.graphql.handler;
 
+import com.black.core.query.MethodWrapper;
 import com.black.graphql.GraphqlHandler;
 import com.black.graphql.GraphqlObject;
 import com.black.graphql.Utils;
 import com.black.graphql.annotation.OnlyAttribues;
 import com.black.graphql.annotation.ResultAttributes;
-import com.black.core.query.MethodWrapper;
-import org.mountcloud.graphql.request.result.ResultAttributtes;
+import com.black.graphql.core.request.result.ResultAttributtes;
+
 
 public class ResultAttribuesHandler implements GraphqlHandler {
 

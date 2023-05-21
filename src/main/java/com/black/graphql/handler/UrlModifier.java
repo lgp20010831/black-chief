@@ -1,13 +1,15 @@
 package com.black.graphql.handler;
 
-import com.black.graphql.GraphqlHandler;
-import com.black.graphql.GraphqlObject;
-import com.black.graphql.annotation.UrlAddress;
 import com.black.core.aop.servlet.ParameterWrapper;
 import com.black.core.query.ClassWrapper;
 import com.black.core.query.MethodWrapper;
-import org.mountcloud.graphql.GraphqlClient;
-import org.mountcloud.graphql.response.GraphqlResponse;
+import com.black.graphql.GraphqlHandler;
+import com.black.graphql.GraphqlObject;
+import com.black.graphql.annotation.UrlAddress;
+import com.black.graphql.core.GraphqlClient;
+import com.black.graphql.core.response.GraphqlResponse;
+
+
 
 public class UrlModifier implements GraphqlHandler {
 
