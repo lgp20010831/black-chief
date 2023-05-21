@@ -8,7 +8,7 @@ import org.springframework.util.ClassUtils;
 
 //坐标
 @Getter @SuppressWarnings("all")
-public final class Beacon {
+public class Beacon {
 
     @LazyAutoWried
     protected String[] arr;

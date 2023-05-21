@@ -16,7 +16,6 @@ import com.black.project.DEMO;
 import com.black.project.JdbcProjectGenerator;
 import com.black.project.ProjectEnvironmentalGuess;
 import com.black.project.Version;
-import com.black.servlet.Post;
 import com.black.sql_v2.Sql;
 import com.black.sql_v2.handler.SqlStatementHandler;
 import com.black.utils.IoUtils;
@@ -25,8 +24,6 @@ import com.black.xml.XmlSql;
 import com.black.xml.engine.impl.XmlNodeHandler;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -131,27 +128,5 @@ public class DemoList {
 
 
 
-    static abstract class PostJson implements Post {
 
-        abstract Object fetch(JSONObject body);
-
-    }
-
-
-    static class servlet{
-
-        PostJson getUser = new PostJson(){
-
-            @Override
-            Object fetch(JSONObject body) {
-
-                return null;
-            }
-        };
-
-        @PostMapping("getUser")
-        Object getUser(@RequestBody JSONObject body){
-            return Sql.query("user").list();
-        }
-    }
 }

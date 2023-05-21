@@ -16,6 +16,7 @@ import com.black.sql.Query;
 import com.black.sql.QueryResultSetParser;
 import com.black.sql_v2.Sql;
 import com.black.sql_v2.SqlExecutor;
+import com.black.standard.XmlSqlOperator;
 import lombok.Getter;
 
 import java.sql.Connection;
@@ -28,7 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @create 2023-05-08 11:11
  */
 @SuppressWarnings("all") @Getter
-public class XmlExecutor {
+public class XmlExecutor implements XmlSqlOperator {
 
     private final Map<String, ElementWrapper> bindCache = new ConcurrentHashMap<>();
 
@@ -65,6 +66,16 @@ public class XmlExecutor {
 
     public boolean exist(String id){
         return bindCache.containsKey(id);
+    }
+
+    @Override
+    public QueryResultSetParser selectXml(String id, Object... params) {
+        return select(id, params);
+    }
+
+    @Override
+    public void updateXml(String id, Object... params) {
+        update(id, params);
     }
 
     public void scanAndParse(String... classPaths){

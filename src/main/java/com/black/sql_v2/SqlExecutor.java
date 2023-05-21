@@ -32,6 +32,7 @@ import com.black.sql_v2.transaction.NestedTransactionControlManager;
 import com.black.sql_v2.utils.SqlV2Utils;
 import com.black.sql_v2.with.GeneratePrimaryManagement;
 import com.black.sql_v2.with.WaitGenerateWrapper;
+import com.black.standard.SqlOperator;
 import com.black.table.PrimaryKey;
 import com.black.table.TableMetadata;
 import com.black.table.TableUtils;
@@ -52,7 +53,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import static com.black.utils.ServiceUtils.*;
 
 @SuppressWarnings("all") @Setter
-public class SqlExecutor implements NativeSqlAdapter {
+public class SqlExecutor implements NativeSqlAdapter, SqlOperator {
 
     private DataSourceBuilder dataSourceBuilder;
 
@@ -146,6 +147,26 @@ public class SqlExecutor implements NativeSqlAdapter {
     @Override
     public void closeNativeFetchConnection(Connection connection) {
         closeConnection(connection);
+    }
+
+    @Override
+    public QueryResultSetParser nativeQuery(String sql, Object... paramArray) {
+        return NativeSqlAdapter.super.nativeQuery(sql, paramArray);
+    }
+
+    @Override
+    public QueryResultSetParser nativeQueryWithEnv(String sql, Map<String, Object> env, Object... paramArray) {
+        return NativeSqlAdapter.super.nativeQueryWithEnv(sql, env, paramArray);
+    }
+
+    @Override
+    public void nativeExec(String sql, Object... paramArray) {
+        NativeSqlAdapter.super.nativeExec(sql, paramArray);
+    }
+
+    @Override
+    public void nativeExecWithEnv(String sql, Map<String, Object> env, Object... paramArray) {
+        NativeSqlAdapter.super.nativeExecWithEnv(sql, env, paramArray);
     }
 
     public Connection getConnection(){
@@ -298,7 +319,7 @@ public class SqlExecutor implements NativeSqlAdapter {
         }
     }
 
-    public <T> void saveAndEffect(String tableName, T param, boolean effect, Object... params){
+    public void saveAndEffect(String tableName, Object param, boolean effect, Object... params){
         List<String> primaryKeyAliasNames = findPrimaryKeyAliasNames(tableName);
         //JSONObject json = JsonUtils.letJson(param);
         Map<String, Object> json = serialize(param);

@@ -1,6 +1,13 @@
 package com.black.core.util;
 
 import com.black.core.aop.servlet.AopControllerIntercept;
+import com.black.sql_v2.Opt;
+import com.black.sql_v2.Sql;
+import com.black.standard.AttributeMapHandler;
+import com.black.standard.SqlOperator;
+import com.black.standard.TypeConvertStandard;
+import com.black.standard.XmlSqlOperator;
+import com.black.xml.XmlSql;
 import lombok.NonNull;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
@@ -11,11 +18,14 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @SuppressWarnings("all")
-public class ParentController implements BeanFactoryAware {
+public class BaseController implements BeanFactoryAware, SqlOperator, Opt,
+        XmlSqlOperator, AttributeMapHandler, TypeConvertStandard {
+
 
     protected BeanFactory factory;
     protected final Map<Class<?>, Object> cache = new ConcurrentHashMap<>();
@@ -57,4 +67,36 @@ public class ParentController implements BeanFactoryAware {
         return factory;
     }
 
+    @Override
+    public String getAlias() {
+        return Sql.DEFAULT_ALIAS;
+    }
+
+    @Override
+    public SqlOperator getSqlDelegate() {
+        return Sql.opt(getAlias());
+    }
+
+    @Override
+    public XmlSqlOperator getSqlXmlDelegate() {
+        return XmlSql.opt(getAlias());
+    }
+
+    @Override
+    public Map<String, Object> getFormData() {
+        LinkedHashMap<String, Object> linkedHashMap = new LinkedHashMap<>();
+        Map<String, String[]> map = getRequest().getParameterMap();
+        map.forEach((k, v) -> {
+            Object value;
+            if (v == null){
+                value = null;
+            }else if (v.length == 1){
+                value = v[0];
+            }else {
+                value = Av0.as(v);
+            }
+            linkedHashMap.put(k, value);
+        });
+        return linkedHashMap;
+    }
 }
