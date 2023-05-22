@@ -9,6 +9,8 @@ import com.black.core.query.ConstructorWrapper;
 import com.black.core.query.FieldWrapper;
 import com.black.core.query.MethodWrapper;
 import com.black.core.spring.factory.AgentLayer;
+import com.black.core.spring.instance.InstanceConstructor;
+import com.black.core.spring.instance.PostConstr;
 import com.black.utils.NameUtil;
 import com.black.utils.ProxyUtil;
 import lombok.NonNull;
@@ -141,18 +143,22 @@ public class DefaultBeanDefinitional<B> implements BeanDefinitional<B>{
     @Override
     public ConstructorWrapper<?> mainConstructor() throws NoSuchMethodException {
         ConstructorWrapper<?> constructorWrapper = classWrapper.getConstructorByAnnotation(MainConstructor.class);
-        if (constructorWrapper == null){
-            ConstructorWrapper<?> constructor = classWrapper.getConstructor();
-            if (constructor == null){
-                List<ConstructorWrapper<?>> constructorWrapperList = classWrapper.getConstructorWrapperList();
-                if (constructorWrapperList.size() == 1){
-                    return constructorWrapperList.get(0);
-                }
-                throw new NoSuchMethodException();
-            }
-            return constructor;
+        if (constructorWrapper != null){
+            return constructorWrapper;
         }
-        return constructorWrapper;
+        ConstructorWrapper<?> constructorByAnnotation = classWrapper.getConstructorByAnnotation(InstanceConstructor.class);
+        if (constructorByAnnotation != null){
+            return constructorByAnnotation;
+        }
+        ConstructorWrapper<?> constructor = classWrapper.getConstructor();
+        if (constructor == null){
+            List<ConstructorWrapper<?>> constructorWrapperList = classWrapper.getConstructorWrapperList();
+            if (constructorWrapperList.size() == 1){
+                return constructorWrapperList.get(0);
+            }
+            throw new NoSuchMethodException();
+        }
+        return constructor;
     }
 
     @Override
@@ -212,7 +218,11 @@ public class DefaultBeanDefinitional<B> implements BeanDefinitional<B>{
 
     @Override
     public MethodWrapper getPostConstructorMethod() {
-        return classWrapper.getSingleMethodByAnnotation(PostConstructor.class);
+        MethodWrapper wrapper = classWrapper.getSingleMethodByAnnotation(PostConstructor.class);
+        if (wrapper == null){
+            wrapper = classWrapper.getSingleMethodByAnnotation(PostConstr.class);
+        }
+        return wrapper;
     }
 
     @Override

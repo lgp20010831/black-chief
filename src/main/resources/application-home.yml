@@ -1,7 +1,7 @@
 spring:
   datasource:
     dynamic:
-      primary: one
+      primary: two
       datasource:
         one:
           driver-class-name: com.mysql.cj.jdbc.Driver

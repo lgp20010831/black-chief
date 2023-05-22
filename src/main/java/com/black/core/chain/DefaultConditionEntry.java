@@ -17,7 +17,7 @@ public class DefaultConditionEntry implements ConditionEntry, ConditionResultBod
     boolean proxy = false;
     boolean instance = true;
     AgentLayer layer;
-    InstanceType instanceType = InstanceType.INSTANCE;
+    InstanceType instanceType = InstanceType.BEAN_FACTORY_SINGLE;
     private final QueryConditionRegister register;
 
     public DefaultConditionEntry(QueryConditionRegister register) {

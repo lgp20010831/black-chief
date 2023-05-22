@@ -17,6 +17,8 @@ public @interface Collect {
     //目标继承的类型
     Class<?>[] type() default {};
 
+    boolean sort() default true;
+
     boolean typeOr() default true;
 
     //目标是可实例化的

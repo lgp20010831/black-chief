@@ -470,8 +470,6 @@ public abstract class AbstractEmbedApplication implements ChiefExpansivelyApplic
     protected void initFactory(){
         instanceFactory = obtainInstanceFactory();
         instanceFactory.registerInstance(AbstractEmbedApplication.class, this);
-        BeanFactory beanFactory = FactoryManager.getBeanFactory();
-        beanFactory.registerBean(this);
     }
 
     public InstanceFactory obtainInstanceFactory(){

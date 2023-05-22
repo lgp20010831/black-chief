@@ -1,5 +1,6 @@
 package com.black.core.chain;
 
+import com.black.bin.InstanceBeanManager;
 import com.black.bin.InstanceType;
 import com.black.core.factory.beans.BeanFactory;
 import com.black.core.factory.manager.FactoryManager;
@@ -141,16 +142,7 @@ public class GlobalTaskChainCollector implements OpenComponent, ApplicationDrive
 
     private Object instance(Class<?> type, InstanceType instanceType){
         try {
-            switch (instanceType){
-                case REFLEX:
-                    return ReflexUtils.instance(type);
-                case INSTANCE:
-                    return instanceFactory.getInstance(type);
-                case BEAN_FACTORY:
-                    return FactoryManager.initAndGetBeanFactory().getSingleBean(type);
-                default:
-                    return null;
-            }
+            return InstanceBeanManager.instance(type, instanceType);
         }catch (Throwable e){
             if (log.isWarnEnabled()) {
                 log.warn("could not be built object: [{}], error msg: [{}]",

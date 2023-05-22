@@ -127,6 +127,20 @@ public class DemoList {
     }
 
 
+    static {
+        System.out.println("赤骊骋疆，巡狩八荒！");
+        System.out.println("长缨在手，百骥可降！");
+        System.out.println("世皆彳亍，唯我纵横。");
+        System.out.println("横枪立马，独啸秋风！");
+        System.out.println("离群之马，虽强亦亡。");
+        System.out.println("赶缚苍龙擒猛虎，一枪纵横定天山！");
+        System.out.println("马踏祁连山河动，兵起玄黄奈何天！");
+        System.out.println("一骑破霄汉，饮马星河，醉卧广寒！");
+        System.out.println("雷部显圣，引赤电为翼，铸霹雳成枪！");
+        System.out.println("七情难掩，六欲难消，何谓之神？");
+
+    }
+
 
 
 }

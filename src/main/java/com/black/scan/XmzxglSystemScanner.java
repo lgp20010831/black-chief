@@ -20,7 +20,7 @@ public class XmzxglSystemScanner extends AbstractChiefScanner{
 
 
     @Override
-    public Set<Class<?>> load(String classpath) {
+    public Set<Class<?>> doLoad(String classpath) {
         return getClasses(classpath);
     }
 

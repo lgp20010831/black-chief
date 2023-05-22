@@ -33,5 +33,7 @@ public class CollectCondition {
 
     boolean prototypeCreate;
 
+    boolean sort = true;
+
     Class<? extends ClassMatchCustom>[] customs;
 }

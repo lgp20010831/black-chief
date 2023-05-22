@@ -37,6 +37,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 import java.util.Map;
+import java.util.Set;
 
 @EnableSwagger2
 @EnabledCastSwaggerToApi
@@ -105,6 +106,8 @@ public class SpringAutoThymeleafApplication {
         MvcMappingRegister.registerSupportAopController(NestDictController.class);
 
         Map<Class<?>, ProxyMetadata> proxyMetadataMap = ApplyProxyFactory.getProxyMetadataMap();
+        Map<String, Set<Class<?>>> sourceCache = ClassSourceCache.getSourceCache();
+        System.out.println(sourceCache.size());
 //        System.out.println(proxyMetadataMap);
 //
 //        DefaultLifecycleProcessor configuration = context.getBean(DefaultLifecycleProcessor.class);

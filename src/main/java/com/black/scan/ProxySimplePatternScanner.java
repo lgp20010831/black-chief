@@ -15,7 +15,7 @@ public class ProxySimplePatternScanner extends AbstractChiefScanner{
 
 
     @Override
-    public Set<Class<?>> load(String classpath) {
+    public Set<Class<?>> doLoad(String classpath) {
         return simplePattern.scan(classpath);
     }
 }

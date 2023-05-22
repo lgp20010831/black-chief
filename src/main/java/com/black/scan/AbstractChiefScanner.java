@@ -1,5 +1,9 @@
 package com.black.scan;
 
+import com.black.core.cache.ClassSourceCache;
+
+import java.util.Set;
+
 public abstract class AbstractChiefScanner implements ChiefScanner{
 
     private ClassLoader classLoader;
@@ -7,6 +11,18 @@ public abstract class AbstractChiefScanner implements ChiefScanner{
     private boolean stopOnClassNotFind;
 
     private boolean printNotFindClass;
+
+    @Override
+    public Set<Class<?>> load(String classpath) {
+        Set<Class<?>> source = ClassSourceCache.getSource(classpath);
+        if (source == null){
+            source = doLoad(classpath);
+            ClassSourceCache.registerSource(classpath, source);
+        }
+        return source;
+    }
+
+    protected abstract Set<Class<?>> doLoad(String classpath);
 
     public static String getPackagePath(String packageName) {
         return packageName == null ? null : packageName.replace('.', '/');

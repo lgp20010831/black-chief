@@ -16,7 +16,7 @@ public class ProxyVfsScanner extends AbstractChiefScanner{
     }
 
     @Override
-    public Set<Class<?>> load(String classpath) {
+    public Set<Class<?>> doLoad(String classpath) {
         return vfsScanner.load(classpath);
     }
 

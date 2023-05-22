@@ -120,11 +120,14 @@ public class CrutchSpringPettyApplication extends PettySpringApplication impleme
     @Override
     protected void initFactory() {
         super.initFactory();
+        com.black.core.factory.beans.BeanFactory beanFactory = FactoryManager.initAndGetBeanFactory();
         if (ApplicationHolder.getApplicationContext() != null){
+            beanFactory.registerBean(ApplicationHolder.getApplicationContext());
             instanceFactory.registerInstance(ApplicationContext.class, ApplicationHolder.getApplicationContext());
             setApplicationContext(ApplicationHolder.getApplicationContext());
         }
         if (ApplicationHolder.getBeanFactory() != null){
+            beanFactory.registerBean(ApplicationHolder.getBeanFactory());
             instanceFactory.registerInstance(BeanFactory.class, ApplicationHolder.getBeanFactory());
             if (ApplicationHolder.getBeanFactory() instanceof DefaultListableBeanFactory){
                 instanceFactory.setSpringBeanFactory((DefaultListableBeanFactory) ApplicationHolder.getBeanFactory());

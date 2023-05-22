@@ -1,7 +1,9 @@
 package com.black.core.factory.beans.config_collect520;
 
 import com.black.core.Beacon;
+import com.black.core.annotation.Sort;
 import com.black.core.cache.ClassSourceCache;
+import com.black.core.chain.Order;
 import com.black.core.spring.ChiefApplicationRunner;
 import com.black.core.tools.BeanUtil;
 import com.black.core.util.AnnotationUtils;
@@ -155,6 +157,17 @@ public class ResourceCollectionBeanFactory extends AttributeInjectionEnhancement
             }else {
                 list.add(source);
             }
+        }
+
+        if (collectCondition.isSort()){
+            list = ServiceUtils.sort(list, ele -> {
+                if (ele instanceof Order){
+                    return ((Order) ele).getOrder();
+                }
+                Class<Object> primordialClass = BeanUtil.getPrimordialClass(ele);
+                Sort annotation = primordialClass.getAnnotation(Sort.class);
+                return annotation == null ? 0 : annotation.value();
+            }, false);
         }
 
         if (collectCondition.isSingle()){

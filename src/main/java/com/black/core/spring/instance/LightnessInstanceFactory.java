@@ -89,6 +89,10 @@ public class LightnessInstanceFactory implements InstanceFactory, BeanFactoryAwa
      */
     @Override
     public <T> T getInstance(Class<T> instanceClass) {
+        com.black.core.factory.beans.BeanFactory factory = FactoryManager.getBeanFactory();
+        if (factory != null && factory.containBean(instanceClass)){
+            return factory.getSingleBean(instanceClass);
+        }
         long startTime = System.currentTimeMillis();
         try {
             List<? extends T> instanceMutes = getInstanceMutes(instanceClass);
@@ -102,6 +106,7 @@ public class LightnessInstanceFactory implements InstanceFactory, BeanFactoryAwa
             }
         }
     }
+
 
     /***
      * 获取这个类型下的所有可能存在的类型
@@ -160,6 +165,10 @@ public class LightnessInstanceFactory implements InstanceFactory, BeanFactoryAwa
     public <K, V extends K> boolean registerInstance(Class<K> instanceClass, V instance) {
         if (instance == null || instanceClass == null){
             throw new RuntimeException("不允许向工厂中注册空对象, class:" + instanceClass);
+        }
+        com.black.core.factory.beans.BeanFactory factory = FactoryManager.getBeanFactory();
+        if (factory != null && !factory.containBean(instanceClass)){
+            factory.registerBean(instance);
         }
         if (instanceMutes.containsKey(instanceClass)){
             return false;

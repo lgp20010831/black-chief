@@ -10,7 +10,7 @@ import java.util.Map;
 @SuppressWarnings("all")
 public class AttributeInjectionEnhancementBeanFactory extends VfsBeanFactory {
 
-    private final CentralizedProcessorConfiguringAttributeInjector configuringAttributeInjector;
+    private CentralizedProcessorConfiguringAttributeInjector configuringAttributeInjector;
 
     public AttributeInjectionEnhancementBeanFactory(){
         this(null);
@@ -18,19 +18,24 @@ public class AttributeInjectionEnhancementBeanFactory extends VfsBeanFactory {
 
     public AttributeInjectionEnhancementBeanFactory(DefaultListableBeanFactory springFactory) {
         super(springFactory);
-        configuringAttributeInjector = new SpringApplicationConfigAutoInjector();
         registerBeanFactoryProcessor(new NestPropertyFieldHandler());
         registerBeanFactoryProcessor(new NestPropertyParamHandler());
     }
 
     public CentralizedProcessorConfiguringAttributeInjector getConfiguringAttributeInjector() {
+        if (configuringAttributeInjector == null){
+            configuringAttributeInjector = new CentralizedProcessorConfiguringAttributeInjector();
+        }
         return configuringAttributeInjector;
     }
 
-    public void reloadSource(Map<String, String> source){
-        configuringAttributeInjector.setDataSource(source);
+    public void setConfiguringAttributeInjector(CentralizedProcessorConfiguringAttributeInjector configuringAttributeInjector) {
+        this.configuringAttributeInjector = configuringAttributeInjector;
     }
 
+    public void reloadSource(Map<String, String> source){
+        getConfiguringAttributeInjector().setDataSource(source);
+    }
     public void pourinto(Object target){
         getConfiguringAttributeInjector().pourintoBean(target);
     }
