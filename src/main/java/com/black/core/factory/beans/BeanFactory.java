@@ -49,8 +49,10 @@ import java.util.concurrent.Callable;
  *Finally, registerbean
  * 作者: 李桂鹏
  */
+@SuppressWarnings("all")
 public interface BeanFactory {
 
+    <T> T replaceInstance(Class<T> type, T newBean);
 
     /***
      * This method is freely defined by subclasses.

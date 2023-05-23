@@ -1,5 +1,6 @@
 package com.black.bin;
 
+import com.black.core.query.Wrapper;
 import com.black.utils.ProxyUtil;
 import lombok.Getter;
 import org.springframework.cglib.proxy.MethodProxy;
@@ -76,7 +77,11 @@ public class ProxyTemplate {
         if (!method.isAccessible()){
             method.setAccessible(true);
         }
-        return method.invoke(bean, args);
+        Object invokeBean = bean;
+        if (bean instanceof Wrapper){
+            invokeBean = ((Wrapper<?>) bean).get();
+        }
+        return method.invoke(invokeBean, args);
     }
 
 }

@@ -35,5 +35,7 @@ public class CollectCondition {
 
     boolean sort = true;
 
+    String key;
+
     Class<? extends ClassMatchCustom>[] customs;
 }

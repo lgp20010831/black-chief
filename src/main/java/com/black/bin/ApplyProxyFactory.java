@@ -3,6 +3,7 @@ package com.black.bin;
 import com.black.core.query.ClassWrapper;
 import com.black.core.tools.BeanUtil;
 import com.black.core.util.Assert;
+import com.black.utils.ServiceUtils;
 import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.Factory;
 import sun.reflect.ReflectionFactory;
@@ -110,13 +111,22 @@ public class ApplyProxyFactory {
         return Proxy.newProxyInstance(getLoader(), interfaceArray, handler);
     }
 
-    public static Object proxyCGLIB(Class<?> primordialClass, CommonProxyHandler handler){
+    public static Object proxyCGLIB(Class<?> primordialClass, CommonProxyHandler handler, Class<?>... superInterfaces){
+        return proxyCGLIB(primordialClass, handler, false, superInterfaces);
+    }
+
+    public static Object proxyCGLIB(Class<?> primordialClass, CommonProxyHandler handler, boolean useNewConstructions, Class<?>... superInterfaces){
         Enhancer enhancer = new Enhancer();
         enhancer.setSuperclass(primordialClass);
         enhancer.setClassLoader(getLoader());
-        enhancer.setInterfaces(new Class[]{ApplyProxy.class});
+        Class<?>[] interfaces = new Class[superInterfaces.length + 1];
+        interfaces[0] = ApplyProxy.class;
+        for (int i = 0; i < superInterfaces.length; i++) {
+            interfaces[i + 1] = superInterfaces[i];
+        }
+        enhancer.setInterfaces(interfaces);
         enhancer.setCallbackType(CommonProxyHandler.class);
-        if (existenceParameterlessConstructions(primordialClass)){
+        if (!useNewConstructions && existenceParameterlessConstructions(primordialClass)){
             enhancer.setCallback(handler);
             return enhancer.create();
         }else {

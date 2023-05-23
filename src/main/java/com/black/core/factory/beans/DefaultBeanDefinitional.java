@@ -3,7 +3,9 @@ package com.black.core.factory.beans;
 import com.black.core.aop.servlet.ParameterWrapper;
 import com.black.core.factory.beans.agent.BeanProxy;
 import com.black.core.factory.beans.agent.ProxyType;
+import com.black.core.factory.beans.annotation.AsLazy;
 import com.black.core.factory.beans.annotation.CompleteMethod;
+import com.black.core.factory.beans.annotation.NotNull;
 import com.black.core.query.ClassWrapper;
 import com.black.core.query.ConstructorWrapper;
 import com.black.core.query.FieldWrapper;
@@ -17,9 +19,10 @@ import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.core.annotation.AnnotationUtils;
 
+import java.lang.annotation.Annotation;
 import java.util.*;
 
-@Log4j2
+@Log4j2 @SuppressWarnings("all")
 public class DefaultBeanDefinitional<B> implements BeanDefinitional<B>{
 
     private final ClassWrapper<B> classWrapper;
@@ -52,6 +55,11 @@ public class DefaultBeanDefinitional<B> implements BeanDefinitional<B>{
     }
 
     @Override
+    public boolean isLazy() {
+        return com.black.core.util.AnnotationUtils.isPertain(classWrapper.get(), AsLazy.class);
+    }
+
+    @Override
     public ClassWrapper<B> getClassWrapper() {
         return classWrapper;
     }
@@ -65,7 +73,7 @@ public class DefaultBeanDefinitional<B> implements BeanDefinitional<B>{
     public Set<MethodWrapper> getQualifiedAgentMethods() {
         if (qualifiedAgentMethods == null){
             qualifiedAgentMethods = new HashSet<>();
-            if (classWrapper.hasAnnotation(AgentRequired.class)){
+            if (requiredAgent()){
                 qualifiedAgentMethods.addAll(classWrapper.getMethods());
             }else {
                 for (MethodWrapper method : classWrapper.getMethods()) {
@@ -89,10 +97,20 @@ public class DefaultBeanDefinitional<B> implements BeanDefinitional<B>{
         if(agent != null) return agent;
         boolean proxy = classWrapper.hasAnnotation(AgentRequired.class);
         if (!proxy){
-            for (MethodWrapper mw : classWrapper.getMethods()) {
-                if (mw.hasAnnotation(AgentRequired.class)){
+            loop: for (MethodWrapper mw : classWrapper.getMethods()) {
+                if (mw.hasAnnotation(AgentRequired.class) || mw.hasAnnotation(NotNull.class)){
                     proxy = true;
                     break;
+                }else {
+                    for (ParameterWrapper parameterWrapper : mw.getParameterArray()) {
+                        for (Annotation annotation : parameterWrapper.getAnnotations()) {
+                            String name = annotation.annotationType().getName();
+                            if (name.startsWith("com.black.core.factory.beans")){
+                                proxy = true;
+                                break loop;
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -106,7 +124,7 @@ public class DefaultBeanDefinitional<B> implements BeanDefinitional<B>{
             if (annotation != null){
                 proxyType = annotation.proxyType();
             }else
-                proxyType = ProxyType.INSTANCE_PROXY;
+                proxyType = ProxyType.INITIALIZATION;
         }
         return proxyType;
     }

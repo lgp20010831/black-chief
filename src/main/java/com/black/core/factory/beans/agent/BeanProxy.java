@@ -10,15 +10,12 @@ import lombok.extern.log4j.Log4j2;
 import java.lang.reflect.Method;
 
 @Log4j2
-public class BeanProxy implements AgentLayer {
+public class BeanProxy extends AbstractBeansProxy implements AgentLayer {
 
-    private final BeanFactory factory;
-
-    private final BeanDefinitional<?> definitional;
 
     public BeanProxy(BeanFactory factory, BeanDefinitional<?> definitional) {
-        this.factory = factory;
-        this.definitional = definitional;
+        super(factory, definitional);
+
     }
 
     @Override
@@ -27,17 +24,15 @@ public class BeanProxy implements AgentLayer {
         MethodWrapper mw = MethodWrapper.get(proxyMethod);
         Object proxyObject = layer.getProxyObject();
         Object[] args = layer.getArgs();
-        boolean qualified = definitional.isQualified(mw);
-        if (qualified) {
-            if (log.isInfoEnabled()) {
-                log.info("factory: {}, pretreatment args from method: {}", factory.getClass().getSimpleName(), mw.getName());
-            }
-            args = factory.prepareMethodParams(args, proxyObject, mw);
+        boolean qualified = isQualified(mw);
+        if (!qualified){
+            return layer.doFlow(args);
+        }else {
+            args = checkArgs(args);
+            checkNotNullArgs(mw, args);
+            args = prepareArgs(mw, args, proxyObject);
+            Object result = layer.doFlow(args);
+            return resolveResult(mw, result, proxyObject);
         }
-        Object result = layer.doFlow(args);
-        if (qualified){
-            result = factory.afterInvokeMethod(proxyObject, result, mw);
-        }
-        return result;
     }
 }

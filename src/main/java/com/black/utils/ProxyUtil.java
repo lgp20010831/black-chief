@@ -4,6 +4,7 @@ import com.black.core.util.Av0;
 import com.black.core.util.MethodHandlerUtilsByCSDN;
 import com.black.core.util.StringUtils;
 import org.springframework.aop.SpringProxy;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.cglib.proxy.MethodProxy;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
@@ -93,7 +94,9 @@ public class ProxyUtil {
     }
 
     public static boolean isObjectMethod(Method method){
-        return OBJECT_METHODS.contains(method);
+        return OBJECT_METHODS.contains(method) || AopUtils.isEqualsMethod(method)
+                || AopUtils.isFinalizeMethod(method) || AopUtils.isHashCodeMethod(method)
+                || AopUtils.isToStringMethod(method);
     }
 
     public static boolean isDefaultMethod(Method method){

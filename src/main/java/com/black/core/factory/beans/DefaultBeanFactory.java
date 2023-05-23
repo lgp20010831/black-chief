@@ -1,5 +1,8 @@
 package com.black.core.factory.beans;
 
+import com.black.core.factory.beans.imports.ImportBeanProcessor;
+import com.black.core.factory.beans.lazy.DefaultBeanMethodReturnValueHandler;
+import com.black.core.factory.beans.lazy.LazyBeanResourceProcessor;
 import com.black.core.factory.beans.process.impl.PrototypeBeanMethodParamHandler;
 import com.black.core.factory.beans.process.impl.PrototypeFieldResolver;
 import com.black.core.factory.manager.FactoryManager;
@@ -12,6 +15,10 @@ public class DefaultBeanFactory extends AbstractBeanFactory{
         registerBeanFactoryProcessor(new DefaultBeanMethodHandler());
         registerBeanFactoryProcessor(new PrototypeBeanMethodParamHandler());
         registerBeanFactoryProcessor(new PrototypeFieldResolver());
+        registerBeanFactoryProcessor(new ImportBeanProcessor());
+        registerBeanFactoryProcessor(new LazyBeanResourceProcessor());
+        registerBeanLifeCycleProcessor(new ImportBeanProcessor());
+        registerBeanFactoryProcessor(new DefaultBeanMethodReturnValueHandler());
         registerBean(this);
     }
 

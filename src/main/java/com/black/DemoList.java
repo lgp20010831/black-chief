@@ -5,7 +5,11 @@ import com.black.asm.Demo;
 import com.black.core.cache.TypeConvertCache;
 import com.black.core.convert.TypeHandler;
 import com.black.core.factory.beans.AgentRequired;
+import com.black.core.factory.beans.BeanFactory;
+import com.black.core.factory.beans.annotation.AsLazy;
 import com.black.core.factory.beans.config_collect520.Collect;
+import com.black.core.factory.manager.FactoryManager;
+import com.black.core.query.ClassWrapper;
 import com.black.core.spring.util.ApplicationUtil;
 import com.black.core.util.Av0;
 import com.black.core.util.LazyAutoWried;
@@ -92,7 +96,9 @@ public class DemoList {
     }
 
     public static void main(String[] args) throws Throwable{
-        gra();
+        ClassWrapper<Cd> wrapper = ClassWrapper.get(Cd.class);
+        System.out.println(wrapper.getFields());
+        //fa();
     }
 
 
@@ -114,17 +120,39 @@ public class DemoList {
         int age;
     }
 
+
+    static void fa(){
+        BeanFactory factory = FactoryManager.initAndGetBeanFactory();
+        Cd cd = factory.getSingleBean(Cd.class);
+        System.out.println(1);
+        System.out.println(cd);
+        cd.say(null);
+    }
+
     @Data
     @AgentRequired
+    @AsLazy
     public static class Cd{
+
+        public Cd(){
+            System.out.println("cd执行");
+        }
+
+        static String name;
+
+        @AsLazy
+        A a;
 
         @Collect(scope = "com.black.xml.engine.impl")
         List<XmlNodeHandler> nodeHandlers;
 
         void say(@Collect(scope = "com.black.sql_v2.handler") Map<Class<?>, SqlStatementHandler> handlerMap){
             System.out.println(handlerMap);
+            System.out.println(a);
         }
     }
+
+    public static class A{}
 
 
     static {

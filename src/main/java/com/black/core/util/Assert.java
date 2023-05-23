@@ -4,6 +4,17 @@ package com.black.core.util;
 public class Assert {
 
 
+    public static <T> T nonNull(T target){
+        return nonNull(target, "target is null");
+    }
+
+    public static <T> T nonNull(T target, String msg){
+        if (target == null){
+            throw new IllegalStateException(msg);
+        }
+        return target;
+    }
+
     public static void state(boolean expression, String message) {
         if (!expression) {
             throw new IllegalStateException(message);

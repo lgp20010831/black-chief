@@ -2,6 +2,7 @@ package com.black.core.factory.beans;
 
 import com.black.core.aop.servlet.ParameterWrapper;
 import com.black.core.factory.beans.annotation.SingleBean;
+import com.black.core.factory.beans.lazy.KeyUtils;
 import com.black.core.factory.beans.process.inter.BeanMethodHandler;
 import com.black.core.query.ClassWrapper;
 import com.black.core.query.ConstructorWrapper;
@@ -51,10 +52,11 @@ public class DefaultBeanMethodHandler implements BeanMethodHandler {
                     Class<?> keyType = genericVals[0];
                     List<?> list = factory.getBean(rawType);
                     Map<Object, Object> map = ServiceUtils.createMap(type);
-                    for (Object ele : list) {
-                        if (keyType.equals(String.class)){
-                            map.put(NameUtil.getName(ele), ele);
-                        }else {
+                    if (keyType.equals(String.class)){
+                        Map<String, ?> keyMap = KeyUtils.handlerKey(param, list);
+                        map.putAll(keyMap);
+                    }else {
+                        for (Object ele : list) {
                             map.put(BeanUtil.getPrimordialClass(ele), ele);
                         }
                     }

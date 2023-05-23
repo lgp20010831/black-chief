@@ -1,18 +1,18 @@
 package com.black.core.factory.beans;
 
 
+import com.black.core.factory.beans.lazy.KeyUtils;
 import com.black.core.factory.beans.process.inter.BeanInitializationHandler;
 import com.black.core.query.FieldWrapper;
 import com.black.core.tools.BeanUtil;
 import com.black.core.util.SetGetUtils;
 import com.black.utils.ReflexHandler;
+import com.black.utils.ServiceUtils;
 import lombok.extern.log4j.Log4j2;
 
+import javax.print.ServiceUI;
 import java.lang.reflect.Field;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 
 @Log4j2
 public class WiredBeanFactoryProcessor implements BeanInitializationHandler {
@@ -55,22 +55,24 @@ public class WiredBeanFactoryProcessor implements BeanInitializationHandler {
                 //map value type
                 Class<?> valType = genericVal[1];
                 Collection<?> objects = getBeans(valType, factory, fw, annotation.required());
-                Map<Object, Object> map = new HashMap<>();
-                for (Object wriedBean : objects) {
-                    BeanDefinitional<?> definitional = factory.getDefinitional(wriedBean);
-                    if (definitional == null){
-                        throw new BeanFactorysException("The identity definition of the object " +
-                                "obtained from the factory cannot be found, bean is [" + wriedBean + "]");
+                Map<Object, Object> map = ServiceUtils.createMap(type);
+                if (keyType.equals(String.class)){
+                    Map<String, ?> handlerSource = KeyUtils.handlerKey(fw.get(), objects);
+                    map.putAll(handlerSource);
+                }else if (keyType.equals(Class.class)){
+                    for (Object wriedBean : objects) {
+                        BeanDefinitional<?> definitional = factory.getDefinitional(wriedBean);
+                        if (definitional == null){
+                            throw new BeanFactorysException("The identity definition of the object " +
+                                    "obtained from the factory cannot be found, bean is [" + wriedBean + "]");
+                        }
+
+                        map.put(definitional.getPrimordialClass(), wriedBean);
                     }
 
-                    if (keyType.equals(String.class)){
-                        map.put(definitional.getBeanName(), wriedBean);
-                    }else if (keyType.equals(Class.class)){
-                        map.put(definitional.getPrimordialClass(), wriedBean);
-                    }else {
-                        throw new BeanFactorysException("When the field attribute type is a map, " +
-                                "either string or class as the index type is not supported by other types");
-                    }
+                }else {
+                    throw new BeanFactorysException("When the field attribute type is a map, " +
+                            "either string or class as the index type is not supported by other types");
                 }
                 if (SetGetUtils.hasSetMethod(field)) {
                     SetGetUtils.invokeSetMethod(field, map, bean);

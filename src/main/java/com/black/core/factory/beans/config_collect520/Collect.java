@@ -30,6 +30,8 @@ public @interface Collect {
     //搜索范围
     String[] scope() default {};
 
+    String key() default "";
+
     //舍弃无法实例化的
     boolean abandonUnableInstance() default false;
 

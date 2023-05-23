@@ -9,6 +9,7 @@ import com.black.core.factory.beans.agent.ApplyBeanProxy;
 import com.black.core.factory.beans.agent.BeanProxy;
 import com.black.core.factory.beans.agent.ProxyType;
 import com.black.core.factory.beans.config.BeanFactoryConditionalOnClass;
+import com.black.core.factory.beans.lazy.LazyFactory;
 import com.black.core.factory.beans.process.inter.*;
 import com.black.core.json.ReflexUtils;
 import com.black.core.query.ClassWrapper;
@@ -90,6 +91,14 @@ public abstract class AbstractBeanFactory implements BeanFactory {
 
     //无参构造
     public AbstractBeanFactory(){}
+
+    @Override
+    public <T> T replaceInstance(Class<T> type, @NonNull T newBean) {
+        T singleBean = getSingleBean(type);
+        Map<Class<?>, Object> mutes = getMutes();
+        mutes.replace(type, newBean);
+        return singleBean;
+    }
 
     /***
      * This method is freely defined by subclasses.
@@ -299,7 +308,23 @@ public abstract class AbstractBeanFactory implements BeanFactory {
             //application creation
             joinCreaing(genealogyClass);
 
+
             try {
+
+                if (definitional.isLazy()){
+                    try {
+                        return (B) LazyFactory.lazyProxyBean(definitional, this);
+                    }catch (Throwable ex){
+                        if (log.isInfoEnabled()) {
+                            log.info("Error occurred while creating lazy loading object, current " +
+                                    "create bean is : {}", definitional.getBeanName());
+                        }
+                        throw new BeanFactorysException("Error occurred while creating lazy loading object, current " +
+                                " create bean is : " + definitional.getBeanName(), ex);
+                    }
+
+                }
+
 
                 return doCreateBean(definitional, tempSource);
             }catch (BeanFactorysException ex){
@@ -527,6 +552,7 @@ public abstract class AbstractBeanFactory implements BeanFactory {
      */
     @Override
     public Object instanceBean(BeanDefinitional<?> definitional, Map<String, Object> tempSource) {
+
         ConstructorWrapper<?> constructorWrapper;
         try {
 
@@ -918,13 +944,17 @@ public abstract class AbstractBeanFactory implements BeanFactory {
     public Object initializeBean(Object bean, BeanDefinitional<?> definitional) {
         Class<?> primordialClass = definitional.getClassWrapper().getPrimordialClass();
 
-        initializeFactoryBeanMutes.put(primordialClass, new InitializeFactoryBean() {
-            @Override
-            public Object doInitialize() {
-                return initializeBean0(bean, definitional);
-            }
-        });
-        return getSingleBean(primordialClass);
+        if (definitional.isLazy()) {
+            return initializeBean0(bean, definitional);
+        }else {
+            initializeFactoryBeanMutes.put(primordialClass, new InitializeFactoryBean() {
+                @Override
+                public Object doInitialize() {
+                    return initializeBean0(bean, definitional);
+                }
+            });
+            return getSingleBean(primordialClass);
+        }
     }
 
     @SuppressWarnings("all")
