@@ -1,9 +1,11 @@
 package com.black;
 
+import com.black.core.asyn.AsynConfigurationManager;
 import com.black.core.sql.annotation.GlobalConfiguration;
 import com.black.core.sql.annotation.RunScript;
 import com.black.core.sql.code.YmlDataSourceBuilder;
 import com.black.core.util.Av0;
+import com.black.core.util.Utils;
 import com.black.datasource.MybatisPlusDynamicDataSourceBuilder;
 import com.black.db.DbBuffer;
 import com.black.db.DbBufferManager;
@@ -11,9 +13,11 @@ import com.black.db.SpringDBConnection;
 import com.black.sql.NativeSql;
 import com.black.sql.NativeV2Sql;
 import com.black.sql_v2.Sql;
+import com.black.thread.ThreadUtils;
 import com.black.utils.ServiceUtils;
 import com.black.xml.XmlMapper;
 import com.black.xml.XmlSql;
+import lombok.extern.log4j.Log4j2;
 
 import java.util.Arrays;
 import java.util.List;
@@ -24,10 +28,24 @@ import java.util.StringJoiner;
  * @author 李桂鹏
  * @create 2023-05-08 17:51
  */
-@SuppressWarnings("all")
+@SuppressWarnings("all") @Log4j2
 public class SqlDemo {
 
     static final String sql = "select * from user";
+
+    static void dxc(){
+        //10
+        //2
+        //10
+        AsynConfigurationManager.getConfiguration().setCorePoolSize(4);
+        Sql.opt();
+        ThreadUtils.allAliasTransaction().latch(() -> {
+            log.info("执行业务");
+            Utils.sleep(2000);
+            throw new RuntimeException();
+        }, 10);
+        System.out.println("执行完成----------------------");
+    }
 
     static void sql_v1(){
         DbBuffer dbBuffer = DbBufferManager.alloc(new SpringDBConnection());
@@ -66,8 +84,9 @@ public class SqlDemo {
 
 
     public static void main(String[] args) {
-        Sql.configDataSource(new MybatisPlusDynamicDataSourceBuilder());
-        XmlSql.opt().scanAndParse("iu", "xml-sql/");
+//        Sql.configDataSource(new MybatisPlusDynamicDataSourceBuilder());
+//        XmlSql.opt().scanAndParse("iu", "xml-sql/");
+        dxc();
     }
 
     @XmlMapper

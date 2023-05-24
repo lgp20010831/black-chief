@@ -1,7 +1,11 @@
 package com.black.thread;
 
 import com.black.core.spring.util.ApplicationUtil;
+import com.black.core.sql.code.SpringDataSourceBuilder;
+import com.black.core.sql.code.datasource.ConnectionManagement;
+import com.black.function.Supplier;
 
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BrokenBarrierException;
@@ -17,6 +21,48 @@ public class ThreadUtils {
 
     private static final AtomicInteger SORT = new AtomicInteger(0);
 
+    public static ThreadHandler springTransaction(){
+        SpringDataSourceBuilder builder = new SpringDataSourceBuilder();
+        return new MultithreadedTransactions(() -> {
+            return builder.getDataSource().getConnection();
+        });
+    }
+
+    public static ThreadHandler springAndAllAliasTransaction(){
+        return springAndAliasTransaction(ConnectionManagement.getAliasSet().toArray(new String[0]));
+    }
+
+    public static ThreadHandler springAndAliasTransaction(String... aliases){
+        List<Supplier<Connection>> suppliers = createSupplierConnections(aliases);
+        SpringDataSourceBuilder builder = new SpringDataSourceBuilder();
+        suppliers.add(() -> {
+            return builder.getDataSource().getConnection();
+        });
+        return new MultithreadedTransactions(suppliers.toArray(new Supplier[0]));
+    }
+
+    public static ThreadHandler aliasTransaction(String... aliases){
+        List<Supplier<Connection>> suppliers = createSupplierConnections(aliases);
+        return new MultithreadedTransactions(suppliers.toArray(new Supplier[0]));
+    }
+    public static ThreadHandler allAliasTransaction(){
+        return aliasTransaction(ConnectionManagement.getAliasSet().toArray(new String[0]));
+    }
+
+
+    protected static List<Supplier<Connection>> createSupplierConnections(String... aliases){
+        List<Supplier<Connection>> list = new ArrayList<>();
+        for (String alias : aliases) {
+            list.add(() -> {
+                return ConnectionManagement.getConnection(alias);
+            });
+        }
+        return list;
+    }
+
+    public static ThreadHandler getHandler(){
+        return AsyncThreadHandler.GLOBAL;
+    }
 
     public static String getName(){
         return getName(THREAD_NAME_PREFIX);

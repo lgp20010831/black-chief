@@ -27,8 +27,13 @@ public class ApplyBeanProxy extends AbstractBeansProxy implements ApplyProxyLaye
             args = checkArgs(args);
             checkNotNullArgs(mw, args);
             args = prepareArgs(mw, args, bean);
-            Object result = template.invokeOriginal(args);
-            return resolveResult(mw, result, bean);
+            tryLock(mw, args);
+            try {
+                Object result = template.invokeOriginal(args);
+                return resolveResult(mw, result, bean);
+            }finally {
+                tryUnlock();
+            }
         }
     }
 }

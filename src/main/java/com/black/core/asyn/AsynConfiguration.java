@@ -27,6 +27,8 @@ public class AsynConfiguration {
 
     private RejectedExecutionHandler handler = new ACallerRunsPolicy();
 
+    private Thread.UncaughtExceptionHandler exceptionHandler;
+
     public static class ACallerRunsPolicy extends ThreadPoolExecutor.CallerRunsPolicy{
         @Override
         public String toString() {
@@ -40,4 +42,5 @@ public class AsynConfiguration {
         this.corePoolSize = corePoolSize;
         maximumPoolSize = corePoolSize * 2;
     }
+
 }

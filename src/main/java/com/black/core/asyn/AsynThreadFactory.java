@@ -13,8 +13,11 @@ public class AsynThreadFactory implements ThreadFactory {
 
     @Override
     public Thread newThread(@NotNull Runnable r) {
+        AsynConfiguration configuration = AsynConfigurationManager.getConfiguration();
         size.incrementAndGet();
-        return new Thread(r, ALIAS + size.get());
+        Thread thread = new Thread(r, ALIAS + size.get());
+        thread.setUncaughtExceptionHandler(configuration.getExceptionHandler());
+        return thread;
     }
 
     @Override

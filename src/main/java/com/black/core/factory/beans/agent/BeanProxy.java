@@ -31,8 +31,12 @@ public class BeanProxy extends AbstractBeansProxy implements AgentLayer {
             args = checkArgs(args);
             checkNotNullArgs(mw, args);
             args = prepareArgs(mw, args, proxyObject);
-            Object result = layer.doFlow(args);
-            return resolveResult(mw, result, proxyObject);
+            try {
+                Object result = layer.doFlow(args);
+                return resolveResult(mw, result, proxyObject);
+            }finally {
+                tryUnlock();
+            }
         }
     }
 }

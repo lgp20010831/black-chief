@@ -78,7 +78,7 @@ public abstract class AbstractCollectHandler {
                 if (state == 0){
                     map.put(BeanUtil.getPrimordialClass(resource), resource);
                 }else if (state == 1){
-                    if (StringUtils.hasText(key)){
+                    if (!StringUtils.hasText(key)){
                         map.put(NameUtil.getName(resource), resource);
                     }else {
                         //构造环境
