@@ -20,6 +20,7 @@ import com.black.project.DEMO;
 import com.black.project.JdbcProjectGenerator;
 import com.black.project.ProjectEnvironmentalGuess;
 import com.black.project.Version;
+import com.black.socket.JHexSocket;
 import com.black.sql_v2.Sql;
 import com.black.sql_v2.handler.SqlStatementHandler;
 import com.black.utils.IoUtils;
@@ -96,9 +97,8 @@ public class DemoList {
     }
 
     public static void main(String[] args) throws Throwable{
-        ClassWrapper<Cd> wrapper = ClassWrapper.get(Cd.class);
-        System.out.println(wrapper.getFields());
-        //fa();
+
+        lltest();
     }
 
 
@@ -169,6 +169,21 @@ public class DemoList {
 
     }
 
+
+    //流量测试
+    static void lltest() throws IOException {
+        JHexSocket socket = new JHexSocket(5000);
+        socket.connect();
+        InputStream inputStream = ServiceUtils.getNonNullResource("open-chief-sdk.jar");
+        ApplicationUtil.programRunMills(() -> {
+            try {
+                socket.writeAndFlush(inputStream);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+
+    }
 
 
 }

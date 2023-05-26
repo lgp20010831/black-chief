@@ -31,8 +31,15 @@ public final class ResponseUtil {
     }
 
     public static void configResponse(HttpServletResponse response, String fileName) throws UnsupportedEncodingException {
+        configResponse(response, fileName, true);
+    }
+
+    public static void configResponse(HttpServletResponse response, String fileName, boolean reset) throws UnsupportedEncodingException {
         fileName = URLEncoder.encode(fileName,"UTF-8");
-        response.reset();
+        if (reset){
+            response.reset();
+        }
+
         String contentType = new MimetypesFileTypeMap().getContentType(fileName);
         log.info("fileName: {} ---> content-type: {}", fileName, contentType);
         response.setContentType(contentType);

@@ -212,7 +212,6 @@ public class AsyncThreadHandler implements ThreadHandler{
             try {
                 runBlackTask(runnable);
             }finally {
-                System.out.println("减一次数");
                 latch.countDown();
             }
         }, size, false);

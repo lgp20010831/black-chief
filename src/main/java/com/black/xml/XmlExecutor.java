@@ -131,6 +131,7 @@ public class XmlExecutor implements XmlSqlOperator {
         log.info("[XML] invoke query sql ===> {}", sql);
         ResultSet resultSet = SQLUtils.runQuery(sql, getConnection());
         QueryResultSetParser parser = new QueryResultSetParser(resultSet);
+        parser.setConvertHandler(executor.getEnvironment().getConvertHandler());
         parser.setFinish(() -> closeConnection());
         return parser;
     }

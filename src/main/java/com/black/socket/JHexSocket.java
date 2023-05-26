@@ -371,10 +371,18 @@ public class JHexSocket {
 
     public void closeSocket() throws IOException {
         getLog().info("close socket");
-        if (outputStream != null)
-        outputStream.close();
-        if (inputStream != null)
-        inputStream.close();
+        if (outputStream != null){
+            try {
+                outputStream.close();
+            }catch (IOException e){}
+        }
+
+        if (inputStream != null){
+            try {
+                inputStream.close();
+            }catch (IOException e){}
+        }
+
         if (socket != null && !socket.isClosed()) {
             socket.close();
         }
