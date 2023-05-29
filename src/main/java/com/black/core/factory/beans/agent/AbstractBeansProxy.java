@@ -5,6 +5,7 @@ import com.black.core.factory.beans.BeanDefinitional;
 import com.black.core.factory.beans.BeanFactory;
 import com.black.core.factory.beans.annotation.Lock;
 import com.black.core.factory.beans.annotation.NotNull;
+import com.black.core.factory.beans.annotation.ProgramTiming;
 import com.black.core.factory.beans.lock.KnitLock;
 import com.black.core.factory.beans.lock.LockConfig;
 import com.black.core.factory.beans.lock.ReentrantKnitLock;
@@ -129,5 +130,9 @@ public abstract class AbstractBeansProxy {
 
     protected Object resolveResult(MethodWrapper methodWrapper, Object result, Object bean){
         return factory.afterInvokeMethod(bean, result, methodWrapper);
+    }
+
+    protected boolean isNeedReckon(MethodWrapper mw){
+        return mw.hasAnnotation(ProgramTiming.class);
     }
 }

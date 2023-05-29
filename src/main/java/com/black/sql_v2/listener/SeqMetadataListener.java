@@ -9,12 +9,14 @@ import com.black.sql.InsertStatement;
 import com.black.sql.SqlOutStatement;
 import com.black.sql.UpdateStatement;
 import com.black.sql_v2.*;
+import com.black.sql_v2.serialize.SerializeUtils;
 import com.black.sql_v2.utils.SqlV2Utils;
 import com.black.sql_v2.with.GeneratePrimaryManagement;
 import com.black.sql_v2.with.WaitGenerateWrapper;
 import com.black.utils.ServiceUtils;
 
 import java.util.List;
+import java.util.Map;
 
 public class SeqMetadataListener implements SqlListener{
 
@@ -35,15 +37,22 @@ public class SeqMetadataListener implements SqlListener{
             List<Object> list = attachment == null ? null : SQLUtils.wrapList(attachment);
             SqlV2Utils.setSeqInStatement(statement, OperationType.INSERT, pack.getSeqQueue().toArray(new String[0]));
             pack.getKeyValueMap().forEach((c, v) -> {
-                v = getValue(v);
-                String value = MapArgHandler.getString(v);
-                statement.removeInsertValue(c);
-                statement.insertValue(c, value, false);
+
                 if (list != null){
                     String alias = aliasColumnConvertHandler.convertAlias(c);
                     for (Object ele : list) {
-                        ServiceUtils.setProperty(ele, alias, v);
+                        Object originValue = ServiceUtils.getProperty(ele, alias);
+                        if (originValue == null){
+                            v = getValue(v);
+                            String value = MapArgHandler.getString(v);
+                            ServiceUtils.setProperty(ele, alias, value);
+                        }
                     }
+                }else {
+                    v = getValue(v);
+                    String value = MapArgHandler.getString(v);
+                    statement.removeInsertValue(c);
+                    statement.insertValue(c, value, false);
                 }
             });
         }else if (statement instanceof UpdateStatement){

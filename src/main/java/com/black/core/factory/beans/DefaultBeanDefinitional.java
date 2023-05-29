@@ -98,10 +98,14 @@ public class DefaultBeanDefinitional<B> implements BeanDefinitional<B>{
         boolean proxy = classWrapper.hasAnnotation(AgentRequired.class);
         if (!proxy){
             loop: for (MethodWrapper mw : classWrapper.getMethods()) {
-                if (mw.hasAnnotation(AgentRequired.class) || mw.hasAnnotation(NotNull.class)){
-                    proxy = true;
-                    break;
-                }else {
+                for (Annotation annotation : mw.getAnnotationMap().values()) {
+                    String name = annotation.annotationType().getName();
+                    if (name.startsWith("com.black.core.factory.beans")){
+                        proxy = true;
+                        break;
+                    }
+                }
+                if(!proxy){
                     for (ParameterWrapper parameterWrapper : mw.getParameterArray()) {
                         for (Annotation annotation : parameterWrapper.getAnnotations()) {
                             String name = annotation.annotationType().getName();

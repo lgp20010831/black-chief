@@ -6,6 +6,7 @@ import com.black.core.sql.code.util.SQLUtils;
 import com.black.core.sql.xml.PrepareSource;
 import com.black.core.sql.xml.XmlSqlSource;
 import com.black.core.util.StringUtils;
+import com.black.core.util.Utils;
 import com.black.table.TableMetadata;
 import com.black.table.TableUtils;
 import com.black.utils.ServiceUtils;
@@ -55,7 +56,8 @@ public class ForXmlNodeHandler extends AbstractXmlNodeHandler{
         final String itemTopic = "#{" + item + "}";
         final String indexTopic = "#{" + index + "}";
         String tempTxt;
-        StringJoiner joiner = new StringJoiner(space, prefix, suffix);
+        StringJoiner joiner = Utils.isEmpty(collection) ? new StringJoiner("") :
+                new StringJoiner(" " + space + " ", " " + prefix + " ", " " + suffix + " ");
         int i = 0;
         for (Object obj : collection) {
             ElementWrapper copy = ew.createCopy();
@@ -79,6 +81,7 @@ public class ForXmlNodeHandler extends AbstractXmlNodeHandler{
                                 ElementWrapper ew,
                                 XmlSqlSource sqlSource,
                                 PrepareSource prepareSource){
+        Map<String, Object> argMap = sqlSource.getArgMap();
         String mapValue = getAssertNullAttri(ew, "value", "val");
         String mapKey = getAssertNullAttri(ew, "key", "item");
         String prefix = getAssertNullAttri(ew, "prefix", "");
@@ -88,12 +91,17 @@ public class ForXmlNodeHandler extends AbstractXmlNodeHandler{
         String index = getAssertNullAttri(ew, "index", "index");
         final String itemTopic = "#{" + mapKey + "}";
         final String indexTopic = "#{" + index + "}";
-        StringJoiner joiner = new StringJoiner(space, prefix, suffix);
-        //验证 map 数据源字段
+        StringJoiner joiner = Utils.isEmpty(map) ? new StringJoiner("") :
+                new StringJoiner(" " + space + " ", " " + prefix + " ", " " + suffix + " ");        //验证 map 数据源字段
         List<TableMetadata> metadataList = new ArrayList<>();
         if (StringUtils.hasText(check)){
             Connection connection = prepareSource.getConnection();
             for (String name : check.split(",")) {
+                if (name.startsWith("${")){
+                    name = ServiceUtils.parseTxt(name, "${", "}", param -> {
+                        return String.valueOf(ServiceUtils.getByExpression(argMap, param));
+                    });
+                }
                 TableMetadata metadata = TableUtils.getTableMetadata(name, connection);
                 if (metadata != null){
                     metadataList.add(metadata);

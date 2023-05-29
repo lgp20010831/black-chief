@@ -5,6 +5,7 @@ import com.black.bin.ProxyTemplate;
 import com.black.core.factory.beans.BeanDefinitional;
 import com.black.core.factory.beans.BeanFactory;
 import com.black.core.query.MethodWrapper;
+import com.black.core.spring.util.ApplicationUtil;
 
 import java.lang.reflect.Method;
 
@@ -29,7 +30,20 @@ public class ApplyBeanProxy extends AbstractBeansProxy implements ApplyProxyLaye
             args = prepareArgs(mw, args, bean);
             tryLock(mw, args);
             try {
-                Object result = template.invokeOriginal(args);
+                Object result;
+                if (isNeedReckon(mw)){
+                    Object[] finalArgs = args;
+                    result = ApplicationUtil.programRunMills(() -> {
+                        try {
+                            return template.invokeOriginal(finalArgs);
+                        } catch (Throwable e) {
+                            throw new IllegalStateException("An exception occurred during " +
+                                    "the timing process", e);
+                        }
+                    }, "[BEAN PROXY]");
+                }else {
+                    result = template.invokeOriginal(args);
+                }
                 return resolveResult(mw, result, bean);
             }finally {
                 tryUnlock();

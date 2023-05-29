@@ -5,6 +5,7 @@ import com.black.core.factory.beans.BeanFactory;
 import com.black.core.query.MethodWrapper;
 import com.black.core.spring.factory.AgentLayer;
 import com.black.core.spring.factory.AgentObject;
+import com.black.core.spring.util.ApplicationUtil;
 import lombok.extern.log4j.Log4j2;
 
 import java.lang.reflect.Method;
@@ -32,7 +33,20 @@ public class BeanProxy extends AbstractBeansProxy implements AgentLayer {
             checkNotNullArgs(mw, args);
             args = prepareArgs(mw, args, proxyObject);
             try {
-                Object result = layer.doFlow(args);
+                Object result;
+                if (isNeedReckon(mw)){
+                    Object[] finalArgs = args;
+                    result = ApplicationUtil.programRunMills(() -> {
+                        try {
+                            return layer.doFlow(finalArgs);
+                        } catch (Throwable e) {
+                            throw new IllegalStateException("An exception occurred during " +
+                                    "the timing process", e);
+                        }
+                    }, "[BEAN PROXY]");
+                }else {
+                    result = layer.doFlow(args);
+                }
                 return resolveResult(mw, result, proxyObject);
             }finally {
                 tryUnlock();

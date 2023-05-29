@@ -12,6 +12,7 @@ import com.black.core.data.annotation.EnabledDataTransferStation;
 import com.black.core.event.EnableEventAutoDispenser;
 import com.black.core.factory.beans.BeanFactory;
 import com.black.core.factory.beans.component.BeanFactoryType;
+import com.black.core.factory.beans.config_collect520.ResourceCollectionBeanFactory;
 import com.black.core.factory.beans.xml.XmlBeanFactory;
 import com.black.core.factory.manager.FactoryManager;
 import com.black.core.graphql.ann.EnabledGraphqlTransfer;
@@ -68,7 +69,7 @@ import java.util.Set;
 @EnabledGlobalAviatorLayer
 @EnabledGlobalMarkHandler
 @EnabledMapSQLApplication
-@BeanFactoryType(XmlBeanFactory.class)
+@BeanFactoryType(ResourceCollectionBeanFactory.class)
 @EnableNettyAsynAdapter
 @EnabledDataTransferStation
 //@EnabledManyAopMQClients

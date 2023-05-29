@@ -104,6 +104,10 @@ public class Sql {
         return opt().queryCount(tableName, params);
     }
 
+    public static void deleteById(String tableName, Object idValue, Object... params){
+        opt().deleteById(tableName, idValue, params);
+    }
+
     public static void delete(String tableName, Object... params){
         opt(DEFAULT_ALIAS).delete(tableName, params);
     }

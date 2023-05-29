@@ -152,7 +152,7 @@ public class XmlExecutor implements XmlSqlOperator {
         ElementWrapper wrapper = findBind(id);
         long start = System.currentTimeMillis();
         //获取预处理 sql
-        String sql = XmlEngine.prepareSql(wrapper, env, prepare());
+        String sql = XmlEngine.prepareSql(wrapper.createCopy(), env, prepare());
 
         //处理 ${}
         sql = GlobalMapping.parseAndObtain(sql);

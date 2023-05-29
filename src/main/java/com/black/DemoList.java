@@ -2,14 +2,20 @@ package com.black;
 
 import com.alibaba.fastjson.JSONObject;
 import com.black.asm.Demo;
+import com.black.core.SpringAutoThymeleafApplication;
 import com.black.core.cache.TypeConvertCache;
 import com.black.core.convert.TypeHandler;
 import com.black.core.factory.beans.AgentRequired;
 import com.black.core.factory.beans.BeanFactory;
 import com.black.core.factory.beans.annotation.AsLazy;
+import com.black.core.factory.beans.annotation.NotNull;
+import com.black.core.factory.beans.annotation.ProgramTiming;
 import com.black.core.factory.beans.config_collect520.Collect;
+import com.black.core.factory.beans.imports.Default;
 import com.black.core.factory.manager.FactoryManager;
 import com.black.core.query.ClassWrapper;
+import com.black.core.spring.ChiefApplicationRunner;
+import com.black.core.spring.OpenComponent;
 import com.black.core.spring.util.ApplicationUtil;
 import com.black.core.util.Av0;
 import com.black.core.util.LazyAutoWried;
@@ -98,7 +104,7 @@ public class DemoList {
 
     public static void main(String[] args) throws Throwable{
 
-        lltest();
+        fa();
     }
 
 
@@ -122,11 +128,13 @@ public class DemoList {
 
 
     static void fa(){
+        ChiefApplicationRunner.getMainClasses().add(SpringAutoThymeleafApplication.class);
         BeanFactory factory = FactoryManager.initAndGetBeanFactory();
         Cd cd = factory.getSingleBean(Cd.class);
         System.out.println(1);
         System.out.println(cd);
-        cd.say(null);
+        System.out.println(cd.say(null));
+        System.out.println(cd);
     }
 
     @Data
@@ -146,9 +154,13 @@ public class DemoList {
         @Collect(scope = "com.black.xml.engine.impl")
         List<XmlNodeHandler> nodeHandlers;
 
-        void say(@Collect(scope = "com.black.sql_v2.handler") Map<Class<?>, SqlStatementHandler> handlerMap){
+        @NotNull
+        @Default
+        @ProgramTiming
+        Object say(@Collect Map<Class<?>, OpenComponent> handlerMap){
             System.out.println(handlerMap);
             System.out.println(a);
+            return null;
         }
     }
 
