@@ -2,6 +2,7 @@ package com.black;
 
 import com.alibaba.fastjson.JSONObject;
 import com.black.asm.Demo;
+import com.black.compile.JavaDelegateCompiler;
 import com.black.core.SpringAutoThymeleafApplication;
 import com.black.core.cache.TypeConvertCache;
 import com.black.core.convert.TypeHandler;
@@ -13,7 +14,6 @@ import com.black.core.factory.beans.annotation.ProgramTiming;
 import com.black.core.factory.beans.config_collect520.Collect;
 import com.black.core.factory.beans.imports.Default;
 import com.black.core.factory.manager.FactoryManager;
-import com.black.core.query.ClassWrapper;
 import com.black.core.spring.ChiefApplicationRunner;
 import com.black.core.spring.OpenComponent;
 import com.black.core.spring.util.ApplicationUtil;
@@ -26,9 +26,7 @@ import com.black.project.DEMO;
 import com.black.project.JdbcProjectGenerator;
 import com.black.project.ProjectEnvironmentalGuess;
 import com.black.project.Version;
-import com.black.socket.JHexSocket;
 import com.black.sql_v2.Sql;
-import com.black.sql_v2.handler.SqlStatementHandler;
 import com.black.utils.IoUtils;
 import com.black.utils.ServiceUtils;
 import com.black.xml.XmlSql;
@@ -104,7 +102,7 @@ public class DemoList {
 
     public static void main(String[] args) throws Throwable{
 
-        fa();
+        lltest();
     }
 
 
@@ -184,17 +182,8 @@ public class DemoList {
 
     //流量测试
     static void lltest() throws IOException {
-        JHexSocket socket = new JHexSocket(5000);
-        socket.connect();
-        InputStream inputStream = ServiceUtils.getNonNullResource("open-chief-sdk.jar");
-        ApplicationUtil.programRunMills(() -> {
-            try {
-                socket.writeAndFlush(inputStream);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
-
+        JavaDelegateCompiler compiler = new JavaDelegateCompiler();
+        compiler.compileAndRun("System.out.println($1.get(${name}));System.out.println(${hello world});", Av0.js("name", "lgp"));
     }
 
 
