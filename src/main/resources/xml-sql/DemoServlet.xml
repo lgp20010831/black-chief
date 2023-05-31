@@ -1,0 +1,21 @@
+<root mapping="demo" remark="测试控制器">
+
+<!--
+
+    @OpenSqlPage
+    @ApiOperation("列表查询")
+    @RequestMapping(value="list", method=RequestMethod.POST")
+    public Object list(@RequestBody(required=true) JSONObject $1){
+        Object result = XmlSql.opt("master_v2").select("list", new Object[]{$1}).list();
+        return result;
+    }
+
+-->
+
+    <annotation type="io.swagger.annotations.ApiOperation" value="列表查询"/>
+    <select id="list" request="!?body" page="true" remark="列表查询">
+        select * from demo
+        <fortable target="arg1" table="demo" blend="like[name, age]"/>
+    </select>
+
+</root>
