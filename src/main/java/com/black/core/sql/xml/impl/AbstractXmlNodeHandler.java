@@ -55,8 +55,11 @@ public abstract class AbstractXmlNodeHandler implements XmlNodeHandler {
             List<ElementWrapper> wrapperList = elements.get(name);
             for (ElementWrapper wrapper : wrapperList) {
                 XmlNodeHandler handler = XmlEngine.getHandler(wrapper.getName());
-                Assert.notNull(handler, "unknown xml node is [" + wrapper.getName() + "]");
-                handler.doHandler(sqlSource, wrapper, prepareSource);
+                if (handler == null){
+                    wrapper.clearContent();
+                }else {
+                    handler.doHandler(sqlSource, wrapper, prepareSource);
+                }
             }
         }
     }

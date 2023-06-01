@@ -35,20 +35,13 @@ public class XmlSql {
         return env;
     }
 
-    public static QueryResultSetParser selectByArray(String id, Object... params){
-        return select(id, castParams(params));
+
+    public static QueryResultSetParser select(String id, Object... params){
+        return opt().select(id, params);
     }
 
-    public static QueryResultSetParser select(String id, Map<String, Object> env){
-        return opt().select(id, env);
-    }
-
-    public static void updateByArray(String id, Object... params){
-        update(id, castParams(params));
-    }
-
-    public static void update(String id, Map<String, Object> env){
-        opt().update(id, env);
+    public static void update(String id, Object... params){
+        opt().update(id, params);
     }
 
     public static XmlExecutor opt(){

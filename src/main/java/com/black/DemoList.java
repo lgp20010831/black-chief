@@ -183,7 +183,7 @@ public class DemoList {
     //流量测试
     static void lltest() throws IOException {
         JavaDelegateCompiler compiler = new JavaDelegateCompiler();
-        compiler.compileAndRun("System.out.println($1.get(${name}));System.out.println(${hello world});", Av0.js("name", "lgp"));
+        compiler.compileAndRun("$[com.black.sql_v2, com.black] Sql.opt();System.out.println($1.get(${name}));System.out.println(${hello world});", Av0.js("name", "lgp"));
     }
 
 

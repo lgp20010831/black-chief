@@ -49,18 +49,20 @@ public class FortableNodeHandler extends AbstractXmlNodeHandler{
         if (val instanceof Collection){
             throw new IllegalStateException("fortable only support handler map");
         }
-
+        Set<String> columnNameSet = tableMetadata.getColumnNameSet();
         JSONObject target = JsonUtils.letJson(val);
         if (target.isEmpty()){
             return;
         }
-
-        Set<String> columnNameSet = tableMetadata.getColumnNameSet();
+        Map<String, Object> aim = filterMap(target, columnNameSet, convertHandler);
+        if (aim.isEmpty()){
+            return;
+        }
         List<BlendObject> blendObjects = CharParser.parseBlend(blend);
         Map<String, String> blendMap = castBlendToMap(blendObjects, convertHandler);
         StringJoiner joiner = new StringJoiner(appendBlankSpace(space), appendBlankSpace(prefix), appendBlankSpace(suffix));
-        for (String key : target.keySet()) {
-            Object value = target.get(key);
+        for (String key : aim.keySet()) {
+            Object value = aim.get(key);
             String operator = blendMap.get(key);
             String column = convertHandler.convertColumn(key);
             if (!columnNameSet.contains(column)){
@@ -70,6 +72,19 @@ public class FortableNodeHandler extends AbstractXmlNodeHandler{
             joiner.add(condition);
         }
         ew.setText(joiner.toString());
+    }
+    
+    public static Map<String, Object> filterMap(Map<String, Object> source, Set<String> names, AliasColumnConvertHandler convertHandler){
+        LinkedHashMap<String, Object> linkedHashMap = new LinkedHashMap<>();
+        for (String name : names) {
+            if (convertHandler != null){
+                name = convertHandler.convertAlias(name);
+            }
+            if (source.containsKey(name)){
+                linkedHashMap.put(name, source.get(name));
+            }
+        }
+        return linkedHashMap;
     }
 
     public static String appendBlankSpace(String str){

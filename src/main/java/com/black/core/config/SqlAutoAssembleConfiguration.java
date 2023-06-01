@@ -42,6 +42,7 @@ public class SqlAutoAssembleConfiguration implements InitializingBean {
             configDefSql(properties);
         }
 
+        XmlSql.opt().setOpenXmlServlet(properties.isOpenServlet());
         List<String> mapperPaths = properties.getMapperPaths();
         if (!Utils.isEmpty(mapperPaths)){
             XmlSql.opt().scanAndParse(mapperPaths.toArray(new String[0]));
@@ -70,6 +71,7 @@ public class SqlAutoAssembleConfiguration implements InitializingBean {
             log.info("init sql executor: {} -- data builder is {}", alias, environment.getDataSourceBuilder());
 
             XmlExecutor xmlExecutor = XmlSql.opt(alias);
+            xmlExecutor.setOpenXmlServlet(sqlAndXmlProperties.isOpenServlet());
             xmlExecutor.scanAndParse(sqlAndXmlProperties.getMapperPaths().toArray(new String[0]));
             log.info("init xml sql executor: {}", alias);
         }
@@ -106,6 +108,8 @@ public class SqlAutoAssembleConfiguration implements InitializingBean {
 
         private String url;
 
+        private boolean openServlet = false;
+
         private List<String> mapperPaths;
 
         private Map<String, SqlAndXmlProperties> other;
@@ -122,6 +126,8 @@ public class SqlAutoAssembleConfiguration implements InitializingBean {
         private String password;
 
         private String url;
+
+        private boolean openServlet = false;
 
         @NestedConfigurationProperty
         private Environment environment = new Environment();

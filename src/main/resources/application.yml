@@ -18,6 +18,8 @@ mybatis-plus:
 chief:
   enabled-visit-database: true
 sql:
+  mapperPaths: xml-sql/
+  open-servlet: true
   other:
     one:
       mapperPaths: xml-sql/

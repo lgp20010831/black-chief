@@ -7,8 +7,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.lang.annotation.Annotation;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.StringJoiner;
 
 public class CtAnnotation {
 
@@ -23,6 +25,10 @@ public class CtAnnotation {
     public CtAnnotation addField(String name, Object value, Class<?> type){
         valueTypeMap.put(name, new ValueAndType(value, type));
         return this;
+    }
+
+    public Class<? extends Annotation> getJavaAnnType() {
+        return javaAnnType;
     }
 
     @AllArgsConstructor
@@ -43,5 +49,23 @@ public class CtAnnotation {
                 annotation.addMemberValue(name, memberValue);
             }
         });
+    }
+
+    @Override
+    public String toString() {
+        String annName = "@" + javaAnnType.getSimpleName();
+        StringJoiner joiner = new StringJoiner(", ", "(", ")");
+        valueTypeMap.forEach((n, v) -> {
+            Object value = v.value;
+            if (value == null){
+                value = "";
+            }else {
+                if (value.getClass().isArray()) {
+                    value = Arrays.toString((Object[]) value);
+                }
+            }
+            joiner.add(n + "=" + value);
+        });
+        return annName + joiner;
     }
 }

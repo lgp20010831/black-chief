@@ -26,6 +26,10 @@ public class CtAnnotations {
         return ctAnnotations;
     }
 
+    public List<CtAnnotation> getAnnotationList() {
+        return annotationList;
+    }
+
     public Map<Class<? extends java.lang.annotation.Annotation>,
             Consumer<Annotation>> getAnnotationCallback(){
         Map<Class<? extends java.lang.annotation.Annotation>,
@@ -36,5 +40,14 @@ public class CtAnnotations {
             map.putAll(annotationCallback);
         }
         return map;
+    }
+
+    @Override
+    public String toString() {
+        StringJoiner joiner = new StringJoiner("\n", "", "\n");
+        for (CtAnnotation ctAnnotation : annotationList) {
+            joiner.add(ctAnnotation.toString());
+        }
+        return joiner.toString();
     }
 }

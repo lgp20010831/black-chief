@@ -17,12 +17,16 @@ import com.black.sql.QueryResultSetParser;
 import com.black.sql_v2.Sql;
 import com.black.sql_v2.SqlExecutor;
 import com.black.standard.XmlSqlOperator;
+import com.black.utils.ServiceUtils;
+import com.black.xml.listener.XmlSqlListener;
+import com.black.xml.servlet.XmlServletRegister;
 import lombok.Getter;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * @author 李桂鹏
@@ -39,17 +43,35 @@ public class XmlExecutor implements XmlSqlOperator {
 
     private boolean supportFtl = true;
 
+    private boolean openXmlServlet = false;
+
     private final SqlExecutor executor;
 
     private Set<String> handledXmlPaths = new HashSet<>();
 
     private final IoLog log;
 
+    private final LinkedBlockingQueue<XmlSqlListener> listeners = new LinkedBlockingQueue<>();
+
     public XmlExecutor(String name) {
         this.name = name;
         executor = Sql.opt(name);
         log = executor.getEnvironment().getLog();
         XmlManager.init();
+        List<XmlSqlListener> xmlSqlListeners = ServiceUtils.scanAndLoad("com.black.xml.listener", XmlSqlListener.class);
+        listeners.addAll(xmlSqlListeners);
+    }
+
+    public void setOpenXmlServlet(boolean openXmlServlet) {
+        this.openXmlServlet = openXmlServlet;
+    }
+
+    public void registerListeners(XmlSqlListener... listeners){
+        this.listeners.addAll(Arrays.asList(listeners));
+    }
+
+    public LinkedBlockingQueue<XmlSqlListener> getListeners() {
+        return listeners;
     }
 
     public Connection getConnection(){
@@ -100,6 +122,9 @@ public class XmlExecutor implements XmlSqlOperator {
 
     private void parseXmlWrapper(XmlWrapper wrapper){
         ElementWrapper rootElement = wrapper.getRootElement();
+        if (openXmlServlet){
+            XmlServletRegister.getInstance().parseWrapper(getName(), rootElement);
+        }
         List<ElementWrapper> selects = rootElement.getsByName("select");
         selects.forEach(this::parseElementWrapper);
         List<ElementWrapper> updates = rootElement.getsByName("update");
@@ -128,6 +153,9 @@ public class XmlExecutor implements XmlSqlOperator {
         Map<Object, Object> indexMap = XmlUtils.castIndexMap(params);
         Map<String, Object> env = XmlUtils.makeEnv(params);
         String sql = invoke(id, env, indexMap);
+        for (XmlSqlListener listener : getListeners()) {
+            sql = listener.postSelectSql(sql, env, this);
+        }
         log.info("[XML] invoke query sql ===> {}", sql);
         ResultSet resultSet = SQLUtils.runQuery(sql, getConnection());
         QueryResultSetParser parser = new QueryResultSetParser(resultSet);
@@ -141,6 +169,9 @@ public class XmlExecutor implements XmlSqlOperator {
             Map<Object, Object> indexMap = XmlUtils.castIndexMap(params);
             Map<String, Object> env = XmlUtils.makeEnv(params);
             String sql = invoke(id, env, indexMap);
+            for (XmlSqlListener listener : getListeners()) {
+                sql = listener.postUpdateSql(sql, env, this);
+            }
             log.info("[XML] invoke update sql ===> {}", sql);
             SQLUtils.executeSql(sql, getConnection());
         }finally {

@@ -76,9 +76,9 @@ public class SqlDemo {
     }
 
     static void sql_v5(){
-        List<Map<String, Object>> list = XmlSql.selectByArray("countSupplier", "lgp").list();
-        List<Map<String, Object>> list1= XmlSql.select("countSupplier", Av0.js("name", "lgp", "list", Arrays.asList(1,2,3),
-                "map", Av0.js("phone", 123))).list();
+//        List<Map<String, Object>> list = XmlSql.selectByArray("countSupplier", "lgp").list();
+//        List<Map<String, Object>> list1= XmlSql.select("countSupplier", Av0.js("name", "lgp", "list", Arrays.asList(1,2,3),
+//                "map", Av0.js("phone", 123))).list();
 
     }
 
