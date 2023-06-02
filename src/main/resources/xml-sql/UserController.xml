@@ -1,5 +1,7 @@
 <root mapping="user" remark="测试用户管理">
 
+    <crud type="simple" table="user" excludes="insert, delete" hiddle="list, save"/>
+
     <select id="list2" page="true" remark="查询用户列表" request="!id::string, !?body" response="user{}">
         select * from user where id = ?1
         <fortable target="arg2" table="user" prefix="and"/>

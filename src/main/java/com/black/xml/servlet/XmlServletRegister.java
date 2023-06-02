@@ -1,10 +1,13 @@
 package com.black.xml.servlet;
 
 import com.black.core.factory.beans.xml.ElementWrapper;
+import com.black.core.log.IoLog;
+import com.black.core.log.LogFactory;
 import com.black.core.util.StringUtils;
 import com.black.javassist.CtAnnotation;
 import com.black.javassist.CtAnnotations;
 import io.swagger.annotations.Api;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.util.List;
@@ -19,6 +22,10 @@ import java.util.StringJoiner;
 public class XmlServletRegister implements ElementWrapperHandler{
 
     public static final String DEF_PREFIX = "XmlServlet";
+
+    private final IoLog log = LogFactory.getArrayLog();
+
+    public static volatile boolean debugPrint = true;
 
     private static XmlServletRegister register;
 
@@ -39,7 +46,7 @@ public class XmlServletRegister implements ElementWrapperHandler{
         if (!ew.getAttrMap().containsKey("mapping")) {
             return;
         }
-        MvcGenerator generator = createServletClass(classNamePrefix, ew);
+        MvcGenerator generator = createServletClass(classNamePrefix, name, ew);
         Map<String, List<ElementWrapper>> elements = ew.getElements();
         for (String key : elements.keySet()) {
             if ("select".equalsIgnoreCase(key)){
@@ -48,7 +55,10 @@ public class XmlServletRegister implements ElementWrapperHandler{
                 parseUpdateWrapper(name, generator, elements.get(key));
             }
         }
-        generator.registerMvc();
+        GeneratorInfo info = generator.registerMvc();
+        if (debugPrint){
+            log.info("Dynamically generated controller info:\n{}", info.getClassInfo());
+        }
     }
 
     protected void parseSelectWrapper(String name, MvcGenerator generator, List<ElementWrapper> wrappers){
@@ -91,7 +101,7 @@ public class XmlServletRegister implements ElementWrapperHandler{
             afterWrapper.clearContent();
         }
 
-        String selectBody = "Object result = XmlSql.opt(\"" + name + "\").select(\"" + id + "\", new Object[]{" + createInParams(paramSize) + "})." + result;
+        String selectBody = "  Object result = XmlSql.opt(\"" + name + "\").select(\"" + id + "\", new Object[]{" + createInParams(paramSize) + "})." + result;
         String body = StringUtils.letString(
                 "{\n", before, selectBody, after,
                 "return result;", "\n}"
@@ -169,7 +179,7 @@ public class XmlServletRegister implements ElementWrapperHandler{
             afterWrapper.clearContent();
         }
 
-        String selectBody = "XmlSql.opt(\"" + name + "\").update(\"" + id + "\", new Object[]{" + createInParams(paramSize) + "});";
+        String selectBody = "  XmlSql.opt(\"" + name + "\").update(\"" + id + "\", new Object[]{" + createInParams(paramSize) + "});";
         String body = StringUtils.letString(
                 "{\n", before, selectBody, after, "\n}"
         );
@@ -178,15 +188,22 @@ public class XmlServletRegister implements ElementWrapperHandler{
     }
 
 
-    protected MvcGenerator createServletClass(String classNamePrefix, ElementWrapper ew){
+    protected MvcGenerator createServletClass(String classNamePrefix, String name, ElementWrapper ew){
         String mapping = getAttribute(ew, "mapping", "");
         String remark = getAttribute(ew, "remark", "");
         CtAnnotation apiAnn = new CtAnnotation(Api.class);
         apiAnn.addField("tags", remark, String[].class);
         String[] mappings = mapping.split(",");
+        String[] urls = new String[mappings.length];
+        for (int i = 0; i < mappings.length; i++) {
+            String url = mappings[i];
+            url = StringUtils.removeIfStartWith(url, "/");
+            url = name + "/" + url;
+            urls[i] = url;
+        }
         MvcGenerator generator = new MvcGenerator(classNamePrefix);
         generator.importDependencyPackage("com.alibaba.fastjson", "com.black.sql_v2", "com.black.xml");
-        generator.generateServletAnnotation(ew.getAttrMap(), CtAnnotations.group(apiAnn), mappings);
+        generator.generateServletAnnotation(ew.getAttrMap(), CtAnnotations.group(apiAnn), urls);
         return generator;
     }
 

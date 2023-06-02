@@ -7,6 +7,7 @@ import com.black.core.query.ClassWrapper;
 import com.black.core.sql.annotation.OpenSqlPage;
 import com.black.core.util.StreamUtils;
 import com.black.core.util.StringUtils;
+import com.black.core.util.TextUtils;
 import com.black.javassist.CtAnnotation;
 import com.black.javassist.CtAnnotations;
 import com.black.javassist.PartiallyCtClass;
@@ -35,7 +36,13 @@ public class MvcGenerator {
 
     private final IoLog log = LogFactory.getArrayLog();
 
-    public static boolean print = true;
+    public static boolean print = false;
+
+    private StringBuilder methodInfoBuilder = new StringBuilder();
+
+    private StringBuilder classInfoBuilder = new StringBuilder();
+
+    private CtAnnotations classAnnotations = new CtAnnotations();
 
     private final PartiallyCtClass partiallyCtClass;
 
@@ -94,9 +101,13 @@ public class MvcGenerator {
             others = new CtAnnotations();
         }
         others.addAnnotation(servletAnn);
-        partiallyCtClass.addClassAnnotations(others);
+        classAnnotations.addAnnotations(others.getAnnotationList());
+
     }
 
+    public void addOtherAnnotations(CtAnnotations annotations){
+        classAnnotations.addAnnotations(annotations.getAnnotationList());
+    }
 
     public void setSuperClass(Class<?> superClass){
         partiallyCtClass.setSuperClass(superClass);
@@ -142,21 +153,37 @@ public class MvcGenerator {
             ctAnnotations.addAnnotation(new CtAnnotation(OpenSqlPage.class));
         }
 
+        methodInfoBuilder.append("\n\n");
+        StringJoiner joiner = new StringJoiner(", ");
+        int i = 1;
+        for (MappingMethodInfo.RequestParamInfo info : paramInfos) {
+            joiner.add(StringUtils.letString(info.toString(), "$", i++));
+        }
+        String methodInfo = TextUtils.parseContent("{}{} {}({})\n{}", ctAnnotations,
+                returnType.getSimpleName(), methodName, joiner.toString(), body);
+        methodInfoBuilder.append(StringUtils.overallIndent(methodInfo, 4));
         if (print){
-            StringJoiner joiner = new StringJoiner(", ");
-            int i = 1;
-            for (MappingMethodInfo.RequestParamInfo info : paramInfos) {
-                joiner.add(StringUtils.letString(info.toString(), "$", i++));
-            }
-            log.debug("Generated Request Method:\n{}{} {}({})\n {}", ctAnnotations, returnType.getSimpleName(), methodName, joiner.toString(), body);
+            log.debug("Generated Request Method:\n{}", methodInfo);
         }
         partiallyCtClass.addMethodAnnotations(methodName, ctAnnotations);
         return ctMethod;
     }
 
-    public Object registerMvc(){
+    public GeneratorInfo registerMvc(){
+        partiallyCtClass.addClassAnnotations(classAnnotations);
         Class<?> javaClass = partiallyCtClass.getJavaClass();
+        Class<?> superclass = javaClass.getSuperclass();
+        superclass = superclass == null ? Object.class : superclass;
+        String classInfo = TextUtils.parseContent("{}public class {} extends {}", classAnnotations,
+                javaClass.getSimpleName(), superclass.getSimpleName());
+        classInfoBuilder.append(classInfo);
         ClassWrapper<?> wrapper = ClassWrapper.get(javaClass);
-        return MvcMappingRegister.registerSupportAopController(javaClass);
+        Object instance = MvcMappingRegister.registerSupportAopController(javaClass);
+        String classCompleteInfo = createClassCompleteInfo();
+        return new GeneratorInfo(instance, javaClass, classCompleteInfo);
+    }
+
+    protected String createClassCompleteInfo(){
+        return StringUtils.letString(classInfoBuilder, "{", "\n", methodInfoBuilder, "\n", "}");
     }
 }

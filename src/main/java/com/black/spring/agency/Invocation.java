@@ -77,25 +77,30 @@ public class Invocation {
     }
 
 
-    public Object invoke() throws Throwable {
+    public Object invoke() {
         return invoke(getArgs());
     }
 
-    public Object invoke(Object[] args) throws Throwable {
-        this.args = args;
-        MethodInvoker next = methodInvokerLinkedBlockingQueue.poll();
-        if (next == null){
-            return invokeFun.apply(args);
-        }else {
-            MethodWrapper methodWrapper = next.getMw();
-            MethodWrapper originMethodWrapper = MethodWrapper.get(getMethod());
-            Object[] tempArgs = args;
-            if (parameterProcessor != null){
-                tempArgs = parameterProcessor.parse(methodWrapper, originMethodWrapper, args, this);
-                log.info("proxy Jump to {}", next);
+    public Object invoke(Object[] args){
+        try {
+            this.args = args;
+            MethodInvoker next = methodInvokerLinkedBlockingQueue.poll();
+            if (next == null){
+                return invokeFun.apply(args);
+            }else {
+                MethodWrapper methodWrapper = next.getMw();
+                MethodWrapper originMethodWrapper = MethodWrapper.get(getMethod());
+                Object[] tempArgs = args;
+                if (parameterProcessor != null){
+                    tempArgs = parameterProcessor.parse(methodWrapper, originMethodWrapper, args, this);
+                    log.info("proxy Jump to {}", next);
+                }
+                return next.invoke(tempArgs);
             }
-            return next.invoke(tempArgs);
+        }catch (Throwable ex){
+            throw new IllegalStateException(ex);
         }
+
     }
 
     public void reset(){
