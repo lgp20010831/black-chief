@@ -4,7 +4,7 @@ package com.black.compile;
 public interface DelegateCompiler {
 
     default DelegateCompiler getDelegate(){
-        return null;
+        throw new UnsupportedOperationException("not find delegate");
     }
 
     default void setAsyn(boolean asyn){

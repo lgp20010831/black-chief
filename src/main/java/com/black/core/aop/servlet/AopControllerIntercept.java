@@ -482,10 +482,13 @@ public class AopControllerIntercept implements AopTaskIntercepet, CollectedCilen
                     }
                 }
             }
-        } else {
+        }
+
+        if (pageSize == null || pageNum == null){
             pageSize = Convert.toInt(getRequest().getParameter(restWrapper.getPageSizeArgName()));
             pageNum = Convert.toInt(getRequest().getParameter(restWrapper.getPageNumArgName()));
         }
+
         if (pageSize == null || pageNum == null) {
             return false;
         }

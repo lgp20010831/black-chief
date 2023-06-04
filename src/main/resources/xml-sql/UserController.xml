@@ -1,0 +1,48 @@
+<root mapping="user" remark="测试用户管理">
+
+    <crud type="simple" table="user" excludes="insert, delete" hiddle="list, save"/>
+
+    <select id="list2" page="true" remark="查询用户列表" request="!id::string, !?body" response="user{}">
+        select * from user where id = ?1
+        <fortable target="arg2" table="user" prefix="and"/>
+    </select>
+
+
+    <select id="selectGroup" request="!workareaNo::int" remark="结果集查询">
+        SELECT
+        sg.workarea_no,
+        sg.group_no,
+        sg.material,
+        sg.material_type,
+        sg.material_type_flange,
+        sg.rating,
+        sg.gc1,
+        sg.vigorous_circulation,
+        sg.corrosion_allowance,
+        sg.status,
+        sc.pipe_naming_table :: JSON ->> 'pipe_no' AS pipe_no,
+        sc.uid,
+        sg.file_sheet_id,
+        fs.name file_name,
+        f.url,
+        sc.pipe_naming_table :: JSON ->> 'nominal_diameters' AS nominal_diameters,
+        sc.pipe_naming_table :: JSON ->> 'medium_discription' AS medium_discription,
+        sc.pipe_naming_table :: JSON ->> 'medium_phase' AS medium_phase,
+        sc.pipe_naming_table :: JSON ->> 'pipe_spec' AS pipe_spec,
+        sc.pipe_naming_table :: JSON ->> 'fluid_code' AS fluid_code,
+        sc.pipe_naming_table :: JSON ->> 'pipe_materials' AS pipe_materials,
+        sc.pipe_naming_table :: JSON ->> 'design_temp' AS design_temp,
+        sc.pipe_naming_table :: JSON ->> 'design_press' AS design_press
+        FROM
+        select_group AS sg
+        left JOIN select_condition AS sc ON sc.workarea_no = sg.workarea_no and sc.group_no = sg.group_no
+        left join file_sheet fs on fs.id = sg.file_sheet_id
+        left join file f on fs.file_no = f.file_no and f.workarea_no = sg.workarea_no
+        WHERE
+        sg.workarea_no = ?1
+        ORDER BY
+        sg.group_no,
+        sc.file_item_index
+    </select>
+
+</root>

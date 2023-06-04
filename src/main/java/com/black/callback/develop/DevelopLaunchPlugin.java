@@ -58,8 +58,8 @@ public class DevelopLaunchPlugin implements SpringApplicationRunListener {
             String packageName = ClassUtils.getPackageName(mainClass);
             Set<Class<?>> source = ClassSourceCache.getSource(packageName);
             if (source == null){
-                Set<Class<?>> classes = scanner.load(packageName);
-                ClassSourceCache.registerSource(packageName, classes);
+                source = scanner.load(packageName);
+                ClassSourceCache.registerSource(packageName, source);
             }
             developerEarlyClasses.addAll(filterDevelopers(source));
         }

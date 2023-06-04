@@ -26,6 +26,15 @@ public class Sql {
     }
 
     //--------------- auto find table name -------------------
+
+    public static void modify(Object entity, Object... params){
+        opt().modify(entity, params);
+    }
+
+    public static void modify(String tableName, Object entity, Object... params){
+        opt().modify(tableName, entity, params);
+    }
+
     public static <T> void saveBatch(Collection<T> collection, Object... params){
         opt().saveBatch(collection, params);
     }

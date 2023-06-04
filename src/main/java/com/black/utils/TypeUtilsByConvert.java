@@ -202,6 +202,14 @@ public class TypeUtilsByConvert {
         throw new JSONException("can not cast to byte, value : " + value);
     }
 
+    public static Class<?> stringCastToClass(String name){
+        try {
+            return Class.forName(name);
+        } catch (ClassNotFoundException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
     public static Character castToChar(Object value){
         if(value == null){
             return null;

@@ -6,6 +6,24 @@ import java.util.StringJoiner;
 
 public class StringUtils {
 
+    public static String overallIndent(String str, int size){
+        StringBuilder indentBuilder = new StringBuilder();
+        for (int i = 0; i < size; i++) {
+            indentBuilder.append(' ');
+        }
+        String indent = indentBuilder.toString();
+        StringBuilder builder = new StringBuilder(indent);
+        for (char c : str.toCharArray()) {
+            builder.append(c);
+            if (c == '\n'){
+                builder.append(indent);
+            }
+
+        }
+        return builder.toString();
+    }
+
+
     //判断这个字符串片段在 整个文本里是不是独立的   isIndependent("abc", "b") = false
     //isIndependent(abc b, b) = true
     //isIndependent(a b c, b) = true

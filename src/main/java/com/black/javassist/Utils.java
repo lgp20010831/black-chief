@@ -491,6 +491,21 @@ public class Utils {
             }
             arrayMemberValue.setValue(memberValues.toArray(new MemberValue[0]));
             memberValue = arrayMemberValue;
+        }else if (type.isEnum()){
+            EnumMemberValue enumMemberValue = new EnumMemberValue(Utils.createConstPool(type));
+            enumMemberValue.setType(type.getName());
+            enumMemberValue.setValue(((Enum)value).name());
+            memberValue = enumMemberValue;
+        }else if (type.isArray()){
+            ArrayMemberValue arrayMemberValue = new ArrayMemberValue(Utils.createConstPool(type.getComponentType()));
+            List<Object> list = SQLUtils.wrapList(value);
+            List<MemberValue> memberValues = new ArrayList<>();
+            for (Object val : list) {
+                Class<?> valClass = val.getClass();
+                memberValues.add(getMemberValue(valClass, val));
+            }
+            arrayMemberValue.setValue(memberValues.toArray(new MemberValue[0]));
+            memberValue = arrayMemberValue;
         }
         return memberValue;
     }

@@ -134,6 +134,13 @@ public abstract class AbstractDelegateCompiler implements DelegateCompiler{
 
         code = StringUtils.addIfNotStartWith(code, "{");
         code = StringUtils.addIfNotEndWith(code, "}");
+        code = ServiceUtils.parseTxt(code, "$[", "]", imports -> {
+            String[] splits = imports.split(",");
+            for (String split : splits) {
+                importDependencyPackage(split.trim());
+            }
+            return "";
+        });
         if (isMarkEscape()){
             code = ServiceUtils.parseTxt(code, "${", "}", txt -> {
                 return "\"" + txt + "\"";

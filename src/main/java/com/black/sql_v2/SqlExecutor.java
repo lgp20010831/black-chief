@@ -46,6 +46,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -365,6 +366,29 @@ public class SqlExecutor implements NativeSqlAdapter, SqlOperator {
         JsonParser jsonParser = getEnvironment().getJsonParser();
         JSONObject json = SqlV2Utils.prepareJson(jsonParser, setMap, bean);
         update(tableName, json, params);
+    }
+
+    public void modify(Object entity, Object... params){
+        String tableName = SqlV2Utils.findTableName(entity, environment.getConvertHandler());
+        modify(tableName, entity, params);
+    }
+
+    public void modify(String tableName, Object entity, Object... params){
+        TableMetadata metadata = getTableMetadata(tableName);
+        Map<String, Object> condition = findInArray(params, Map.class);
+        if (condition == null){
+            condition = new LinkedHashMap<>();
+            params = addArray(params, condition, true);
+        }
+        Map<String, Object> serialize = SerializeUtils.serialize(entity);
+        List<String> primaryKeyAliasNames = findPrimaryKeyAliasNames(tableName);
+        Map<String, Object> effectCondition = createEffectCondition(serialize, primaryKeyAliasNames);
+        for (String effkey : effectCondition.keySet()) {
+            if (!condition.containsKey(effkey)){
+                condition.put(effkey, effectCondition.get(effkey));
+            }
+        }
+        update(tableName, serialize, params);
     }
 
     public <T> void update(String tableName, T setMap, Object... params){
