@@ -133,7 +133,9 @@ public class MvcGenerator {
                 annotation = new CtAnnotation(RequestBody.class);
             }
             annotation.addField("required", paramInfo.isRequired(), boolean.class);
-            partiallyCtClass.addParameterAnnotation(methodName, i, CtAnnotations.group(annotation));
+            CtAnnotations annotations = paramInfo.getAnnotations().copy();
+            annotations.addAnnotation(annotation);
+            partiallyCtClass.addParameterAnnotation(methodName, i, annotations);
         }
         //添加方法注解
         CtAnnotation requestMappingAnn = new CtAnnotation(RequestMapping.class);
@@ -159,7 +161,7 @@ public class MvcGenerator {
         for (MappingMethodInfo.RequestParamInfo info : paramInfos) {
             joiner.add(StringUtils.letString(info.toString(), "$", i++));
         }
-        String methodInfo = TextUtils.parseContent("{}{} {}({})\n{}", ctAnnotations,
+        String methodInfo = TextUtils.parseContent("{}\n{} {}({})\n{}", ctAnnotations,
                 returnType.getSimpleName(), methodName, joiner.toString(), body);
         methodInfoBuilder.append(StringUtils.overallIndent(methodInfo, 4));
         if (print){

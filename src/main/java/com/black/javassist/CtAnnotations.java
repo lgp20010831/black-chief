@@ -26,6 +26,10 @@ public class CtAnnotations {
         return ctAnnotations;
     }
 
+    public boolean isEmpty(){
+        return annotationList.isEmpty();
+    }
+
     public List<CtAnnotation> getAnnotationList() {
         return annotationList;
     }
@@ -44,10 +48,14 @@ public class CtAnnotations {
 
     @Override
     public String toString() {
-        StringJoiner joiner = new StringJoiner("\n", "", "\n");
+        StringJoiner joiner = new StringJoiner("\n", "", "");
         for (CtAnnotation ctAnnotation : annotationList) {
             joiner.add(ctAnnotation.toString());
         }
         return joiner.toString();
+    }
+
+    public CtAnnotations copy(){
+        return CtAnnotations.group(annotationList.toArray(new CtAnnotation[0]));
     }
 }

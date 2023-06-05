@@ -3,9 +3,13 @@ package com.black.xml.servlet;
 import com.black.core.factory.beans.xml.ElementWrapper;
 import com.black.core.log.IoLog;
 import com.black.core.log.LogFactory;
+import com.black.core.sql.unc.OperationType;
+import com.black.core.tools.BeanUtil;
 import com.black.core.util.StringUtils;
 import com.black.javassist.CtAnnotation;
 import com.black.javassist.CtAnnotations;
+import com.black.xml.crud.CrudGeneratorConfiguration;
+import com.black.xml.crud.CrudMvcGenerator;
 import io.swagger.annotations.Api;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -55,10 +59,40 @@ public class XmlServletRegister implements ElementWrapperHandler{
                 parseUpdateWrapper(name, generator, elements.get(key));
             }
         }
+        ElementWrapper crudWrapper = ew.getByName("crud");
+        if (crudWrapper != null){
+            handlerCrudWrapper(crudWrapper, generator);
+        }
         GeneratorInfo info = generator.registerMvc();
         if (debugPrint){
             log.info("Dynamically generated controller info:\n{}", info.getClassInfo());
         }
+    }
+
+    protected void handlerCrudWrapper(ElementWrapper crudWrapper, MvcGenerator generator){
+        Map<String, Object> attrMap = crudWrapper.getAttrMap();
+        CrudGeneratorConfiguration configuration = BeanUtil.mapping(new CrudGeneratorConfiguration(), attrMap);
+        String table = getAttribute(crudWrapper, "table");
+        configuration.setTableName(table);
+        String type = getAttribute(crudWrapper, "simple", "true");
+        configuration.setUseSimple(Boolean.parseBoolean(type));
+        String excludes = getAttribute(crudWrapper, "excludes", "");
+        for (String exclude : excludes.split(",")) {
+            if (!StringUtils.hasText(excludes)){
+                continue;
+            }
+            OperationType operationType = OperationType.valueOf(exclude.trim().toUpperCase());
+            configuration.getAllowOperationType().remove(operationType);
+        }
+        String hiddle = getAttribute(crudWrapper, "hiddle", "");
+        for (String hiddleName : hiddle.split(",")) {
+            if (!StringUtils.hasText(hiddleName)){
+                continue;
+            }
+            configuration.getHiddleMethods().add(hiddleName.trim());
+        }
+        CrudMvcGenerator crudMvcGenerator = new CrudMvcGenerator(configuration, generator);
+        crudMvcGenerator.generator();
     }
 
     protected void parseSelectWrapper(String name, MvcGenerator generator, List<ElementWrapper> wrappers){

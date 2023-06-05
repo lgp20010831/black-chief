@@ -27,6 +27,14 @@ public class CrudMvcGenerator {
     }
 
     public void generator(){
-
+        boolean useSimple = configuration.isUseSimple();
+        RequestMethodGenerator requestMethodGenerator;
+        if (useSimple){
+            requestMethodGenerator = new SimpleSqlMethodGenerator(getConfiguration());
+        }else {
+            requestMethodGenerator = new CompleteSqlMethodGenerator(getConfiguration());
+        }
+        requestMethodGenerator.generate(mvcGenerator);
     }
+
 }

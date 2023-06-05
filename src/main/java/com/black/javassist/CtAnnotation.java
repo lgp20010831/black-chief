@@ -1,5 +1,8 @@
 package com.black.javassist;
 
+import com.black.core.query.AnnotationTypeWrapper;
+import com.black.core.query.MethodWrapper;
+import com.black.core.util.Assert;
 import com.black.function.Consumer;
 import com.black.core.util.Av0;
 import javassist.bytecode.annotation.MemberValue;
@@ -20,6 +23,13 @@ public class CtAnnotation {
 
     public CtAnnotation(Class<? extends Annotation> javaAnnType) {
         this.javaAnnType = javaAnnType;
+    }
+
+    public CtAnnotation addField(String name, Object value){
+        AnnotationTypeWrapper typeWrapper = AnnotationTypeWrapper.get(javaAnnType);
+        MethodWrapper methodWrapper = typeWrapper.select(name);
+        Assert.notNull(methodWrapper, "can not find method: " + name + " on annotation: @" + javaAnnType.getSimpleName());
+        return addField(name, value, methodWrapper.getReturnType());
     }
 
     public CtAnnotation addField(String name, Object value, Class<?> type){

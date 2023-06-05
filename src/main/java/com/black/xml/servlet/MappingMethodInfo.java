@@ -1,10 +1,9 @@
 package com.black.xml.servlet;
 
 import com.black.core.util.StringUtils;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import com.black.javassist.CtAnnotation;
+import com.black.javassist.CtAnnotations;
+import lombok.*;
 
 import java.util.*;
 
@@ -33,6 +32,10 @@ public class MappingMethodInfo {
 
     private String body;
 
+    public void addParam(@NonNull RequestParamInfo paramInfo){
+        paramInfos.add(paramInfo);
+    }
+
     public void addParam(String name, Class<?> type, boolean required, boolean query){
         paramInfos.add(new RequestParamInfo(name, type, required, query));
     }
@@ -47,12 +50,24 @@ public class MappingMethodInfo {
     }
 
     @Getter @Setter
-    @AllArgsConstructor
     public static class RequestParamInfo{
         private final String name;
         private final Class<?> type;
         private boolean required = true;
         private boolean query = true;
+        private CtAnnotations annotations;
+
+        public RequestParamInfo(String name, Class<?> type, boolean required, boolean query) {
+            this.name = name;
+            this.type = type;
+            this.required = required;
+            this.query = query;
+            this.annotations = new CtAnnotations();
+        }
+
+        public void addAnnotations(CtAnnotation... annotations){
+            this.annotations.addAnnotations(Arrays.asList(annotations));
+        }
 
         @Override
         public String toString() {
@@ -62,7 +77,7 @@ public class MappingMethodInfo {
                             StringUtils.letString("(required=false, value=", name, ")"))
                     :
                     (required ? "(required=true)" : "(required=false)");
-            return StringUtils.letString(annName, annAttr, " ", type.getSimpleName(),
+            return StringUtils.letString(annName, annAttr, annotations.isEmpty() ? " " :"\n", annotations, " ", type.getSimpleName(),
                     " ");
         }
     }

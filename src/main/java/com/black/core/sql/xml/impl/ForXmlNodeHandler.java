@@ -1,10 +1,12 @@
 package com.black.core.sql.xml.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.black.core.factory.beans.xml.ElementWrapper;
 import com.black.core.sql.code.AliasColumnConvertHandler;
 import com.black.core.sql.code.util.SQLUtils;
 import com.black.core.sql.xml.PrepareSource;
 import com.black.core.sql.xml.XmlSqlSource;
+import com.black.core.util.Av0;
 import com.black.core.util.StringUtils;
 import com.black.core.util.Utils;
 import com.black.table.TableMetadata;
@@ -91,8 +93,6 @@ public class ForXmlNodeHandler extends AbstractXmlNodeHandler{
         String index = getAssertNullAttri(ew, "index", "index");
         final String itemTopic = "#{" + mapKey + "}";
         final String indexTopic = "#{" + index + "}";
-        StringJoiner joiner = Utils.isEmpty(map) ? new StringJoiner("") :
-                new StringJoiner(" " + space + " ", " " + prefix + " ", " " + suffix + " ");        //验证 map 数据源字段
         List<TableMetadata> metadataList = new ArrayList<>();
         if (StringUtils.hasText(check)){
             Connection connection = prepareSource.getConnection();
@@ -111,24 +111,33 @@ public class ForXmlNodeHandler extends AbstractXmlNodeHandler{
             }
         }
         AliasColumnConvertHandler convertHandler = prepareSource.getConvertHandler();
-        final String valTopic = "#{" + mapValue + "}";
-        String tempTxt;
-        int i = 0;
-        for (String k : map.keySet()) {
-            Object v = map.get(k);
-            String indexStr = String.valueOf(i++);
-            if (!metadataList.isEmpty()){
-                boolean save = false;
-                String column = convertHandler.convertColumn(k);
+        LinkedHashMap<String, Object> copyMap = new LinkedHashMap<>(map);
+        if (!metadataList.isEmpty()){
+            copyMap.keySet().removeIf(ele -> {
+                boolean remove = true;
+                String column = convertHandler.convertColumn(ele);
                 for (TableMetadata metadata : metadataList) {
                     if (metadata.getColumnNameSet().contains(column)) {
-                        save = true;
+                        remove = false;
                         break;
                     }
                 }
-                if (!save){
-                    continue;
-                }
+                return remove;
+            });
+        }
+        if (copyMap.isEmpty()){
+            ew.clearContent();
+            return;
+        }
+        StringJoiner joiner = new StringJoiner(" " + space + " ", " " + prefix + " ", " " + suffix + " ");
+        final String valTopic = "#{" + mapValue + "}";
+        String tempTxt;
+        int i = 0;
+        for (String k : copyMap.keySet()) {
+            Object v = copyMap.get(k);
+            String indexStr = String.valueOf(i++);
+            if (!metadataList.isEmpty()){
+                String column = convertHandler.convertColumn(k);
                 tempTxt = replaceMapFor(itemTopic, valTopic, ew, sqlSource, mapKey, column, mapValue, v, prepareSource);
             }else {
                 tempTxt = replaceMapFor(itemTopic, valTopic, ew, sqlSource, mapKey, k, mapValue, v, prepareSource);
@@ -163,5 +172,11 @@ public class ForXmlNodeHandler extends AbstractXmlNodeHandler{
             argMap.remove(mapKey);
             argMap.remove(mapValue);
         }
+    }
+
+    public static void main(String[] args) {
+        JSONObject js = Av0.js("name", "lgp");
+        js.keySet().removeIf(e -> "name".equals(e));
+        System.out.println(js);
     }
 }

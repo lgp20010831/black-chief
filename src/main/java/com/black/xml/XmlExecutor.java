@@ -123,7 +123,7 @@ public class XmlExecutor implements XmlSqlOperator {
     private void parseXmlWrapper(XmlWrapper wrapper){
         ElementWrapper rootElement = wrapper.getRootElement();
         if (openXmlServlet){
-            XmlServletRegister.getInstance().parseWrapper(getName(), rootElement);
+            XmlServletRegister.getInstance().parseWrapper(getName() + "_xml", rootElement);
         }
         List<ElementWrapper> selects = rootElement.getsByName("select");
         selects.forEach(this::parseElementWrapper);

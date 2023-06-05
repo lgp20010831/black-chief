@@ -1,8 +1,9 @@
 <root mapping="user" remark="测试用户管理">
 
-    <crud type="simple" table="user" excludes="insert, delete" hiddle="list, save"/>
+<!--    excludes="insert, delete" hiddle="list, save"-->
+    <crud simple="false" table="user" />
 
-    <select id="list2" page="true" remark="查询用户列表" request="!id::string, !?body" response="user{}">
+    <select id="list2" page="true" remark="查询用户列表" request="!id::string@nonNull, !?body@nonNull" response="user{}">
         select * from user where id = ?1
         <fortable target="arg2" table="user" prefix="and"/>
     </select>
@@ -45,4 +46,16 @@
         sc.file_item_index
     </select>
 
+    <post request="!?file">
+        List list = [{"lgp":1}, {"lgp":2}, {"lgp":3}, {"lgp":4}]
+        list{
+            print(it.get("lgp"))
+        }
+    </post>
+    <compile>
+        List list = new ArrayList(Arrays.asList(Av0.of("lgp", 1), Av0.of("lgp", 2), Av0.of("lgp", 3), Av0.of("lgp", 4)));
+        for(Object it: list){
+            System.out.println((Map)it.get("lgp"));
+        }
+    </compile>
 </root>

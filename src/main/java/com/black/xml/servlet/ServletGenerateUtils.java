@@ -2,16 +2,24 @@ package com.black.xml.servlet;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.black.core.cache.TypeConvertCache;
+import com.black.core.factory.beans.annotation.NotNull;
 import com.black.core.factory.beans.xml.ElementWrapper;
 import com.black.core.factory.beans.xml.XmlWrapper;
 import com.black.core.factory.manager.FactoryManager;
+import com.black.core.json.Trust;
 import com.black.core.query.AnnotationTypeWrapper;
 import com.black.core.query.MethodWrapper;
 import com.black.core.util.Assert;
 import com.black.core.util.StringUtils;
 import com.black.javassist.CtAnnotation;
+import com.black.swagger.v2.V2Swagger;
 import com.black.utils.ServiceUtils;
+import com.black.xml.crud.TypeRegister;
+import lombok.NonNull;
 
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -25,34 +33,6 @@ import java.util.concurrent.atomic.AtomicReference;
 @SuppressWarnings("all")
 public class ServletGenerateUtils {
 
-    public static final Map<String, Class<?>> typeMappingMap = new ConcurrentHashMap<>();
-
-    static {
-        typeMappingMap.put("string", String.class);
-        typeMappingMap.put("int", Integer.class);
-        typeMappingMap.put("double", Double.class);
-        typeMappingMap.put("float", Float.class);
-        typeMappingMap.put("short", Short.class);
-        typeMappingMap.put("long", Long.class);
-        typeMappingMap.put("byte", Byte.class);
-        typeMappingMap.put("boolean", Boolean.class);
-        typeMappingMap.put("char", Character.class);
-        typeMappingMap.put("json", JSONObject.class);
-        typeMappingMap.put("jsonObject", JSONObject.class);
-        typeMappingMap.put("map", Map.class);
-        typeMappingMap.put("list", List.class);
-        typeMappingMap.put("collection", Collection.class);
-        typeMappingMap.put("array", JSONArray.class);
-        typeMappingMap.put("jsonArray", JSONArray.class);
-    }
-
-    public static Map<String, Class<?>> getTypeMappingMap(){
-        return typeMappingMap;
-    }
-
-    public static Class<?> getType(String name){
-        return Assert.nonNull(typeMappingMap.get(name), "Unable to find mapped type");
-    }
 
     public static void loadCtAnnotationAttrs(CtAnnotation annotation, Map<String, Object> attrMap){
         AnnotationTypeWrapper wrapper = AnnotationTypeWrapper.get(annotation.getJavaAnnType());
@@ -75,16 +55,59 @@ public class ServletGenerateUtils {
     }
 
     public static void parseParam2(String syntax, MappingMethodInfo methodInfo){
+        MappingMethodInfo.RequestParamInfo paramInfo = parseParam2(syntax);
+        methodInfo.addParam(paramInfo);
+    }
+
+    public static MappingMethodInfo.RequestParamInfo parseParam2(String syntax){
         syntax = syntax.trim();
         boolean required = syntax.startsWith("!");
         syntax = StringUtils.removeIfStartWith(syntax, "!");
         boolean body = syntax.startsWith("?");
         syntax = StringUtils.removeIfStartWith(syntax, "?");
-        String[] nameAndType = syntax.split("::");
+        TypeRegister typeRegister = TypeRegister.getInstance();
+        String[] paramAndAnnotation = syntax.split("@");
+        List<CtAnnotation> ctAnnotations = new ArrayList<>();
+        if (paramAndAnnotation.length > 1){
+            String annotationInfo = paramAndAnnotation[1];
+            String[] annotations = annotationInfo.split("&");
+            for (String annotation : annotations) {
+                annotation = annotation.trim();
+                JSONObject attrs = new JSONObject();
+                if (annotation.endsWith(")") && annotation.contains("(")) {
+                    String fieldInfo = annotation.substring(annotation.indexOf("(") + 1, annotation.lastIndexOf(")"));
+                    annotation = annotation.substring(0, annotation.indexOf("("));
+                    String[] kvs = fieldInfo.split(",");
+                    for (String fs : kvs) {
+                        String[] kv = fs.split(":");
+                        if (kv.length != 2){
+                            throw new IllegalStateException("Parsing attribute format error:" + fs);
+                        }
+                        attrs.put(kv[0].trim(), kv[1].trim());
+                    }
+                }
+
+                Class<? extends Annotation> annotationType = typeRegister.getAnnotationType(annotation);
+                CtAnnotation ctAnnotation = new CtAnnotation(annotationType);
+                AnnotationTypeWrapper typeWrapper = AnnotationTypeWrapper.get(annotationType);
+                attrs.forEach((k, v) -> {
+                    MethodWrapper methodWrapper = typeWrapper.select(k);
+                    if (methodWrapper == null){
+                        throw new IllegalStateException("Unable to find annotated property method: " + k);
+                    }
+                    Class<?> returnType = methodWrapper.getReturnType();
+                    v = TypeConvertCache.initAndGet().convert(returnType, v);
+                    ctAnnotation.addField(k, v, returnType);
+                });
+                ctAnnotations.add(ctAnnotation);
+            }
+        }
+        String param = paramAndAnnotation[0];
+        String[] nameAndType = param.split("::");
 
         Class<?> type = String.class;
         if (nameAndType.length == 2){
-            type = getType(nameAndType[1]);
+            type = typeRegister.getType(nameAndType[1]);
         }
         String name = nameAndType[0];
         if (body){
@@ -92,17 +115,21 @@ public class ServletGenerateUtils {
                 type = JSONObject.class;
             }
         }
-
-        methodInfo.addParam(name, type, required, !body);
+        MappingMethodInfo.RequestParamInfo paramInfo = new MappingMethodInfo.RequestParamInfo(name, type, required, !body);
+        if (!ctAnnotations.isEmpty()){
+            paramInfo.addAnnotations(ctAnnotations.toArray(new CtAnnotation[0]));
+        }
+        return paramInfo;
     }
 
     //!id::query(int), !body::body  !id, !body::body
     public static void parseParam(String param, MappingMethodInfo methodInfo){
+        TypeRegister typeRegister = TypeRegister.getInstance();
         boolean required = param.startsWith("!");
         param = StringUtils.removeIfStartWith(param, "!");
         AtomicReference<Class<?>> paramType = new AtomicReference<>(String.class);
         param = ServiceUtils.parseTxt(param, "(", ")", type -> {
-            paramType.set(getType(type));
+            paramType.set(typeRegister.getType(type));
             return "";
         });
         boolean query = true;
@@ -129,6 +156,14 @@ public class ServletGenerateUtils {
     }
 
     public static void main(String[] args) {
+        test();
+    }
+
+    static void test(){
+        System.out.println(parseParam2("!?body@V2Swagger(value:user{})&notnull"));
+    }
+
+    static void xml(){
         XmlWrapper xmlWrapper = (XmlWrapper) FactoryManager.initAndGetBeanFactory().get("xml-sql/UserController.xml");
         ElementWrapper element = xmlWrapper.getRootElement();
         XmlServletRegister register = XmlServletRegister.getInstance();
