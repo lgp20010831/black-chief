@@ -180,8 +180,8 @@ public class MvcGenerator {
                 javaClass.getSimpleName(), superclass.getSimpleName());
         classInfoBuilder.append(classInfo);
         ClassWrapper<?> wrapper = ClassWrapper.get(javaClass);
-        Object instance = MvcMappingRegister.registerSupportAopController(javaClass);
         String classCompleteInfo = createClassCompleteInfo();
+        Object instance = MvcMappingRegister.registerSupportAopController(javaClass);
         return new GeneratorInfo(instance, javaClass, classCompleteInfo);
     }
 

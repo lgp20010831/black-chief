@@ -2,12 +2,14 @@ package com.black.javassist;
 
 import com.black.core.query.AnnotationTypeWrapper;
 import com.black.core.query.MethodWrapper;
+import com.black.core.util.AnnotationUtils;
 import com.black.core.util.Assert;
 import com.black.function.Consumer;
 import com.black.core.util.Av0;
 import javassist.bytecode.annotation.MemberValue;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NonNull;
 
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
@@ -15,6 +17,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.StringJoiner;
 
+@SuppressWarnings("all")
 public class CtAnnotation {
 
     private final Class<? extends java.lang.annotation.Annotation> javaAnnType;
@@ -23,6 +26,14 @@ public class CtAnnotation {
 
     public CtAnnotation(Class<? extends Annotation> javaAnnType) {
         this.javaAnnType = javaAnnType;
+    }
+
+    public CtAnnotation(@NonNull Annotation annotation){
+        this.javaAnnType = annotation.annotationType();
+        Map<String, Object> valueMap = AnnotationUtils.getAnnotationValueMap(annotation, false);
+        valueMap.forEach((k, v) -> {
+            addField(k, v);
+        });
     }
 
     public CtAnnotation addField(String name, Object value){
