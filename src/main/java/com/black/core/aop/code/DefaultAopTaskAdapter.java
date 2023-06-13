@@ -75,7 +75,7 @@ public class DefaultAopTaskAdapter extends AbstractAopTaskQueueAdapter{
             hybrid.ifMatchCallBack(wrapper);
             methods.add(method);
         }
-        factory.registerMapping(clazz, method, hybrid.obtainAopTaskIntercept());
+        factory.registerMapping(clazz, method, hybrid.obtainAopTaskIntercept(), hybrid);
     }
 
     @Override

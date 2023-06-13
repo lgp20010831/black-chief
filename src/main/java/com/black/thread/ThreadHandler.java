@@ -14,6 +14,10 @@ import java.util.List;
 @SuppressWarnings("all")
 public interface ThreadHandler {
 
+    Executor getExecutor();
+
+    void setExecutor(Executor executor);
+
     void setNamePrefix(String namePrefix);
 
     void setOpenReckonTime(boolean openReckonTime);

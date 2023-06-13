@@ -71,7 +71,7 @@ public class CrutchSpringPettyApplication extends PettySpringApplication impleme
 
     @Override
     public int getPhase() {
-        return SmartLifecycle.DEFAULT_PHASE;
+        return 20000;
     }
 
 

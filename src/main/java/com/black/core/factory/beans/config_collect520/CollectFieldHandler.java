@@ -4,6 +4,8 @@ import com.black.core.factory.beans.BeanFactory;
 import com.black.core.factory.beans.process.inter.BeanInitializationHandler;
 import com.black.core.query.FieldWrapper;
 import com.black.core.util.AnnotationUtils;
+import com.black.generic.GenericInfo;
+import com.black.generic.GenericUtils;
 import com.black.utils.ReflectionUtils;
 
 import java.util.Collection;
@@ -22,9 +24,9 @@ public class CollectFieldHandler extends AbstractCollectHandler implements BeanI
         Collect annotation = fw.getAnnotation(Collect.class);
         CollectCondition collectCondition = AnnotationUtils.loadAttribute(annotation, new CollectCondition());
         Class<?> type = fw.getType();
-        Class<?>[] genericVal = ReflectionUtils.genericVal(fw.get(), type);
-        calibrationCollectCondition(type, genericVal, collectCondition);
-        Object source = collectAndConvert(type, genericVal, collectCondition, factory);
+        GenericInfo genericInfo = GenericUtils.getGenericByField(fw.getField());
+        calibrationCollectCondition(type, genericInfo, collectCondition);
+        Object source = collectAndConvert(type, genericInfo, collectCondition, factory);
         Object value = fw.getValue(bean);
         if (value == null){
             fw.setValue(bean, source);

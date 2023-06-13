@@ -35,6 +35,7 @@ import com.black.throwable.BreakException;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
+import org.apache.poi.ss.formula.functions.T;
 import org.checkerframework.checker.units.qual.K;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.jdbc.datasource.DataSourceUtils;
@@ -442,6 +443,20 @@ public class ServiceUtils {
             list.addLast(ele);
         }
         return (T[]) list.toArray();
+    }
+
+    public static Class<?>[] addClassArray(Class<?>[] source, Class<?> ele){
+        return addClassArray(source, ele, false);
+    }
+
+    public static Class<?>[] addClassArray(Class<?>[] source, Class<?> ele, boolean first){
+        LinkedList<Class<?>> list = new LinkedList<>(Arrays.asList(source));
+        if (first){
+            list.addFirst(ele);
+        }else {
+            list.addLast(ele);
+        }
+        return list.toArray(new Class[0]);
     }
 
     public static <K, V> boolean containKeys(Map<K, V> map, K... keys){

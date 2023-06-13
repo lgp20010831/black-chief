@@ -8,6 +8,8 @@ import com.black.core.sql.annotation.OpenSqlPage;
 import com.black.core.util.StreamUtils;
 import com.black.core.util.StringUtils;
 import com.black.core.util.TextUtils;
+import com.black.generic.Generic;
+import com.black.generic.GenericInfo;
 import com.black.javassist.CtAnnotation;
 import com.black.javassist.CtAnnotations;
 import com.black.javassist.PartiallyCtClass;
@@ -22,7 +24,9 @@ import javassist.CtMethod;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
@@ -113,29 +117,49 @@ public class MvcGenerator {
         partiallyCtClass.setSuperClass(superClass);
     }
 
+
     public CtMethod addRequestMethod(MappingMethodInfo mappingMethodInfo){
         String methodName = mappingMethodInfo.getMethodName();
+        GenericInfo methodGenericInfo = mappingMethodInfo.getMethodGenericInfo();
         Class<?> returnType = mappingMethodInfo.isVoidReturnType() ? void.class : Object.class;
+        if (methodGenericInfo != null && methodGenericInfo.size() == 1){
+            Generic generic = methodGenericInfo.getGeneric(0);
+            returnType = generic.getGenericType();
+            methodGenericInfo = GenericInfo.group(generic.getGenerics().toArray(new Generic[0]));
+        }
+
         List<MappingMethodInfo.RequestParamInfo> paramInfos = mappingMethodInfo.getParamInfos();
         String body = mappingMethodInfo.getBody();
         List<? extends Class<?>> paramTypes = StreamUtils.mapList(paramInfos, MappingMethodInfo.RequestParamInfo::getType);
         CtMethod ctMethod = partiallyCtClass.addMethod(methodName, returnType, body, paramTypes.toArray(new Class[0]));
+        partiallyCtClass.setMethodThrowTypes(methodName, Throwable.class);
 
+        List<String> genericDescList = new ArrayList<>();
         //添加参数注解
         for (int i = 0; i < paramInfos.size(); i++) {
             MappingMethodInfo.RequestParamInfo paramInfo = paramInfos.get(i);
             String name = paramInfo.getName();
+            String genericDesc = paramInfo.getGenericDesc();
+            genericDescList.add(genericDesc);
             CtAnnotation annotation;
-            if (paramInfo.isQuery()){
+            ParamPart paramPart = paramInfo.getParamPart();
+            if (paramPart == ParamPart.RequestParam){
                 annotation = new CtAnnotation(RequestParam.class);
                 annotation.addField("value", name, String.class);
-            }else {
+            }else if (paramPart == ParamPart.RequestBody){
                 annotation = new CtAnnotation(RequestBody.class);
+            }else {
+                annotation = new CtAnnotation(RequestPart.class);
+                annotation.addField("value", name, String.class);
             }
             annotation.addField("required", paramInfo.isRequired(), boolean.class);
             CtAnnotations annotations = paramInfo.getAnnotations().copy();
             annotations.addAnnotation(annotation);
             partiallyCtClass.addParameterAnnotation(methodName, i, annotations);
+        }
+        partiallyCtClass.addParamGeneric(methodName, genericDescList.toArray(new String[0]));
+        if (methodGenericInfo != null && !methodGenericInfo.isEmpty()){
+            partiallyCtClass.addMethodReturnGeneric(methodName, methodGenericInfo.toString());
         }
         //添加方法注解
         CtAnnotation requestMappingAnn = new CtAnnotation(RequestMapping.class);
@@ -144,7 +168,8 @@ public class MvcGenerator {
         CtAnnotation apiOperationAnn = new CtAnnotation(ApiOperation.class);
         ServletGenerateUtils.loadCtAnnotationAttrs(apiOperationAnn, mappingMethodInfo.getApiOperationInfos());
 
-        CtAnnotations ctAnnotations = CtAnnotations.group(requestMappingAnn, apiOperationAnn);
+        CtAnnotations ctAnnotations = mappingMethodInfo.getMethodAnnotations();
+        ctAnnotations.addAnnotationArray(requestMappingAnn, apiOperationAnn);
         if (mappingMethodInfo.isOnV2Swagger()){
             CtAnnotation v2SwaggerAnn = new CtAnnotation(V2Swagger.class);
             v2SwaggerAnn.addField("value", mappingMethodInfo.getV2SwaggerValue(), String.class);
@@ -161,8 +186,9 @@ public class MvcGenerator {
         for (MappingMethodInfo.RequestParamInfo info : paramInfos) {
             joiner.add(StringUtils.letString(info.toString(), "$", i++));
         }
-        String methodInfo = TextUtils.parseContent("{}\n{} {}({})\n{}", ctAnnotations,
-                returnType.getSimpleName(), methodName, joiner.toString(), body);
+        String methodInfo = TextUtils.parseContent("{}\n{}{} {}({}) throws Throwable \n{}", ctAnnotations,
+                returnType.getSimpleName(), (methodGenericInfo != null && !methodGenericInfo.isEmpty())
+                        ? methodGenericInfo : "", methodName, joiner.toString(), body);
         methodInfoBuilder.append(StringUtils.overallIndent(methodInfo, 4));
         if (print){
             log.debug("Generated Request Method:\n{}", methodInfo);

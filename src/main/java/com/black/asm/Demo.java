@@ -52,22 +52,5 @@ public class Demo {
         }, 0);
     }
 
-    @Alias
-    public static class User{
 
-        @Alias
-        User user;
-
-        int age;
-
-        String name;
-
-        public void say(){
-            System.out.println("say");
-        }
-
-        public List<String> get(User user){
-            return null;
-        }
-    }
 }

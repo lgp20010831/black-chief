@@ -1,11 +1,16 @@
 package com.black.core.aop.code;
 
+import com.black.core.aop.annotation.HybridSort;
 import com.black.core.builder.SortUtil;
+import com.black.core.chain.Order;
 import com.black.core.tools.BeanUtil;
+import com.black.core.util.AnnotationUtils;
+import com.black.utils.ServiceUtils;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -35,9 +40,9 @@ public class HijackObjectFactory {
         this.joinInterceptToTaskChain = joinInterceptToTaskChain;
     }
 
-    public void registerMapping(Class<?> clazz, Method method, AopTaskIntercepet intercepet){
+    public void registerMapping(Class<?> clazz, Method method, AopTaskIntercepet intercepet, AopTaskManagerHybrid hybrid){
         InterceptInitialInformation information = informations
-                .computeIfAbsent(intercepet, InterceptInitialInformation::new);
+                .computeIfAbsent(intercepet, i -> new InterceptInitialInformation(hybrid, i));
 
         information.registerClass(clazz);
         information.registerMethod(clazz, method);
@@ -47,7 +52,15 @@ public class HijackObjectFactory {
     public Map<MethodUniqueKey, AopProxyTaskChain> integrationTaskChain(boolean force){
         if (taskChainCache.isEmpty() || force){
             ArrayList<InterceptInitialInformation> beforeSort = new ArrayList<>(informations.values());
-            ArrayList<InterceptInitialInformation> afterSort = SortUtil.sort("order", beforeSort);
+            List<InterceptInitialInformation> afterSort = ServiceUtils.sort(beforeSort, ii -> {
+                AopTaskManagerHybrid hybrid = ii.getHybrid();
+                if (hybrid instanceof Order){
+                    return ((Order) hybrid).getOrder();
+                }
+                HybridSort hybridSort = AnnotationUtils.findAnnotation(hybrid.getClass(), HybridSort.class);
+                return hybridSort == null ? 0 : hybridSort.value();
+            }, true);
+            //ArrayList<InterceptInitialInformation> afterSort = SortUtil.sort("order", beforeSort);
             for (InterceptInitialInformation information : afterSort) {
                 Map<Class<?>, Collection<Method>> mappingCondition = information.getMappingCondition();
                 mappingCondition.forEach((cla, methodSet) ->{

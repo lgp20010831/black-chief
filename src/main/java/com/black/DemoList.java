@@ -47,7 +47,7 @@ public class DemoList {
 
     static void ftl(){
         TypeHandler handler = TypeConvertCache.initAndGet();
-        System.out.println(handler.convert(Demo.User.class, new JSONObject()));
+        System.out.println(handler.convert(User.class, new JSONObject()));
     }
 
     static void xml(){

@@ -7,10 +7,15 @@ import com.black.core.query.ClassWrapper;
 import com.black.core.query.FieldWrapper;
 import com.black.core.query.MethodWrapper;
 import com.black.core.tools.BeanUtil;
+import com.black.core.util.Utils;
 import lombok.NonNull;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestPart;
 
 import java.lang.reflect.Method;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 @SuppressWarnings("all")
 public class NetServletHandler implements ApplyProxyLayer {
@@ -33,7 +38,9 @@ public class NetServletHandler implements ApplyProxyLayer {
 
         Servlet servlet = findServlet(name);
         if (isPostMethod(servlet)){
+            servletParent.setArg(args);
             handlerRequestBody(args, method);
+            handlerRequestPart(args, method);
         }
         try {
             if (servlet != null){
@@ -53,6 +60,20 @@ public class NetServletHandler implements ApplyProxyLayer {
         if (bodyPw != null){
             Object body = args[bodyPw.getIndex()];
             servletParent.setBody(body);
+        }
+    }
+
+    protected void handlerRequestPart(Object[] args, Method method){
+        MethodWrapper methodWrapper = MethodWrapper.get(method);
+        List<ParameterWrapper> parts = methodWrapper.getParameterByAnnotation(RequestPart.class);
+        if (!Utils.isEmpty(parts)){
+            Map<String, Object> partMap = new LinkedHashMap<>();
+            for (ParameterWrapper part : parts) {
+                RequestPart annotation = part.getAnnotation(RequestPart.class);
+                String value = annotation.value();
+                partMap.put(value, args[part.getIndex()]);
+            }
+            servletParent.setPart(partMap);
         }
     }
 

@@ -11,6 +11,7 @@ import com.black.core.sql.code.config.Configuration;
 import com.black.core.sql.code.config.StatementValueSetDisplayConfiguration;
 import com.black.core.sql.code.packet.ExecutePacket;
 import com.black.core.util.StringUtils;
+import com.black.core.util.Utils;
 import com.black.table.SQLTablesException;
 import com.black.table.TableMetadata;
 import com.black.table.TableQuasiEntity;
@@ -79,7 +80,7 @@ public class SQLUtils {
 
 
     public static <E> E getSingle(List<E> list){
-        if (list.isEmpty()){
+        if (Utils.isEmpty(list)){
             return null;
         }else if (list.size() == 1){
             return list.get(0);

@@ -51,6 +51,7 @@ public class ConstructorWrapper<B> implements Wrapper<Constructor<B>>, Executabl
         return constructor.getParameterCount();
     }
 
+    @Override
     public boolean hasAnnotation(Class<? extends Annotation> type){
         return annotationMap.containsKey(type);
     }

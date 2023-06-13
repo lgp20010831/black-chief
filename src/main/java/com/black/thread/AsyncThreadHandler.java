@@ -24,6 +24,19 @@ public class AsyncThreadHandler implements ThreadHandler{
 
     private boolean openReckonTime = false;
 
+    private Executor executor;
+
+    public Executor getExecutor() {
+        return executor;
+    }
+
+    public void setExecutor(Executor executor) {
+        if (executor == null){
+            executor = new AsyncExecutor();
+        }
+        this.executor = executor;
+    }
+
     @Override
     public void setNamePrefix(String namePrefix) {
         //async can not set prefix
@@ -150,7 +163,7 @@ public class AsyncThreadHandler implements ThreadHandler{
     }
 
     protected void runSingleThread0(Runnable runnable, boolean wrapper){
-        AsynGlobalExecutor.execute(new java.lang.Runnable() {
+        getExecutor().execute(new java.lang.Runnable() {
             @Override
             public void run() {
                 if (isOpenReckonTime()){
@@ -178,7 +191,7 @@ public class AsyncThreadHandler implements ThreadHandler{
     }
 
     protected <S> void runConsumer(Consumer<S> consumer, S source, boolean wrapper){
-        AsynGlobalExecutor.execute(new java.lang.Runnable() {
+        getExecutor().execute(new java.lang.Runnable() {
             @Override
             public void run() {
                 if (isOpenReckonTime()){

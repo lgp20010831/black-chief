@@ -1,6 +1,7 @@
 package com.black.core.aop.code;
 
 import com.black.core.spring.ChiefApplicationRunner;
+import com.black.log.LogHttpMappingAopIntercept;
 import com.black.mq_v2.proxy.aop.AopMqttProxyHybrid;
 import com.black.core.aop.annotation.ImportHybridRange;
 import com.black.core.aop.ibatis.AopIbatisRollBackHybrid;
@@ -34,7 +35,7 @@ import java.util.Set;
 @ImportHybridRange({AopEnhanceControllerHybrid.class, AnnotationEventAutoDispenser.class,
         AopIbatisRollBackHybrid.class, AsynScheduler.class, IllAopHybrid.class,
 AopDataDriver.class, AopMarkResolver.class, SQLWriedWrapperHybrid.class, AviatorAopManager.class, AopShareLockManager.class,
-        AopFlowIntecept.class, AopMqttProxyHybrid.class, SqlV2AopHybrid.class})
+        AopFlowIntecept.class, AopMqttProxyHybrid.class, SqlV2AopHybrid.class, LogHttpMappingAopIntercept.class})
 public class AopApplicationContext {
 
     private static SimplePattern simplePattern;

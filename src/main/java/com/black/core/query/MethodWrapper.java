@@ -85,6 +85,7 @@ public class MethodWrapper implements Wrapper<Method>, ExecutableWrapper{
         return method;
     }
 
+    @Override
     public boolean hasAnnotation(Class<? extends Annotation> type){
         return annotationMap.containsKey(type);
     }

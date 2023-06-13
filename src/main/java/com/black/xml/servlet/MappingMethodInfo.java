@@ -1,6 +1,7 @@
 package com.black.xml.servlet;
 
 import com.black.core.util.StringUtils;
+import com.black.generic.GenericInfo;
 import com.black.javassist.CtAnnotation;
 import com.black.javassist.CtAnnotations;
 import lombok.*;
@@ -28,21 +29,30 @@ public class MappingMethodInfo {
 
     private String methodName;
 
+    private GenericInfo methodGenericInfo;
+
     private List<RequestParamInfo> paramInfos = new ArrayList<>();
 
     private String body;
+
+    private CtAnnotations methodAnnotations = new CtAnnotations();
 
     public void addParam(@NonNull RequestParamInfo paramInfo){
         paramInfos.add(paramInfo);
     }
 
-    public void addParam(String name, Class<?> type, boolean required, boolean query){
-        paramInfos.add(new RequestParamInfo(name, type, required, query));
+    public void addParam(String name, Class<?> type, boolean required, ParamPart paramPart){
+        paramInfos.add(new RequestParamInfo(name, type, required, paramPart));
+    }
+
+    public void addMethodAnnotation(CtAnnotation... ctAnnotations){
+        methodAnnotations.addAnnotations(Arrays.asList(ctAnnotations));
     }
 
     public boolean hasBodyParam(){
         for (RequestParamInfo paramInfo : paramInfos) {
-            if (!paramInfo.isQuery()){
+            ParamPart paramPart = paramInfo.paramPart;
+            if (paramPart == ParamPart.RequestPart || paramPart == ParamPart.RequestBody){
                 return true;
             }
         }
@@ -54,14 +64,15 @@ public class MappingMethodInfo {
         private final String name;
         private final Class<?> type;
         private boolean required = true;
-        private boolean query = true;
+        private ParamPart paramPart;
         private CtAnnotations annotations;
+        private String genericDesc;
 
-        public RequestParamInfo(String name, Class<?> type, boolean required, boolean query) {
+        public RequestParamInfo(String name, Class<?> type, boolean required, ParamPart paramPart) {
             this.name = name;
             this.type = type;
             this.required = required;
-            this.query = query;
+            this.paramPart = paramPart;
             this.annotations = new CtAnnotations();
         }
 
@@ -71,14 +82,14 @@ public class MappingMethodInfo {
 
         @Override
         public String toString() {
-            String annName = query ? "@RequestParam" : "@RequestBody";
-            String annAttr = query ?
+            String annName = paramPart.getAnnName();
+            String annAttr = paramPart != ParamPart.RequestBody ?
                     (required ? StringUtils.letString("(required=true, value=", name, ")") :
                             StringUtils.letString("(required=false, value=", name, ")"))
                     :
                     (required ? "(required=true)" : "(required=false)");
             return StringUtils.letString(annName, annAttr, annotations.isEmpty() ? " " :"\n", annotations, " ", type.getSimpleName(),
-                    " ");
+                   genericDesc, " ");
         }
     }
 

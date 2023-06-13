@@ -4,6 +4,8 @@ import com.black.core.factory.beans.BeanFactory;
 import com.black.core.tools.BeanUtil;
 import com.black.core.util.AnnotationUtils;
 import com.black.core.util.StringUtils;
+import com.black.generic.Generic;
+import com.black.generic.GenericInfo;
 import com.black.utils.CollectionUtils;
 import com.black.utils.NameUtil;
 import com.black.utils.ServiceUtils;
@@ -18,43 +20,56 @@ import java.util.Map;
 public abstract class AbstractCollectHandler {
 
 
-    protected void calibrationCollectCondition(Class<?> type, Class<?>[] genericVal, CollectCondition collectCondition){
+    protected void calibrationCollectCondition(Class<?> type, GenericInfo genericInfo, CollectCondition collectCondition){
+        int size = genericInfo.size();
         if (Collection.class.isAssignableFrom(type)){
-            if (genericVal.length == 1){
-                Class<?> superType = genericVal[0];
-                processCondition(superType, collectCondition);
+            if (size == 1){
+                Generic generic = genericInfo.getGeneric(0);
+                processCondition(generic, collectCondition);
             }
         }else if (Map.class.isAssignableFrom(type)){
-            if (genericVal.length == 2){
-                Class<?> superType = genericVal[1];
-                processCondition(superType, collectCondition);
+            if (size == 2){
+                Generic generic = genericInfo.getGeneric(1);
+                processCondition(generic, collectCondition);
             }
         }else {
-            processCondition(type, collectCondition);
+
+            processCondition(genericInfo.isEmpty() ? null : genericInfo.getGeneric(0),
+                    collectCondition);
             collectCondition.setSingle(true);
         }
     }
 
 
-    protected void processCondition(Class<?> superType, CollectCondition collectCondition){
-        if (superType.equals(Object.class)){
+    protected void processCondition(Generic generic, CollectCondition collectCondition){
+        if (generic == null){
             return;
-        }else if (superType.equals(Class.class)){
+        }
+        Class<?> genericType = generic.getGenericType();
+        if (genericType.equals(Object.class)){
+            return;
+        }else if (genericType.equals(Class.class)){
+            if (generic.hasMore()){
+                Class<?> deepGeneric = generic.getDeepGeneric();
+                Class<?>[] rawTypes = collectCondition.getType();
+                Class<?>[] array = ServiceUtils.addClassArray(rawTypes, deepGeneric);
+                collectCondition.setType(array);
+            }
             collectCondition.setInstance(false);
         }else {
+            collectCondition.setInstance(true);
             Class<?>[] conditionTypes = collectCondition.getType();
-            if (conditionTypes == null ||conditionTypes.length == 0){
-                collectCondition.setType(new Class[]{superType});
-            }
+            Class<?>[] array = ServiceUtils.addClassArray(conditionTypes, genericType);
+            collectCondition.setType(array);
         }
     }
 
 
-    protected Object collectAndConvert(Class<?> type, Class<?>[] genericVal, CollectCondition collectCondition, BeanFactory beanFactory){
+    protected Object collectAndConvert(Class<?> type, GenericInfo genericInfo, CollectCondition collectCondition, BeanFactory beanFactory){
         if (!(beanFactory instanceof ResourceCollectionBeanFactory)){
             throw new IllegalStateException("current bean factory is not ResourceCollectionBeanFactory");
         }
-
+        int size = genericInfo.size();
         ResourceCollectionBeanFactory resourceCollectionBeanFactory = (ResourceCollectionBeanFactory) beanFactory;
         List<Object> resources = resourceCollectionBeanFactory.collect(collectCondition);
         if (Collection.class.isAssignableFrom(type)){
@@ -65,8 +80,8 @@ public abstract class AbstractCollectHandler {
             Map<Object, Object> map = ServiceUtils.createMap(type);
             //0: asClass, 1: asName
             int state = 0;
-            if (genericVal.length == 2){
-                Class<?> keyType = genericVal[0];
+            if (size == 2){
+                Class<?> keyType = genericInfo.getGeneric(0).getGenericType();
                 if (keyType.equals(String.class)){
                     state = 1;
                 }else {

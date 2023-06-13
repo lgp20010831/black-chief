@@ -10,12 +10,25 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class AnnotationUtils {
+
+    public static <T extends Annotation> T obtainAnnotation(Method method, Class<T> type){
+        return obtainAnnotation(method.getDeclaringClass(), method, type);
+    }
+
+    public static <T extends Annotation> T obtainAnnotation(Class<?> clazz, Method method, Class<T> type){
+        T annotation = findAnnotation(method, type);
+        if (annotation == null){
+            annotation = findAnnotation(clazz, type);
+        }
+        return annotation;
+    }
 
     public static Object getValueFromAnnotation(Annotation annotation){
         return getValueFromAnnotation(annotation, "value");

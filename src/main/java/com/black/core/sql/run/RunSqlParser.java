@@ -76,12 +76,12 @@ public class RunSqlParser {
             return res ? trueContext : falseContext;
         });
         sql = ServiceUtils.parseTxt(sql, START, END, key -> {
-            Object val = ServiceUtils.findValue(objectMap, key);
+            Object val = ServiceUtils.getByExpression(objectMap, key);
             return MapArgHandler.getString(val);
         });
 
         sql = ServiceUtils.parseTxt(sql, "^{", "}", key -> {
-            Object value = ServiceUtils.findValue(objectMap, key);
+            Object value = ServiceUtils.getByExpression(objectMap, key);
             return value == null ? "null" : JdbcSqlUtils.getEscapeString(value.toString());
         });
         return sql;

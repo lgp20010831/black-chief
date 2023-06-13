@@ -5,6 +5,7 @@ import com.black.core.log.LogFactory;
 import com.black.core.util.Assert;
 import com.black.core.util.StreamUtils;
 import com.black.function.Consumer;
+import com.black.generic.GenericInfo;
 import com.black.scan.ChiefScanner;
 import com.black.scan.ScannerManager;
 import com.black.throwable.IOSException;
@@ -19,6 +20,7 @@ import java.lang.annotation.Annotation;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+@SuppressWarnings("all")
 @Getter @Setter
 //半成品的虚拟类
 public class PartiallyCtClass {
@@ -140,6 +142,12 @@ public class PartiallyCtClass {
         }
     }
 
+    public void createField(String name, Class<?> type, CtAnnotations annotations, GenericInfo genericInfo){
+        CtField ctField = Utils.createField(name, type, annotations == null ? null :
+                annotations.getAnnotationCallback(), ctClass);
+        Utils.setFieldGeneric(ctField, genericInfo);
+        addField(ctField);
+    }
 
     public void addField(CtField field){
         if (field != null){
@@ -238,6 +246,19 @@ public class PartiallyCtClass {
         return ctMethod;
     }
 
+    public void setMethodThrowTypes(String name, Class<? extends Throwable>... types){
+        CtClass[] ctClasses = new CtClass[types.length];
+        for (int i = 0; i < types.length; i++) {
+            ctClasses[i] = Utils.getAndCreateClass(types[i]);
+        }
+        CtMethod ctMethod = getMethod(name);
+        try {
+            ctMethod.setExceptionTypes(ctClasses);
+        } catch (NotFoundException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
     public boolean containMethod(String name){
         return methods.containsKey(name);
     }
@@ -251,6 +272,20 @@ public class PartiallyCtClass {
     public void addParameterAnnotation(String methodName, int index, CtAnnotations annotations){
         CtMethod ctMethod = getMethod(methodName);
         Utils.addAnnotationToParameter(ctClass, ctMethod, index, annotations.getAnnotationCallback());
+    }
+
+    public void addParamGeneric(String methodName, String... descs){
+        CtMethod method = getMethod(methodName);
+        Utils.addGenericToParam(method, descs);
+    }
+
+    public void addMethodReturnGeneric(String methodName, GenericInfo genericInfo){
+        addMethodReturnGeneric(methodName, genericInfo.toString());
+    }
+
+    public void addMethodReturnGeneric(String methodName, String info){
+        CtMethod method = getMethod(methodName);
+        Utils.addGenericToMethod(method, info);
     }
 
     private String prepareBody(String body){

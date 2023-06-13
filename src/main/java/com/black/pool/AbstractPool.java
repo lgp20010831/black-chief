@@ -57,6 +57,14 @@ public abstract class AbstractPool<E> implements Pool<E>{
         registerShutdown();
     }
 
+    public BlockingQueue<PoolElement<E>> getCoreSocketQueue() {
+        return coreSocketQueue;
+    }
+
+    public BlockingQueue<PoolElement<E>> getUnusedSocketQueue() {
+        return unusedSocketQueue;
+    }
+
     protected boolean structureInit(){
         return true;
     }

@@ -13,7 +13,6 @@ import com.black.core.event.EnableEventAutoDispenser;
 import com.black.core.factory.beans.BeanFactory;
 import com.black.core.factory.beans.component.BeanFactoryType;
 import com.black.core.factory.beans.config_collect520.ResourceCollectionBeanFactory;
-import com.black.core.factory.beans.xml.XmlBeanFactory;
 import com.black.core.factory.manager.FactoryManager;
 import com.black.core.graphql.ann.EnabledGraphqlTransfer;
 import com.black.core.ill.aop.EnabledGlobalThrowableManagement;
@@ -109,6 +108,7 @@ public class SpringAutoThymeleafApplication {
         Map<Class<?>, ProxyMetadata> proxyMetadataMap = ApplyProxyFactory.getProxyMetadataMap();
         Map<String, Set<Class<?>>> sourceCache = ClassSourceCache.getSourceCache();
         System.out.println(sourceCache.size());
+        //FunNetRegister.getInstance().loadClass(MyFunNetServlet.class);
 //        System.out.println(proxyMetadataMap);
 //
 //        DefaultLifecycleProcessor configuration = context.getBean(DefaultLifecycleProcessor.class);

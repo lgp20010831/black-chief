@@ -20,7 +20,7 @@ public class JHexByteArrayInputStream extends DataByteBufferArrayInputStream{
         super(buffer);
     }
 
-    public JHexByteArrayInputStream(InputStream in) throws IOException {
+    public JHexByteArrayInputStream(InputStream in){
         super(new byte[0]);
         this.in = in;
         bais = null;

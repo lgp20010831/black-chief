@@ -9,6 +9,9 @@ import com.black.core.query.MethodWrapper;
 import com.black.core.sql.code.util.SQLUtils;
 import com.black.core.tools.BeanUtil;
 import com.black.core.util.StringUtils;
+import com.black.generic.Generic;
+import com.black.generic.GenericInfo;
+import com.black.utils.ServiceUtils;
 import javassist.*;
 import javassist.bytecode.*;
 import javassist.bytecode.annotation.*;
@@ -130,6 +133,9 @@ public class Utils {
         }
 
     }
+
+
+
 
     public static void addAnnotationToParameter(
             final CtClass ctClass, // the class with the method
@@ -421,6 +427,18 @@ public class Utils {
         return pool.get(classObj.getName());
     }
 
+    public static void setFieldGeneric(CtField field, GenericInfo genericInfo){
+        try {
+            if (genericInfo != null){
+                String name = field.getType().getName().replace(".", "/");
+                String desc = "L" + name + (genericInfo == null ? "" : genericInfo.toString());
+                field.setGenericSignature(SignatureAttribute.toClassSignature(desc).encode());
+            }
+        } catch (Throwable e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
     /**
      *  javasist对CtField的泛型类型添加泛型的类声明
      * @param ctField
@@ -521,5 +539,69 @@ public class Utils {
             ctClasses[i] = ctClass;
         }
         return ctClasses;
+    }
+
+    public static void addGenericToParam( CtMethod method, // the method with the targeted parameter
+                                          String... desc){
+        final MethodInfo methodInfo = method.getMethodInfo();
+        final ConstPool constPool = methodInfo.getConstPool();
+        String descriptor = methodInfo.getDescriptor();
+        String genericDesc = ServiceUtils.parseTxt(descriptor, "(", ")", paramDesc -> {
+            String[] params = paramDesc.split(";");
+            StringJoiner joiner = new StringJoiner("", "(", ")");
+            for (int i = 0; i < params.length; i++) {
+                String param = params[i];
+                if (!StringUtils.hasText(param)) continue;
+                if (!param.startsWith("L")) continue;
+                if(i > desc.length - 1){
+                    joiner.add(param + ";");
+                }else {
+                    String d = desc[i];
+                    if (!StringUtils.hasText(d)){
+                        joiner.add(param + ";");
+                    }else {
+                        param = param + d;
+                        joiner.add(param);
+                    }
+                }
+            }
+            return joiner.toString();
+        });
+
+        try {
+            method.setGenericSignature(SignatureAttribute.toMethodSignature(genericDesc).encode());
+        } catch (BadBytecode e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    public static void addGenericToMethod(CtMethod ctMethod, String desc){
+        String descriptor = ctMethod.getGenericSignature();
+        int end = descriptor.lastIndexOf(")");
+        String returnDesc = descriptor.substring(end + 1);
+        returnDesc = StringUtils.removeIfEndWith(returnDesc, ";");
+        returnDesc = returnDesc + (StringUtils.hasText(desc) ? desc : ";");
+        String complete = descriptor.substring(0, end + 1) + returnDesc;
+        try {
+            ctMethod.setGenericSignature(SignatureAttribute.toMethodSignature(complete).encode());
+        } catch (BadBytecode e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    public static void test(List<String> l){}
+
+    public static void main(String[] args) throws BadBytecode {
+        ClassWrapper<?> wrapper = BeanUtil.getPrimordialClassWrapper(Utils.class);
+        GenericInfo info = GenericInfo.group(Generic.of(String.class));
+        PartiallyCtClass test = PartiallyCtClass.make("TEST");
+        CtMethod method = test.addMethod("hello", List.class, "{return null;}", List.class, List.class);
+
+        addGenericToParam(method, info.toString(), info.toString());
+        addGenericToMethod(method, info.toString());
+        System.out.println(method);
+        Class<?> javaClass = test.getJavaClass();
+        ClassWrapper<?> classWrapper = ClassWrapper.get(javaClass);
+        System.out.println(classWrapper);
     }
 }

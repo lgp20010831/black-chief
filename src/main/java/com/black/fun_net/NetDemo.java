@@ -7,8 +7,15 @@ import java.util.Map;
 public class NetDemo {
 
     public static void main(String[] args) {
-        ClassMap<String> map = new ClassMap<>();
-        map.put(Map.class, "str");
-        System.out.println(map.get(HashMap.class));
+
     }
+
+    static class Post2 implements Post{
+
+        @Override
+        public void fetch() throws Throwable {
+
+        }
+    }
+
 }

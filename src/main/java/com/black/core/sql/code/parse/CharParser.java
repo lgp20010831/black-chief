@@ -27,6 +27,10 @@ public class CharParser {
     }
 
     public static List<BlendObjects> parseBlends(String context){
+        return parseBlends(context, '[', ']');
+    }
+
+    public static List<BlendObjects> parseBlends(String context, char start, char end){
         if (!StringUtils.hasText(context)){
             return new ArrayList<>();
         }
@@ -47,7 +51,7 @@ public class CharParser {
                 }
             }
             else
-            if (chr == '['){
+            if (chr == start){
                 BlendObjects ra = new BlendObjects(name.toString());
                 fathers[step ++] = ra;
                 if (step != 1){
@@ -56,7 +60,7 @@ public class CharParser {
                 name.delete(0, name.length());
             }
             else
-            if (chr == ']'){
+            if (chr == end){
                 if (name.length() > 0){
                     fathers[step - 1].add(name.toString());
                 }

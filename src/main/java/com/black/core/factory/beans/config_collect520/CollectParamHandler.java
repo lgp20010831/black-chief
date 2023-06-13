@@ -7,6 +7,8 @@ import com.black.core.query.ConstructorWrapper;
 import com.black.core.query.ExecutableWrapper;
 import com.black.core.query.MethodWrapper;
 import com.black.core.util.AnnotationUtils;
+import com.black.generic.GenericInfo;
+import com.black.generic.GenericUtils;
 import com.black.utils.ReflectionUtils;
 
 import java.util.Collection;
@@ -27,9 +29,9 @@ public class CollectParamHandler extends AbstractCollectHandler implements BeanM
         Collect annotation = pw.getAnnotation(Collect.class);
         CollectCondition collectCondition = AnnotationUtils.loadAttribute(annotation, new CollectCondition());
         Class<?> type = pw.getType();
-        Class<?>[] genericVal = ReflectionUtils.getMethodParamterGenericVals(pw.get());
-        calibrationCollectCondition(type, genericVal, collectCondition);
-        Object source = collectAndConvert(type, genericVal, collectCondition, factory);
+        GenericInfo genericInfo = GenericUtils.getGenericByParameter(pw.getParameter());
+        calibrationCollectCondition(type, genericInfo, collectCondition);
+        Object source = collectAndConvert(type, genericInfo, collectCondition, factory);
         Object value = previousValue;
         if (value == null){
             return source;
@@ -48,9 +50,9 @@ public class CollectParamHandler extends AbstractCollectHandler implements BeanM
         Collect annotation = pw.getAnnotation(Collect.class);
         CollectCondition collectCondition = AnnotationUtils.loadAttribute(annotation, new CollectCondition());
         Class<?> type = pw.getType();
-        Class<?>[] genericVal = ReflectionUtils.getMethodParamterGenericVals(pw.get());
-        calibrationCollectCondition(type, genericVal, collectCondition);
-        Object source = collectAndConvert(type, genericVal, collectCondition, factory);
+        GenericInfo genericInfo = GenericUtils.getGenericByParameter(pw.getParameter());
+        calibrationCollectCondition(type, genericInfo, collectCondition);
+        Object source = collectAndConvert(type, genericInfo, collectCondition, factory);
         Object value = previousValue;
         if (value == null){
             return source;

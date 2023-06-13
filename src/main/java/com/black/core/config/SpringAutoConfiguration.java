@@ -33,6 +33,7 @@ import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.*;
 import org.springframework.core.Ordered;
@@ -48,7 +49,7 @@ import java.util.List;
 @Import({SqlAutoAssembleConfiguration.class, FtlAutoConfiguration.class})
 @AutoConfigureOrder(Ordered.HIGHEST_PRECEDENCE)
 @Conditional({ChiefConfigurationConditional.class})
-@AutoConfigureAfter(GlobalAopAutoConfiguration.class)
+@AutoConfigureAfter({GlobalAopAutoConfiguration.class})
 @Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties({OpenChiefSpringProperties.class})
 public class SpringAutoConfiguration extends AbstractConfiguration implements ChiefApplicationConfigurer, WebMvcConfigurer {

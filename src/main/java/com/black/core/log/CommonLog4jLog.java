@@ -60,6 +60,9 @@ public class CommonLog4jLog extends AbstractIoLog{
         String content = TextUtils.parseContent(getMsg(msg), params);
         AnsiColor color = ArrayIoLog.getColor(ArrayIoLog.ERROR);
         log.error(AnsiOutput.toString(color, content));
+        if (e != null){
+            log.error(e);
+        }
         return 0;
     }
 

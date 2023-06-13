@@ -10,6 +10,12 @@ public class CtAnnotations {
 
     private final List<CtAnnotation> annotationList = new ArrayList<>();
 
+    public void addAnnotationArray(CtAnnotation... annotations){
+        for (CtAnnotation annotation : annotations) {
+            addAnnotation(annotation);
+        }
+    }
+
     public void addAnnotation(CtAnnotation annotation){
         annotationList.add(annotation);
     }

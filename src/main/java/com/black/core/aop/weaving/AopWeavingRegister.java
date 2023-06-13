@@ -61,7 +61,7 @@ public class AopWeavingRegister {
 
                     }
                     pitchClassWithMethodsWrapper.addMethod(method);
-                    hijackObjectFactory.registerMapping(clazz, method, intercepet);
+                    hijackObjectFactory.registerMapping(clazz, method, intercepet, hybrid);
                 }
             }
             hybrid.ifMatchCallBack(pitchClassWithMethodsWrapper);

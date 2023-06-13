@@ -2,14 +2,19 @@ package com.black.xml.crud;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.black.asm.Demo;
+import com.black.asm.User;
+import com.black.core.aop.servlet.OpenIbatisPage;
 import com.black.core.factory.beans.annotation.NotNull;
 import com.black.core.json.Trust;
+import com.black.core.sql.annotation.OpenSqlPage;
 import com.black.core.util.Assert;
 import com.black.scan.ChiefScanner;
 import com.black.scan.ScannerManager;
 import com.black.swagger.v2.V2Swagger;
 import lombok.Data;
 import lombok.NonNull;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.lang.annotation.Annotation;
 import java.util.Collection;
@@ -35,6 +40,7 @@ public class TypeRegister {
     }
 
     private TypeRegister(){
+        registerType(Object.class);
         registerType(String.class);
         registerType(Integer.class);
         registerType(Double.class);
@@ -53,11 +59,17 @@ public class TypeRegister {
         registerType(char.class);
         registerAliasType("json", JSONObject.class);
         registerAliasType("array", JSONArray.class);
+        registerType(MultipartFile.class);
+        registerAliasType("file", MultipartFile.class);
+        registerAliasType("multi", MultipartFile.class);
+
 
         registerAnnotationType(V2Swagger.class);
         registerAnnotationType(NonNull.class);
         registerAnnotationType(NotNull.class);
         registerAnnotationType(Trust.class);
+        registerAnnotationType(OpenSqlPage.class);
+        registerAnnotationType(OpenIbatisPage.class);
     }
 
     private boolean uniqueness = true;
@@ -99,6 +111,10 @@ public class TypeRegister {
         }else {
             typeMappingMap.put(classKey, type);
         }
+    }
+
+    public void registerAnnotationAliasType(String alias, Class<? extends Annotation> type){
+        annotationInfoMap.put(alias, type);
     }
 
     public void registerAnnotationType(Class<? extends Annotation> type){
