@@ -56,11 +56,11 @@ import static com.black.utils.ServiceUtils.*;
 @SuppressWarnings("all") @Setter
 public class SqlExecutor implements NativeSqlAdapter, SqlOperator {
 
-    private DataSourceBuilder dataSourceBuilder;
-
     private final String name;
 
     private Environment environment;
+
+    private volatile boolean init = false;
 
     public SqlExecutor(String name){
         this.name = name;
@@ -68,38 +68,37 @@ public class SqlExecutor implements NativeSqlAdapter, SqlOperator {
 
     public SqlExecutor(DataSourceBuilder dataSourceBuilder, String name) {
         this.name = name;
-        this.dataSourceBuilder = dataSourceBuilder;
         GlobalEnvironment globalEnvironment = GlobalEnvironment.getInstance();
         environment = new Environment();
-        init();
+        environment.setDataSourceBuilder(dataSourceBuilder);
     }
 
-    public void init(){
+    public synchronized void init(){
+        if (init) return;
         GlobalEnvironment globalEnvironment = GlobalEnvironment.getInstance();
         BeanUtil.mappingBean(globalEnvironment, environment);
 
-        if (dataSourceBuilder == null){
-            dataSourceBuilder = GlobalEnvironment.getDataSourceBuilder(name);
-            if (dataSourceBuilder == null){
-                dataSourceBuilder = globalEnvironment.getDataSourceBuilder();
-            }
-        }
+        DataSourceBuilder dataSourceBuilder = getEnvironment().getDataSourceBuilder();
         DataSource dataSource = dataSourceBuilder.getDataSource();
 
         ConnectionManagement.registerDataSource(name, dataSource);
         //保证事务
         ConnectionManagement.registerListeners(name,
                 new TransactionSQLManagement.TransactionConnectionListener(name));
-
+        init = true;
     }
 
     public boolean isManageConnectionWithSpring(){
-        return dataSourceBuilder instanceof SpringDataSourceBuilder;
+        return getEnvironment().getDataSourceBuilder() instanceof SpringDataSourceBuilder;
+    }
+
+    public DataSourceBuilder getDataSourceBuilder(){
+        return getEnvironment().getDataSourceBuilder();
     }
 
     public boolean springTransactionEnabled(){
         Connection connection = getConnection();
-        DataSource dataSource = dataSourceBuilder.getDataSource();
+        DataSource dataSource = getDataSourceBuilder().getDataSource();
         return DataSourceUtils.isConnectionTransactional(connection, dataSource);
     }
 
@@ -136,10 +135,6 @@ public class SqlExecutor implements NativeSqlAdapter, SqlOperator {
         return name;
     }
 
-    public DataSourceBuilder getDataSourceBuilder() {
-        return dataSourceBuilder;
-    }
-
     @Override
     public Connection getNativeFetchConnection() {
         return getConnection();
@@ -171,6 +166,7 @@ public class SqlExecutor implements NativeSqlAdapter, SqlOperator {
     }
 
     public Connection getConnection(){
+        init();
         return ConnectionManagement.getConnection(name);
     }
 
@@ -184,7 +180,7 @@ public class SqlExecutor implements NativeSqlAdapter, SqlOperator {
                 //如果 spring 事务不存活
                 if (!springTransactionEnabled()){
                     Connection fetchConnection = getConnection();
-                    DataSource dataSource = dataSourceBuilder.getDataSource();
+                    DataSource dataSource = getDataSourceBuilder().getDataSource();
                     //关闭 spring 维护的连接
                     DataSourceUtils.releaseConnection(fetchConnection, dataSource);
                     //关闭自己的连接

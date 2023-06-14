@@ -1,8 +1,12 @@
 package com.black.asm;
 
-import com.black.core.json.Alias;
 import lombok.Data;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.reflect.Method;
 import java.util.List;
 
 /**
@@ -20,7 +24,21 @@ public class User {
         System.out.println("say");
     }
 
-    public List<String> get(User user){
+    public static void main(String[] args) throws NoSuchMethodException {
+        Method method = User.class.getMethod("get", User.class);
+    }
+
+    public @Test List<String> get(User user){
+        @Test
+        String key;
+
         return null;
+    }
+
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ElementType.PACKAGE, ElementType.TYPE_USE, ElementType.LOCAL_VARIABLE})
+    @interface Test{
+
     }
 }

@@ -52,4 +52,11 @@ public class Environment extends SqlSeqMetadata{
         this.builderClass = builderClass;
         dataSourceBuilder = DataSourceBuilderTypeManager.getBuilder(builderClass);
     }
+
+    public DataSourceBuilder getDataSourceBuilder() {
+        if (dataSourceBuilder == null){
+            dataSourceBuilder = parent.getDataSourceBuilder();
+        }
+        return dataSourceBuilder;
+    }
 }

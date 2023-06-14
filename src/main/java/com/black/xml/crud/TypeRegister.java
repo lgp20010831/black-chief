@@ -2,8 +2,6 @@ package com.black.xml.crud;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.black.asm.Demo;
-import com.black.asm.User;
 import com.black.core.aop.servlet.OpenIbatisPage;
 import com.black.core.factory.beans.annotation.NotNull;
 import com.black.core.json.Trust;

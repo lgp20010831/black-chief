@@ -11,6 +11,7 @@ import com.black.utils.JHex;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,6 +28,10 @@ public class JHexByteArrayInputStream extends DataByteBufferArrayInputStream{
     }
 
     public static final JHexByteArrayInputStream EMPTY_STREAM =  new JHexByteArrayInputStream(new byte[0]);
+
+    public String readNewString(Charset charset) throws IOException {
+        return new String(readAll(), charset);
+    }
 
     public String readNewString() throws IOException {
         return new String(readAll());
