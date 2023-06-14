@@ -70,6 +70,17 @@ public class PartiallyCtClass {
         return new PartiallyCtClass(Utils.createInterface(path + "." + className));
     }
 
+    public CtConstructor addConstructor(String body, Class<?>... types){
+        CtClass[] ctClasses = Utils.castJavaToCtClassArray(types);
+        CtConstructor constructor = new CtConstructor(ctClasses, ctClass);
+        try {
+            constructor.setBody(body);
+        } catch (CannotCompileException e) {
+            throw new IllegalStateException(e);
+        }
+        return constructor;
+    }
+
     public void setSuperClassGenericity(Class<?> superClass, Class<?>... genericityTypes){
         StringJoiner joiner = new StringJoiner(",", superClass.getSimpleName() + "<", ">");
         for (Class<?> genericityType : genericityTypes) {
