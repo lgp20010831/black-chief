@@ -65,15 +65,16 @@ public class ProxyFactory {
         if (isUseCache()){
             proxyClass = getClassFromCache();
         }else {
-            proxyClass = createProxyClass();
-            if (isUseCache()){
-                cache.put(target, proxyClass);
-            }
+//            proxyClass = createProxyClass();
+//            if (isUseCache()){
+//                cache.put(target, proxyClass);
+//            }
         }
+        return null;
     }
 
     Object instanceByCacheClass(){
-
+        return null;
     }
 
     Class<?> getClassFromCache(){
@@ -93,7 +94,7 @@ public class ProxyFactory {
         Class<?>[] array = createConstructor(partiallyCtClass, methodList);
         Class<?> javaClass = partiallyCtClass.getJavaClass();
         Object[] args = getMethodArgs(methodList);
-
+        return null;
     }
 
     void setRelationship(PartiallyCtClass partiallyCtClass){

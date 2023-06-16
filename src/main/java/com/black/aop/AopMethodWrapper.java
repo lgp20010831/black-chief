@@ -32,7 +32,9 @@ public class AopMethodWrapper implements PointcutAdvisor, Pointcut, MethodInterc
 
     private final MethodInterceptCondition methodInterceptCondition;
 
-    public AopMethodWrapper(Method method, Object target, ClassInterceptCondition classInterceptCondition, MethodInterceptCondition methodInterceptCondition) {
+    public AopMethodWrapper(Method method, Object target,
+                            ClassInterceptCondition classInterceptCondition,
+                            MethodInterceptCondition methodInterceptCondition) {
         this.method = method;
         this.target = target;
         this.classInterceptCondition = classInterceptCondition;

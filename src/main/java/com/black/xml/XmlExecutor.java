@@ -49,17 +49,23 @@ public class XmlExecutor implements XmlSqlOperator {
 
     private Set<String> handledXmlPaths = new HashSet<>();
 
-    private final IoLog log;
+    private IoLog log;
 
     private final LinkedBlockingQueue<XmlSqlListener> listeners = new LinkedBlockingQueue<>();
 
     public XmlExecutor(String name) {
         this.name = name;
         executor = Sql.opt(name);
-        log = executor.getEnvironment().getLog();
         XmlManager.init();
         List<XmlSqlListener> xmlSqlListeners = ServiceUtils.scanAndLoad("com.black.xml.listener", XmlSqlListener.class);
         listeners.addAll(xmlSqlListeners);
+    }
+
+    public IoLog getLog() {
+        if (log == null){
+            log = executor.getEnvironment().getLog();
+        }
+        return log;
     }
 
     public void setOpenXmlServlet(boolean openXmlServlet) {
@@ -156,7 +162,7 @@ public class XmlExecutor implements XmlSqlOperator {
         for (XmlSqlListener listener : getListeners()) {
             sql = listener.postSelectSql(sql, env, this);
         }
-        log.info("[XML] invoke query sql ===> {}", sql);
+        getLog().info("[XML] invoke query sql ===> {}", sql);
         ResultSet resultSet = SQLUtils.runQuery(sql, getConnection());
         QueryResultSetParser parser = new QueryResultSetParser(resultSet);
         parser.setConvertHandler(executor.getEnvironment().getConvertHandler());
@@ -172,7 +178,7 @@ public class XmlExecutor implements XmlSqlOperator {
             for (XmlSqlListener listener : getListeners()) {
                 sql = listener.postUpdateSql(sql, env, this);
             }
-            log.info("[XML] invoke update sql ===> {}", sql);
+            getLog().info("[XML] invoke update sql ===> {}", sql);
             SQLUtils.executeSql(sql, getConnection());
         }finally {
             closeConnection();
@@ -196,7 +202,7 @@ public class XmlExecutor implements XmlSqlOperator {
 
         //压缩 sql
         sql = XmlUtils.compressSql(sql);
-        log.trace("[XML] --> xml resolve sql take: {} ms", System.currentTimeMillis() - start);
+        getLog().trace("[XML] --> xml resolve sql take: {} ms", System.currentTimeMillis() - start);
         return sql;
     }
 

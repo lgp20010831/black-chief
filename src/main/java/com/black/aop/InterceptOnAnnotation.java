@@ -7,6 +7,7 @@ import java.lang.annotation.*;
  * @create 2023-06-06 15:33
  */
 @SuppressWarnings("all")
+@InterceptFlag
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface InterceptOnAnnotation {

@@ -58,6 +58,23 @@ import java.util.function.Function;
 @SuppressWarnings("all")
 public class ServiceUtils {
 
+    public static void addSort(Object param, String key){
+        List<Object> list = SQLUtils.wrapList(param);
+        int sort = 0;
+        for (Object obj : list) {
+            sort++;
+            if (obj instanceof Map){
+                ((Map<String, Object>) obj).put(key, sort);
+            }else {
+                ClassWrapper<?> classWrapper = BeanUtil.getPrimordialClassWrapper(obj);
+                FieldWrapper field = classWrapper.getField(key);
+                if (field != null){
+                    field.setValue(obj, sort);
+                }
+            }
+        }
+    }
+
     public static <C extends Collection<Map<String, Object>>> C convertList(C c){
         return convertList(c, new HumpColumnConvertHandler());
     }

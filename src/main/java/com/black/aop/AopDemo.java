@@ -17,6 +17,7 @@ public class AopDemo {
     @InterceptClass(annAt = ChiefServlet.class)
     @InterceptMethod(annAt = RequestMapping.class)
     Object myIntercept(Handle handle, Lgwr lgwr){
+        System.out.println("代理");
         return handle.invoke();
     }
 
