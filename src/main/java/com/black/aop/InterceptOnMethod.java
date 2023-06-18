@@ -10,7 +10,7 @@ import java.lang.annotation.*;
 @InterceptFlag
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface InterceptMethod {
+public @interface InterceptOnMethod {
 
     //需要指定方法上带有指定的注解
     Class<? extends Annotation>[] annAt() default {};

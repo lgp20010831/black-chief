@@ -10,7 +10,7 @@ import java.lang.annotation.*;
 @InterceptFlag
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface InterceptClass {
+public @interface InterceptOnClass {
 
     Class<?>[] type() default {};
 

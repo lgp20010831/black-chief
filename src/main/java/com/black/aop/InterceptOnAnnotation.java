@@ -14,6 +14,6 @@ public @interface InterceptOnAnnotation {
 
     Class<? extends Annotation>[] value() default {};
 
-    boolean and() default false;
+    boolean and() default true;
 
 }

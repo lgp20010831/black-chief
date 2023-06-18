@@ -1,8 +1,8 @@
 package com.black.aop.impl;
 
 import com.black.aop.ClassInterceptCondition;
-import com.black.aop.InterceptClass;
-import com.black.aop.InterceptMethod;
+import com.black.aop.InterceptOnClass;
+import com.black.aop.InterceptOnMethod;
 import com.black.aop.MethodInterceptCondition;
 import com.black.core.util.AnnotationUtils;
 
@@ -18,7 +18,7 @@ public class CommonInterceptConditionHandler implements ResolveIntercetCondition
 
     @Override
     public void resolveClassCondition(ClassInterceptCondition condition, Method method) {
-        InterceptClass annotation = method.getAnnotation(InterceptClass.class);
+        InterceptOnClass annotation = method.getAnnotation(InterceptOnClass.class);
         if (annotation != null){
             AnnotationUtils.loadAttribute(annotation, condition);
         }
@@ -26,7 +26,7 @@ public class CommonInterceptConditionHandler implements ResolveIntercetCondition
 
     @Override
     public void resolveMethodCondition(MethodInterceptCondition condition, Method method) {
-        InterceptMethod annotation = method.getAnnotation(InterceptMethod.class);
+        InterceptOnMethod annotation = method.getAnnotation(InterceptOnMethod.class);
         if (annotation != null){
             AnnotationUtils.loadAttribute(annotation, condition);
         }

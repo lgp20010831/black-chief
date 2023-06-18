@@ -1,9 +1,11 @@
 package com.black.aop;
 
 import com.black.arg.MethodReflectionIntoTheParameterProcessor;
+import com.black.arg.custom.SerlvetCustomParamterProcessor;
 import com.black.core.query.MethodWrapper;
 import com.black.core.tools.BeanUtil;
 import com.black.core.util.AnnotationUtils;
+import com.black.utils.IdUtils;
 import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -13,16 +15,23 @@ import org.springframework.aop.ClassFilter;
 import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.PointcutAdvisor;
+import org.springframework.core.Ordered;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author 李桂鹏
  * @create 2023-06-06 16:34
  */
 @SuppressWarnings("all")
-public class AopMethodWrapper implements PointcutAdvisor, Pointcut, MethodInterceptor {
+public class AopMethodWrapper implements PointcutAdvisor, Pointcut, MethodInterceptor, Ordered {
+
+    private int sort = 250;
 
     private final Method method;
 
@@ -32,15 +41,25 @@ public class AopMethodWrapper implements PointcutAdvisor, Pointcut, MethodInterc
 
     private final MethodInterceptCondition methodInterceptCondition;
 
+    private final String id;
+
     public AopMethodWrapper(Method method, Object target,
                             ClassInterceptCondition classInterceptCondition,
                             MethodInterceptCondition methodInterceptCondition) {
+        this.id = IdUtils.createShort8Id();
         this.method = method;
         this.target = target;
         this.classInterceptCondition = classInterceptCondition;
         this.methodInterceptCondition = methodInterceptCondition;
     }
 
+    public void setSort(int sort) {
+        this.sort = sort;
+    }
+
+    public String getId() {
+        return id;
+    }
 
     @Override
     public Pointcut getPointcut() {
@@ -62,14 +81,26 @@ public class AopMethodWrapper implements PointcutAdvisor, Pointcut, MethodInterc
     public Object invoke(@NotNull MethodInvocation invocation) throws Throwable {
         Object proxy = invocation.getThis();
         Method method = invocation.getMethod();
-        MethodWrapper methodWrapper = MethodWrapper.get(method);
+        boolean supprotHandle = !method.getReturnType().equals(void.class);
+        MethodWrapper originMethod = MethodWrapper.get(method);
+        MethodWrapper methodWrapper = MethodWrapper.get(this.method);
         Object[] arguments = invocation.getArguments();
         Class<Object> primordialClass = BeanUtil.getPrimordialClass(proxy);
         Handle handle = new Handle(primordialClass, method, arguments, primordialClass, invocation);
         MethodReflectionIntoTheParameterProcessor processor = new MethodReflectionIntoTheParameterProcessor();
-        Object[] args = processor.parse(methodWrapper, arguments, invocation);
+        processor.addCustomParameterProcessor(new SerlvetCustomParamterProcessor());
+        LinkedHashMap<String, Object> env = new LinkedHashMap<>();
+        env.put("handle", handle);
+        env.put("invocation", invocation);
+        env.putAll(getMatchAttributes(method, primordialClass));
+        Object[] args = processor.parse(methodWrapper, originMethod, arguments, (Object) env);
         try {
-            return methodWrapper.invoke(target, args);
+            if (supprotHandle){
+                return fetchMethod(args);
+            }else {
+                fetchMethod(args);
+                return invocation.proceed();
+            }
         }catch (RuntimeException e){
             Throwable cause = e.getCause();
             if (cause != null){
@@ -89,6 +120,56 @@ public class AopMethodWrapper implements PointcutAdvisor, Pointcut, MethodInterc
             }
         }
 
+    }
+
+
+    protected Object fetchMethod(Object[] args){
+        MethodWrapper methodWrapper = MethodWrapper.get(method);
+        return methodWrapper.invoke(target, args);
+    }
+
+    protected Map<String, Object> getMatchAttributes(Method mappingMethod, Class<?> proxyClass){
+        Map<String, Object> env = new LinkedHashMap<>();
+        Map<Class<?>, Annotation> matchAnnotationAttibutes = new LinkedHashMap<>();
+        Class<? extends Annotation>[] annAt = methodInterceptCondition.getAnnAt();
+        if (annAt != null){
+            for (Class<? extends Annotation> type : annAt) {
+                Annotation annotation = AnnotationUtils.findAnnotation(mappingMethod, type);
+                if (annotation != null){
+                    matchAnnotationAttibutes.put(type, annotation);
+                }
+
+            }
+        }
+
+        Class<? extends Annotation>[] paramAt = methodInterceptCondition.getParamAt();
+        if (paramAt != null){
+            for (Class<? extends Annotation> type : paramAt) {
+                List<Annotation> annotations = new ArrayList<>();
+                for (Parameter parameter : method.getParameters()) {
+                    Annotation annotation = AnnotationUtils.findAnnotation(parameter, type);
+                    annotations.add(annotation);
+                }
+                env.put(type.getSimpleName(), annotations);
+            }
+        }
+
+        Class<? extends Annotation>[] classAnnAt = classInterceptCondition.getAnnAt();
+        if (classAnnAt != null){
+            for (Class<? extends Annotation> type : classAnnAt) {
+                if (!matchAnnotationAttibutes.containsKey(type)){
+                    Annotation annotation = AnnotationUtils.findAnnotation(proxyClass, type);
+                    if (annotation != null){
+                        matchAnnotationAttibutes.put(type, annotation);
+                    }
+                }
+            }
+        }
+
+        matchAnnotationAttibutes.forEach((k, v) -> {
+            env.put(k.getSimpleName(), v);
+        });
+        return env;
     }
 
     @Override
@@ -133,8 +214,16 @@ public class AopMethodWrapper implements PointcutAdvisor, Pointcut, MethodInterc
                 Class<? extends Annotation>[] annAts = methodInterceptCondition.getAnnAt();
                 if (annAts != null){
                     if (!match(method, annAts, methodInterceptCondition.isAnnAnd())) {
-                        return false;
+                        if (!classInterceptCondition.isConnectMethodWithAnd()){
+                            if (!match(targetClass, annAts, methodInterceptCondition.isAnnAnd())) {
+                                return false;
+                            }
+                        }else {
+                            return false;
+                        }
+
                     }
+
                 }
                 Class<? extends Annotation>[] paramAt = methodInterceptCondition.getParamAt();
                 if (paramAt != null){
@@ -193,4 +282,8 @@ public class AopMethodWrapper implements PointcutAdvisor, Pointcut, MethodInterc
     }
 
 
+    @Override
+    public int getOrder() {
+        return sort;
+    }
 }

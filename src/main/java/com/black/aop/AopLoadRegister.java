@@ -1,18 +1,21 @@
 package com.black.aop;
 
+import com.black.aop.impl.CommonInterceptConditionHandler;
+import com.black.aop.impl.InterceptOnAnnotationHandler;
+import com.black.aop.impl.ResolveIntercetConditionHandler;
 import com.black.bin.InstanceBeanManager;
 import com.black.bin.InstanceType;
+import com.black.core.annotation.Sort;
 import com.black.core.query.ClassWrapper;
 import com.black.core.query.MethodWrapper;
 import com.black.core.tools.BeanUtil;
 import com.black.core.util.AnnotationUtils;
 import com.black.mvc.SpringBeanRegister;
-import org.springframework.aop.framework.adapter.AdvisorAdapterRegistry;
-import org.springframework.aop.framework.adapter.GlobalAdvisorAdapterRegistry;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * @author 李桂鹏
@@ -22,6 +25,17 @@ import java.util.List;
 public class AopLoadRegister {
 
     private static AopLoadRegister register;
+
+    private static final LinkedBlockingQueue<ResolveIntercetConditionHandler> handlers = new LinkedBlockingQueue<>();
+
+    static {
+        handlers.add(new CommonInterceptConditionHandler());
+        handlers.add(new InterceptOnAnnotationHandler());
+    }
+
+    public static LinkedBlockingQueue<ResolveIntercetConditionHandler> getHandlers() {
+        return handlers;
+    }
 
     public synchronized static AopLoadRegister getInstance() {
         if (register == null){
@@ -53,12 +67,23 @@ public class AopLoadRegister {
         }
         ClassInterceptCondition classInterceptCondition = new ClassInterceptCondition();
         MethodInterceptCondition methodInterceptCondition = new MethodInterceptCondition();
-        return new AopMethodWrapper(methodWrapper.get(), instance, classInterceptCondition, methodInterceptCondition);
+
+        for (ResolveIntercetConditionHandler handler : handlers) {
+            handler.resolveClassCondition(classInterceptCondition, methodWrapper.getMethod());
+            handler.resolveMethodCondition(methodInterceptCondition, methodWrapper.getMethod());
+        }
+        AopMethodWrapper aopMethodWrapper = new AopMethodWrapper(methodWrapper.get(), instance, classInterceptCondition, methodInterceptCondition);
+        Sort annotation = methodWrapper.getAnnotation(Sort.class);
+        if (annotation != null){
+            aopMethodWrapper.setSort(annotation.value());
+        }
+        return aopMethodWrapper;
     }
 
     public static void registerAopMethod(Collection<AopMethodWrapper> methodWrappers){
         for (AopMethodWrapper aopMethodWrapper : methodWrappers) {
-            SpringBeanRegister.registerBean(aopMethodWrapper, false);
+            String name = "aopMethodWrapper_" + aopMethodWrapper.getId();
+            SpringBeanRegister.registerBean(name, aopMethodWrapper, false);
         }
     }
 

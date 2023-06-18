@@ -369,10 +369,11 @@ public class MethodReflectionIntoTheParameterProcessor {
         for (FieldWrapper field : classWrapper.getFields()) {
             Object value = field.getValue(source);
             String name = field.getName();
+            Class<?> type = field.getType();
             if (result.containsKey(name)){
                 continue;
             }
-            if (value != null && canAnalysis(field, source)) {
+            if (value != null && canAnalysis(name, type, source)) {
                 parseObjectNameAsKey(value, result);
             }
             result.put(field.getName(), value);
@@ -394,23 +395,44 @@ public class MethodReflectionIntoTheParameterProcessor {
             return;
         }
         result.put(primordialClass, source);
-        for (FieldWrapper field : classWrapper.getFields()) {
-            Object value = field.getValue(source);
-            Class<?> type = field.getType();
-            if (value != null && !field.getType().equals(classWrapper.get())
-                    && canAnalysis(field, source)) {
-                parseObjectTypeAsKey(value, result);
-            }
-            result.put(field.getType(), value);
+        if (source == null){
+            return;
         }
+        if (source instanceof Map){
+            Map<String, Object> map = (Map<String, Object>) source;
+            for (String name : map.keySet()) {
+                Object value = map.get(name);
+                if (value == null){
+                    continue;
+                }
+                Class<Object> type = BeanUtil.getPrimordialClass(value);
+                if (value != null && !type.equals(classWrapper.get())
+                        && canAnalysis(name, type,  source)) {
+                    parseObjectTypeAsKey(value, result);
+                }
+                result.put(type, value);
+            }
+        }else {
+            for (FieldWrapper field : classWrapper.getFields()) {
+                Object value = field.getValue(source);
+                String name = field.getName();
+                Class<?> type = field.getType();
+                if (value != null && !type.equals(classWrapper.get())
+                        && canAnalysis(name, type,  source)) {
+                    parseObjectTypeAsKey(value, result);
+                }
+                result.put(type, value);
+            }
+        }
+
     }
 
 
 
 
-    protected boolean canAnalysis(FieldWrapper fw, Object bean){
+    protected boolean canAnalysis(String name, Class<?> type, Object bean){
         for (DepthAnalysisFieldFilter filter : fieldFilters) {
-            if (!filter.canAnalysis(fw, bean)) {
+            if (!filter.canAnalysis(name, type, bean)) {
                 return false;
             }
         }
