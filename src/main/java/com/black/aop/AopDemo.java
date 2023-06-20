@@ -1,5 +1,6 @@
 package com.black.aop;
 
+import com.black.core.annotation.Export;
 import com.black.core.factory.beans.annotation.NotNull;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -18,4 +19,9 @@ public class AopDemo {
         System.out.println("打印接口: " + request.getRequestURI());
     }
 
+
+    @Export("loadAop")
+    void loadAop(Class<?> type){
+
+    }
 }

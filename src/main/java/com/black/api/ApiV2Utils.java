@@ -19,6 +19,7 @@ import com.black.template.jdbc.JdbcType;
 import com.black.utils.IdUtils;
 import com.black.utils.ReflexHandler;
 import com.black.utils.ServiceUtils;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import org.springframework.web.bind.annotation.RequestPart;
 
@@ -66,6 +67,8 @@ public class ApiV2Utils {
         metadataResolverQueue.add(new TrustBeanMetadataResolver());
     }
 
+    public static boolean ADD_SWAGGER_REMARK_ANNOTATION = true;
+
     public static final ColumnAnnotationGenerator DEF_ANN_COLUMN_GENERATOR = new ColumnAnnotationGenerator() {
         @Override
         public CtAnnotations createAnnotations(JavaColumnMetadata javaColumnMetadata) {
@@ -74,6 +77,11 @@ public class ApiV2Utils {
             String remarks = javaColumnMetadata.getRemarks();
             ctAnnotation.addField("value", StringUtils.hasText(remarks) ? remarks : "", String.class);
             ctAnnotations.addAnnotation(ctAnnotation);
+            if (ADD_SWAGGER_REMARK_ANNOTATION){
+                CtAnnotation annotation = new CtAnnotation(ApiModelProperty.class);
+                annotation.addField("value", StringUtils.hasText(remarks) ? remarks : "", String.class);
+                ctAnnotations.addAnnotation(annotation);
+            }
             return ctAnnotations;
         }
     };

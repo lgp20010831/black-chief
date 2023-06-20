@@ -62,7 +62,7 @@ public class QueryResultSetParser {
     }
 
     public List<Integer> intList(){
-        return StreamUtils.mapList(values(), e -> Integer.valueOf(String.valueOf(e)));
+        return StreamUtils.mapList(values(), TypeUtils::castToInt);
     }
 
     public String stringValue(){
@@ -103,7 +103,7 @@ public class QueryResultSetParser {
     }
 
     public List<Double> doubleList(){
-        return StreamUtils.mapList(values(), e -> Double.valueOf(String.valueOf(e)));
+        return StreamUtils.mapList(values(), TypeUtils::castToDouble);
     }
 
     public boolean booleanVal(){
@@ -120,7 +120,7 @@ public class QueryResultSetParser {
     }
 
     public List<Boolean> booleanList(){
-        return StreamUtils.mapList(values(), e -> Boolean.valueOf(String.valueOf(e)));
+        return StreamUtils.mapList(values(), TypeUtils::castToBoolean);
     }
 
     public <T> ObjectInputStream<T> getObjectInputStream(){

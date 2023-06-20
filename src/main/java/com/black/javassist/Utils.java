@@ -519,11 +519,24 @@ public class Utils {
             List<Object> list = SQLUtils.wrapList(value);
             List<MemberValue> memberValues = new ArrayList<>();
             for (Object val : list) {
-                Class<?> valClass = val.getClass();
+                Class<?> valClass;
+                if (val instanceof java.lang.annotation.Annotation){
+                    valClass = ((java.lang.annotation.Annotation) val).annotationType();
+                }else {
+                    valClass = val.getClass();
+                }
                 memberValues.add(getMemberValue(valClass, val));
             }
             arrayMemberValue.setValue(memberValues.toArray(new MemberValue[0]));
             memberValue = arrayMemberValue;
+        }else if (type.isAnnotation()){
+            java.lang.annotation.Annotation javaAnn = (java.lang.annotation.Annotation) value;
+            Class<? extends java.lang.annotation.Annotation> annotationType = javaAnn.annotationType();
+            ConstPool constPool = createConstPool(annotationType);
+            Annotation annotation = new Annotation(annotationType.getName(), constPool);
+            memberValue = new AnnotationMemberValue(annotation, constPool);
+        }else {
+            throw new IllegalStateException("不支持类型: " + type + " 的member value");
         }
         return memberValue;
     }

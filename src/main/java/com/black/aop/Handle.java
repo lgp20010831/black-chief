@@ -15,6 +15,10 @@ import java.lang.reflect.Method;
 @SuppressWarnings("all") @AllArgsConstructor @Getter @Setter
 public class Handle {
 
+    private volatile int invokeCount = 0;
+
+    private Object lastResult;
+
     private final Class<?> clazz;
 
     private final Method method;
@@ -25,11 +29,22 @@ public class Handle {
 
     private final MethodInvocation methodInvocation;
 
-    public Object invoke(){
+    public Handle(Class<?> clazz, Method method, Object[] args, Object proxy, MethodInvocation methodInvocation) {
+        this.clazz = clazz;
+        this.method = method;
+        this.args = args;
+        this.proxy = proxy;
+        this.methodInvocation = methodInvocation;
+    }
+
+    public synchronized Object invoke(){
         try {
-            return methodInvocation.proceed();
+            invokeCount++;
+            lastResult = methodInvocation.proceed();
+            return lastResult;
         } catch (Throwable e) {
             throw new AopSecondaryInterceptionException(e);
         }
     }
+
 }

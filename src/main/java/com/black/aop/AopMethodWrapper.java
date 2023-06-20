@@ -99,7 +99,12 @@ public class AopMethodWrapper implements PointcutAdvisor, Pointcut, MethodInterc
                 return fetchMethod(args);
             }else {
                 fetchMethod(args);
-                return invocation.proceed();
+                if (handle.getInvokeCount() == 0) {
+                    return invocation.proceed();
+                }else {
+                    return handle.getLastResult();
+                }
+
             }
         }catch (RuntimeException e){
             Throwable cause = e.getCause();
