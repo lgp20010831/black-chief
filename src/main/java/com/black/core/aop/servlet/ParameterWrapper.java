@@ -1,10 +1,7 @@
 package com.black.core.aop.servlet;
 
 
-import com.black.core.query.ConstructorWrapper;
-import com.black.core.query.GenericWrapper;
-import com.black.core.query.MethodWrapper;
-import com.black.core.query.Wrapper;
+import com.black.core.query.*;
 
 import lombok.NonNull;
 
@@ -15,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class ParameterWrapper implements Wrapper<Parameter>, GenericWrapper {
+public class ParameterWrapper implements Wrapper<Parameter>, GenericWrapper, ModifierInformationist {
 
     private final Parameter parameter;
 
@@ -39,6 +36,11 @@ public class ParameterWrapper implements Wrapper<Parameter>, GenericWrapper {
             annotationMap.put(annotation.annotationType(), annotation);
         }
         type = parameter.getType();
+    }
+
+    @Override
+    public int getModifiers() {
+        return get().getModifiers();
     }
 
     @Override

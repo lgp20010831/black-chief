@@ -2,6 +2,7 @@ package com.black.core.util;
 
 import com.black.core.query.ClassWrapper;
 import com.black.core.query.MethodWrapper;
+import com.black.utils.ReflectionUtils;
 
 import java.lang.reflect.Method;
 
@@ -80,6 +81,28 @@ public class CurrentLineUtils {
         ClassWrapper<?> cw = ClassWrapper.get(loadClass);
         String methodName = getMethodName(4);
         MethodWrapper mw = cw.getSingleMethod(methodName);
+        return mw == null ? null : mw.get();
+    }
+
+    public static Method loadMethod(Class<?>... types){
+        Class<?> loadClass = loadClass(5);
+        ClassWrapper<?> cw = ClassWrapper.get(loadClass);
+        String methodName = getMethodName(4);
+        MethodWrapper mw = cw.getMethod(methodName, types);
+        return mw == null ? null : mw.get();
+    }
+
+    public static Method loadMethod(String... typeNames){
+        Class<?> loadClass = loadClass(5);
+        ClassWrapper<?> cw = ClassWrapper.get(loadClass);
+        String methodName = getMethodName(4);
+        Class[] classes = new Class[typeNames.length];
+        for (int i = 0; i < typeNames.length; i++) {
+            String typeName = typeNames[i];
+            Class<?> type = ReflectionUtils.loadClass(typeName);
+            classes[i] = type;
+        }
+        MethodWrapper mw = cw.getMethod(methodName, classes);
         return mw == null ? null : mw.get();
     }
 

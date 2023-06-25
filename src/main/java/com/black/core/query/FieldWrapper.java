@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class FieldWrapper implements Wrapper<Field>, GenericWrapper{
+public class FieldWrapper implements Wrapper<Field>, GenericWrapper, ModifierInformationist{
 
     static final Map<Field, FieldWrapper> cache = new ConcurrentHashMap<>();
 
@@ -35,6 +35,11 @@ public class FieldWrapper implements Wrapper<Field>, GenericWrapper{
             annotationMap.put(annotation.annotationType(), annotation);
         }
 
+    }
+
+    @Override
+    public int getModifiers() {
+        return get().getModifiers();
     }
 
     public boolean isGenericType(){

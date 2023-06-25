@@ -10,7 +10,7 @@ import java.lang.reflect.Parameter;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ConstructorWrapper<B> implements Wrapper<Constructor<B>>, ExecutableWrapper{
+public class ConstructorWrapper<B> implements Wrapper<Constructor<B>>, ExecutableWrapper, ModifierInformationist{
 
     static final Map<Constructor<?>, ConstructorWrapper<?>> cache = new ConcurrentHashMap<>();
 
@@ -38,6 +38,11 @@ public class ConstructorWrapper<B> implements Wrapper<Constructor<B>>, Executabl
             Parameter parameter = parameters[i];
             parameterWrappers.put(parameter.getName(), new ParameterWrapper(parameter, i));
         }
+    }
+
+    @Override
+    public int getModifiers() {
+        return get().getModifiers();
     }
 
     public ClassWrapper<?> getDeclaringClass(){

@@ -1,10 +1,18 @@
 package com.black.generic;
 
+import com.alibaba.fastjson.JSONObject;
+import com.black.utils.CollectionUtils;
 import lombok.NonNull;
+import sun.reflect.generics.reflectiveObjects.TypeVariableImpl;
+import sun.reflect.generics.tree.ClassTypeSignature;
+import sun.reflect.generics.tree.FieldTypeSignature;
+import sun.reflect.generics.tree.SimpleClassTypeSignature;
 
 import java.lang.reflect.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author 李桂鹏
@@ -89,8 +97,33 @@ public class GenericUtils {
     }
 
     public static Class<?> loadType(@NonNull Type type){
+        if (type instanceof Class){
+            return (Class<?>) type;
+        }
+
+        if (type instanceof TypeVariableImpl){
+            Type[] bounds = ((TypeVariableImpl<?>) type).getBounds();
+            if (bounds.length == 1){
+                Type bound = bounds[0];
+
+                if (bound instanceof Class){
+                    return (Class<?>) bound;
+                }
+
+                if (bound instanceof ClassTypeSignature){
+                    List<SimpleClassTypeSignature> signatureList = ((ClassTypeSignature) bound).getPath();
+                    SimpleClassTypeSignature typeSignature = CollectionUtils.firstElement(signatureList);
+                    if (typeSignature != null){
+                        return loadTypeByName(typeSignature.getName());
+                    }
+                }
+            }
+        }
+        return loadTypeByName(type.getTypeName());
+    }
+
+    protected static Class<?> loadTypeByName(@NonNull String name){
         try {
-            String name = type.getTypeName();
             int s = name.indexOf("<");
             if (s != -1){
                 name = name.substring(0, s);

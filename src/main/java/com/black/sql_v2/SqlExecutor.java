@@ -214,6 +214,7 @@ public class SqlExecutor implements NativeSqlAdapter, SqlOperator {
     }
 
     public String findPrimaryKeyName(String tableName){
+        init();
         return ConnectionManagement.employConnection(name, connection -> {
             TableMetadata metadata = TableUtils.getTableMetadata(tableName, connection);
             Assert.notNull(metadata, "unknown table of:[" + tableName + "]");
@@ -223,6 +224,7 @@ public class SqlExecutor implements NativeSqlAdapter, SqlOperator {
     }
 
     public List<String> findPrimaryKeyNames(String tableName){
+        init();
         return ConnectionManagement.employConnection(name, connection -> {
             TableMetadata metadata = TableUtils.getTableMetadata(tableName, connection);
             Assert.notNull(metadata, "unknown table of:[" + tableName + "]");

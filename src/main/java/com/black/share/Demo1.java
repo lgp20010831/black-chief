@@ -23,10 +23,11 @@ public class Demo1 {
     }
 
     public static void main(String[] args) {
-        ShareMap shareMap = new ShareMap();
-        for (int i = 0; i < 5; i++) {
-            shareMap.put(IdUtils.createShort8Id(), "1");
-        }
+        l1();
+//        ShareMap shareMap = new ShareMap();
+//        for (int i = 0; i < 5; i++) {
+//            shareMap.put(IdUtils.createShort8Id(), "1");
+//        }
 
     }
 }

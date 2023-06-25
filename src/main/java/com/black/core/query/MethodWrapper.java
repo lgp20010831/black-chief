@@ -7,11 +7,12 @@ import lombok.NonNull;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class MethodWrapper implements Wrapper<Method>, ExecutableWrapper{
+public class MethodWrapper implements Wrapper<Method>, ExecutableWrapper, ModifierInformationist{
 
     static final Map<Method, MethodWrapper> cache = new ConcurrentHashMap<>();
 
@@ -43,6 +44,39 @@ public class MethodWrapper implements Wrapper<Method>, ExecutableWrapper{
         for (Annotation annotation : method.getAnnotations()) {
             annotationMap.put(annotation.annotationType(), annotation);
         }
+    }
+
+    public boolean isNoParam(){
+        return getParameterCount() == 0;
+    }
+
+    public boolean isSingleParam(){
+        return getParameterCount() == 1;
+    }
+
+    public ParameterWrapper firstParam(){
+        ParameterWrapper[] parameterArray = getParameterArray();
+        if (parameterArray != null && parameterArray.length > 1){
+            return parameterArray[0];
+        }
+        return null;
+    }
+
+    public ParameterWrapper indexParam(int index){
+        ParameterWrapper[] parameterArray = getParameterArray();
+        if (parameterArray != null){
+            return parameterArray[index];
+        }
+        return null;
+    }
+
+    public boolean isVoid(){
+        return void.class.equals(getReturnType());
+    }
+
+    @Override
+    public int getModifiers(){
+        return get().getModifiers();
     }
 
     public ParameterWrapper[] getParameterArray() {

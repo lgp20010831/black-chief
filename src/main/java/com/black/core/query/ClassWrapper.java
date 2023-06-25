@@ -21,7 +21,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Log4j2
-public class ClassWrapper<T> implements Wrapper<Class<T>>, GenericWrapper{
+public class ClassWrapper<T> implements Wrapper<Class<T>>, GenericWrapper, ModifierInformationist{
 
     private static final Map<Class<?>, ClassWrapper<?>> cache = new ConcurrentHashMap<>();
 
@@ -196,6 +196,11 @@ public class ClassWrapper<T> implements Wrapper<Class<T>>, GenericWrapper{
         for (Annotation annotation : primordialClass.getAnnotations()) {
             annotationMap.put(annotation.annotationType(), annotation);
         }
+    }
+
+    @Override
+    public int getModifiers() {
+        return get().getModifiers();
     }
 
     public T instance(Object... args){

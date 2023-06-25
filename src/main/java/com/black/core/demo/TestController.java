@@ -20,4 +20,10 @@ public class TestController {
         if (ill == 1)
             throw new IOSException();
     }
+
+    public static void main(String[] args) {
+        String[] strings = {"1", "2"};
+        Object[] array = ServiceUtils.castArray(strings, Object.class);
+        System.out.println(array);
+    }
 }

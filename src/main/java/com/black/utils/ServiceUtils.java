@@ -44,6 +44,7 @@ import org.springframework.util.StringUtils;
 import javax.sql.DataSource;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -57,6 +58,20 @@ import java.util.function.Function;
 
 @SuppressWarnings("all")
 public class ServiceUtils {
+
+    public static <R> R[] castArray(Object param, Class<R> type){
+        if (param == null){
+            return null;
+        }
+        Class<?> paramClass = param.getClass();
+        if (!paramClass.isArray()){
+            throw new IllegalStateException("param is not a array");
+        }
+        int length = Array.getLength(param);
+        R[] instance = (R[]) Array.newInstance(type, length);
+        System.arraycopy(param, 0, instance, 0, length);
+        return instance;
+    }
 
     public static void addSort(Object param, String key){
         List<Object> list = SQLUtils.wrapList(param);
