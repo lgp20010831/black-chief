@@ -28,6 +28,8 @@ public class JdbcEntityCreator {
 
     private ColumnAnnotationGenerator columnAnnotationGenerator;
 
+    private Consumer<PartiallyCtClass> partiallyCtClassConsumer;
+
     public JdbcEntityCreator(){}
 
     public JdbcEntityCreator(@NonNull DataSource dataSource){
@@ -59,6 +61,14 @@ public class JdbcEntityCreator {
 
     public void setColumnAnnotationGenerator(ColumnAnnotationGenerator columnAnnotationGenerator) {
         this.columnAnnotationGenerator = columnAnnotationGenerator;
+    }
+
+    public void setPartiallyCtClassConsumer(Consumer<PartiallyCtClass> partiallyCtClassConsumer) {
+        this.partiallyCtClassConsumer = partiallyCtClassConsumer;
+    }
+
+    public Consumer<PartiallyCtClass> getPartiallyCtClassConsumer() {
+        return partiallyCtClassConsumer;
     }
 
     public Class<?> create(String tableName){
@@ -118,6 +128,13 @@ public class JdbcEntityCreator {
                     javaColumnMetadata.getJavaClass(), annotationMap,
                     partiallyCtClass.getCtClass());
             partiallyCtClass.addField(field);
+        }
+        if (partiallyCtClassConsumer != null){
+            try {
+                partiallyCtClassConsumer.accept(partiallyCtClass);
+            } catch (Throwable throwable) {
+                throw new IllegalStateException(throwable);
+            }
         }
         return partiallyCtClass.getJavaClass();
     }

@@ -18,6 +18,10 @@ import java.util.*;
 @Log4j2
 public class ChiefProjectSpringApplicationRunListener implements SpringApplicationRunListener {
 
+    public static SpringApplication springApplication;
+
+    public static String[] args;
+
     private final List<SpringApplicationRunListener> listeners = new ArrayList<>();
 
     public static final Set<String> ranges = new HashSet<>();
@@ -35,6 +39,8 @@ public class ChiefProjectSpringApplicationRunListener implements SpringApplicati
     }
 
     public ChiefProjectSpringApplicationRunListener(SpringApplication springApplication, String[] args){
+        ChiefProjectSpringApplicationRunListener.springApplication = springApplication;
+        ChiefProjectSpringApplicationRunListener.args = args;
         SpringApplicationHodler.setSpringApplication(springApplication);
         SpringApplicationHodler.setArgs(args);
         init();

@@ -8,7 +8,7 @@ import java.util.List;
 
 public class RolePermissionMapBean extends AbstractRUPBean implements RoleWithPermission {
     @Override
-    public List<Permission> getPremissions() {
-        return getList(GlobalVariablePool.RUP_PERMISSION_LIST_NAME, Permission.class);
+    public List<? extends Permission> getPremissions() {
+        return getList(GlobalVariablePool.RUP_PERMISSION_LIST_NAME, PermissionMapBean.class);
     }
 }

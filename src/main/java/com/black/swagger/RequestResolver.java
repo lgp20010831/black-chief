@@ -7,20 +7,25 @@ import com.black.api.FormatParser;
 import com.black.blent.Blent;
 import com.black.blent.BlentJavassistManager;
 import com.black.blent.BlentUtils;
-import com.black.javassist.PartiallyCtClass;
-import com.black.javassist.Utils;
 import com.black.core.bean.TrustBeanCollector;
+import com.black.core.factory.manager.FactoryManager;
 import com.black.core.log.IoLog;
 import com.black.core.log.LogFactory;
+import com.black.core.query.ClassWrapper;
+import com.black.core.query.MethodWrapper;
 import com.black.core.util.StringUtils;
+import com.black.javassist.PartiallyCtClass;
+import com.black.javassist.Utils;
+import com.black.utils.ServiceUtils;
 import io.swagger.annotations.ApiModelProperty;
 import javassist.CtField;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
- @SuppressWarnings("all")
+@SuppressWarnings("all")
 public class RequestResolver {
 
     private static final IoLog log = LogFactory.getLog4j();
@@ -57,6 +62,7 @@ public class RequestResolver {
                     json.putAll((Map<? extends String, ?>) def_json);
                 }
             }else {
+                part = preparePart(part, assist);
                 Blent blent = BlentUtils.parseBlends(part);
                 if (!blent.isJson()) {
                     throw new UnsupportedOperationException("not support blent to convert array");
@@ -93,5 +99,25 @@ public class RequestResolver {
 
     private JSON parseJson(String part){
         return formatParser.parseJSON(part);
+    }
+
+    private String preparePart(String part, Class<?> assist){
+        return ServiceUtils.parseTxt(part, "$<", ">", methodName -> {
+            ClassWrapper<?> classWrapper = ClassWrapper.get(assist);
+            AtomicReference<Object> beanRef = new AtomicReference<>();
+            MethodWrapper method = classWrapper.getMethod(methodName, 0);
+            if (method != null){
+                Object bean = beanRef.get();
+                if (bean == null){
+                    beanRef.set(FactoryManager.initAndGetBeanFactory().getSingleBean(assist));
+                    bean = beanRef.get();
+                    Object invoke = method.invoke(bean);
+                    if (invoke != null){
+                        return invoke.toString();
+                    }
+                }
+            }
+            return "";
+        });
     }
 }

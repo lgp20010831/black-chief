@@ -21,12 +21,14 @@ import com.black.core.mark.annotation.EnabledGlobalMarkHandler;
 import com.black.core.mybatis.plus.EnableAutoAdaptationDynamicllyIbaisPlus;
 import com.black.core.mybatis.source.annotation.EnableDynamicallyMultipleClients;
 import com.black.core.netty.annotation.EnableNettyAsynAdapter;
+import com.black.core.permission.EnabledRUPComponent;
 import com.black.core.query.ClassWrapper;
 import com.black.core.spring.ChiefApplicationRunner;
 import com.black.core.spring.component.DefaultLoadDriver;
 import com.black.core.sql.annotation.EnabledMapSQLApplication;
 import com.black.core.sql.code.mapping.EnabledGlobalMapping;
 import com.black.core.util.IntegratorScanner;
+import com.black.javassist.EnabledPreloadConfigurer;
 import com.black.mq_v2.annotation.EnabledMqttExt;
 import com.black.mvc.MvcMappingRegister;
 import com.black.nest.NestDictController;
@@ -38,6 +40,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 import java.util.Map;
 import java.util.Set;
+
 
 @EnableSwagger2
 @EnabledCastSwaggerToApi
@@ -60,7 +63,7 @@ import java.util.Set;
 //@EnableGlobalTxtUnionApiUnionOperatorCode
 //@EnabledManyAopMQClients
 //@EnabledMinios
-//@EnabledRUPComponent
+@EnabledRUPComponent
 @EnabledApplicationListenerOccur
 @EnabledGraphqlTransfer
 @EnabledGlobalMapping
@@ -83,7 +86,7 @@ import java.util.Set;
 @OpenChiefApplication
 @EnableDynamicallyMultipleClients("com.example.springautothymeleaf.test.contr")
 @EnableEventAutoDispenser
-
+@EnabledPreloadConfigurer(modifyScope = "com.black.asm", weaverScope = "com.black.javassist")
 //封神辣
 //@EntityScan(basePackages = {"com.example.springautothymeleaf.test.jpa.pojo"})
 //@EnableJpaRepositories(basePackages = {"com.example.springautothymeleaf.test"})

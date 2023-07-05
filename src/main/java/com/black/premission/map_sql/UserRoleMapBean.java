@@ -1,7 +1,6 @@
 package com.black.premission.map_sql;
 
 import com.black.GlobalVariablePool;
-import com.black.premission.Role;
 import com.black.premission.UserWithRole;
 
 import java.util.List;
@@ -9,8 +8,8 @@ import java.util.List;
 public class UserRoleMapBean extends AbstractRUPBean implements UserWithRole {
 
     @Override
-    public List<Role> getRoles() {
-        return getList(GlobalVariablePool.RUP_ROLE_LIST_NAME, Role.class);
+    public List<RoleMapBean> obtainRoles() {
+        return getList(GlobalVariablePool.RUP_ROLE_LIST_NAME, RoleMapBean.class);
     }
 
     @Override

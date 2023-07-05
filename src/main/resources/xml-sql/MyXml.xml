@@ -1,0 +1,19 @@
+<root>
+
+
+    <select id="queryAyc">
+        select * from ayc where 1 = 1 and name = ?3
+        <for target="arg1" prefix="and age in(" space="," suffix=")">
+            #{item}
+        </for>
+        <case prefix="and">
+            <when test="arg2 == 2" then="age > 2"/>
+        </case>
+        <switch target="arg2" prefix="and age = ">
+            <case test="2" then="4"/>
+            <case test="5" then="10"/>
+            <def then="20"/>
+        </switch>
+    </select>
+
+</root>

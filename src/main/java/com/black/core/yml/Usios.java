@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 @ChiefServlet @SuppressWarnings("all") @Lgwr
 public class Usios {
 
-    @V2Swagger("user{}")
+    @V2Swagger("ayc{}")
     @GetMapping("/ui/**")
     Object aaa(){
         return "hello";
