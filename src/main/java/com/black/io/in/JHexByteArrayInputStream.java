@@ -17,6 +17,11 @@ import java.util.List;
 
 public class JHexByteArrayInputStream extends DataByteBufferArrayInputStream{
 
+    public static JHexByteArrayInputStream wrapper16Stream(String char16){
+        byte[] bytes = JHex.decode(char16);
+        return new JHexByteArrayInputStream(bytes);
+    }
+
     public JHexByteArrayInputStream(byte[] buffer) {
         super(buffer);
     }

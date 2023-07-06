@@ -210,7 +210,7 @@ public class WordUtils {
 
     public static PictureRenderData writeImage(int width, int height, String type, InputStream in, String altMeta){
         PictureRenderData renderData = new PictureRenderData(width, height, type, in);
-        renderData.setAltMeta(altMeta);
+        renderData.setAltMeta(altMeta == null ? "图片加载失败" : altMeta);
         return renderData;
     }
 

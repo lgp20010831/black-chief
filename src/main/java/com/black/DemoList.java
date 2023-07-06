@@ -1,7 +1,6 @@
 package com.black;
 
 import com.alibaba.fastjson.JSONObject;
-import com.black.asm.Demo;
 import com.black.compile.JavaDelegateCompiler;
 import com.black.core.SpringAutoThymeleafApplication;
 import com.black.core.cache.TypeConvertCache;
@@ -14,6 +13,7 @@ import com.black.core.factory.beans.annotation.ProgramTiming;
 import com.black.core.factory.beans.config_collect520.Collect;
 import com.black.core.factory.beans.imports.Default;
 import com.black.core.factory.manager.FactoryManager;
+import com.black.core.query.ClassWrapper;
 import com.black.core.spring.ChiefApplicationRunner;
 import com.black.core.spring.OpenComponent;
 import com.black.core.spring.util.ApplicationUtil;
@@ -22,10 +22,13 @@ import com.black.core.util.LazyAutoWried;
 import com.black.datasource.MybatisPlusDynamicDataSourceBuilder;
 import com.black.ftl.FtlResolver;
 import com.black.graphql.Graphqls;
+import com.black.javassist.PartiallyCtClass;
 import com.black.project.DEMO;
 import com.black.project.JdbcProjectGenerator;
 import com.black.project.ProjectEnvironmentalGuess;
 import com.black.project.Version;
+import com.black.scan.ChiefScanner;
+import com.black.scan.ScannerManager;
 import com.black.sql_v2.Sql;
 import com.black.utils.IoUtils;
 import com.black.utils.ServiceUtils;
@@ -39,6 +42,7 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class DemoList {
 
@@ -102,7 +106,24 @@ public class DemoList {
 
     public static void main(String[] args) throws Throwable{
 
-        lltest();
+        scan();
+    }
+
+    public static void scan(){
+
+        ChiefScanner scanner = ScannerManager.getScanner();
+        Set<Class<?>> classes = scanner.load("com");
+        System.out.println(classes.size());
+
+    }
+
+    public static void testclass(){
+        PartiallyCtClass myClass = PartiallyCtClass.make("MyClass");
+
+        myClass.addMethod("sayName", void.class, "{System.out.println(\"hello world\");}");
+        Class<?> javaClass = myClass.getJavaClass();
+        Object instance = ClassWrapper.get(javaClass).instance();
+        ClassWrapper.get(javaClass).getSingleMethod("sayName").invoke(instance);
     }
 
 

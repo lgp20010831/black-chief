@@ -8,7 +8,9 @@ import com.black.core.util.Assert;
 import com.black.premission.GlobalRUPConfiguration;
 import com.black.premission.GlobalRUPConfigurationHolder;
 import com.black.premission.Panel;
+import com.black.swagger.v2.V2Swagger;
 import com.black.utils.ReflexHandler;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -45,40 +47,60 @@ public class AbstractRUPController<T, P extends Panel<T>> {
         return configuration;
     }
 
+    @RUPServletMethod
+    @GetMapping("singleById")
+    @ApiOperation("根据id查询单条数据")
+    @V2Swagger("$<getTableName>{}")
+    @ApiJdbcProperty(response = "$<getTableName>{}", remark = "根据id查询单条数据")
+    public Object singleById(@RequestParam String id){
+        return doGetSingleById(id);
+    }
 
     @RUPServletMethod
     @PostMapping("single")
+    @ApiOperation("根据条件查询单条数据")
+    @V2Swagger("$<getTableName>{}")
     @ApiJdbcProperty(request = "$<getTableName>{}", response = "$<getTableName>{}", remark = "根据条件查询单条数据")
-    public Object single(@RequestBody JSONObject json){
+    public Object single(@RequestBody @V2Swagger("$<getTableName>{}") JSONObject json){
         return doGetSingle(json);
     }
 
     @RUPServletMethod
     @PostMapping("list")
+    @ApiOperation("根据条件查询列表数据")
+    @V2Swagger("$<getTableName>{}")
     @ApiJdbcProperty(request = "$<getTableName>{}", response = "$<getTableName>[]", remark = "根据条件查询列表数据")
-    public Object list(@RequestBody JSONObject json){
+    public Object list(@RequestBody @V2Swagger("$<getTableName>{}") JSONObject json){
         return doGetList(json);
     }
 
     @RUPServletMethod
     @PostMapping("save")
+    @ApiOperation("添加或修改一条数据")
     @ApiJdbcProperty(request = "$<getTableName>{}",  remark = "添加或修改一条数据")
-    public Object save(@RequestBody JSONObject json){
+    public Object save(@RequestBody @V2Swagger("$<getTableName>{}") JSONObject json){
         return doSaveData(json);
     }
 
     @RUPServletMethod
     @PostMapping("join")
+    @ApiOperation("添加一条数据")
     @ApiJdbcProperty(request = "$<getTableName>{}",  remark = "添加一条数据")
-    public Object join(@RequestBody JSONObject json){
+    public Object join(@RequestBody @V2Swagger("$<getTableName>{}") JSONObject json){
         return doJoinData(json);
     }
 
     @RUPServletMethod
     @GetMapping("delete")
+    @ApiOperation("根据id删除一条数据")
     @ApiJdbcProperty(request = "url: ?id=主键", remark = "根据id删除一条数据")
     public Object delete(@RequestParam String id){
         return doDeleteData(id);
+    }
+
+    protected Object doGetSingleById(String id){
+        P p = find();
+        return p.findDataById(id);
     }
 
     protected Object doGetSingle(JSONObject json){

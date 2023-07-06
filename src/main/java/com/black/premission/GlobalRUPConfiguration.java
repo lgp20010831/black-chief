@@ -11,6 +11,7 @@ import com.black.core.sql.HumpColumnConvertHandler;
 import com.black.core.sql.code.AliasColumnConvertHandler;
 import com.black.core.sql.code.mapping.GlobalParentMapping;
 import com.black.core.util.Assert;
+import com.black.premission.collect.SqlCollector;
 import com.black.user.User;
 import com.black.user.UserPanel;
 import lombok.Getter;
@@ -21,7 +22,7 @@ import org.springframework.beans.factory.BeanFactory;
 public class GlobalRUPConfiguration {
 
 
-    private RUPType rupType = RUPType.MAP_SQL;
+    private RUPType rupType = RUPType.SQL;
 
     private RolePanel<Role> rolePanel;
 
@@ -87,6 +88,10 @@ public class GlobalRUPConfiguration {
             case MYBATIS_PLUS:
                 MPCollector mpCollector = new MPCollector();
                 mpCollector.collect(this);
+                break;
+            case SQL:
+                SqlCollector sqlCollector = new SqlCollector();
+                sqlCollector.collect(this);
                 break;
             case CUSTOM:
                 break;

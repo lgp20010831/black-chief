@@ -1,6 +1,5 @@
 package com.black.aop;
 
-import com.black.core.annotation.Export;
 import com.black.core.factory.beans.annotation.NotNull;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -20,8 +19,4 @@ public class AopDemo {
     }
 
 
-    @Export("loadAop")
-    void loadAop(Class<?> type){
-
-    }
 }

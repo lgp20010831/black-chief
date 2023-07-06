@@ -1,7 +1,7 @@
 spring:
   datasource:
     dynamic:
-      primary: two
+      primary: one
       datasource:
         one:
           driver-class-name: com.mysql.cj.jdbc.Driver
@@ -34,6 +34,7 @@ minios:
     secretKey: key11
     bucket: db
     file:
+
 #      minios  map: default: value
 #      default map: url: value ....
 #      url : url1
