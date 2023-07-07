@@ -11,6 +11,7 @@ import com.black.core.tools.BeanUtil;
 import com.black.core.util.StringUtils;
 import com.black.generic.Generic;
 import com.black.generic.GenericInfo;
+import com.black.json.Util;
 import com.black.utils.ServiceUtils;
 import javassist.*;
 import javassist.bytecode.*;
@@ -33,6 +34,51 @@ public class Utils {
         pool = ClassPool.getDefault();
         pool.appendClassPath(new LoaderClassPath(Thread.currentThread().getContextClassLoader()));
     }
+
+    public static void addFieldAnnotation(CtField field, CtAnnotations ctAnnotations){
+        ConstPool constPool = field.getFieldInfo().getConstPool();
+        Map<Class<? extends java.lang.annotation.Annotation>, Consumer<Annotation>> annotationCallback = ctAnnotations.getAnnotationCallback();
+        AnnotationsAttribute attr = new AnnotationsAttribute(constPool, AnnotationsAttribute.visibleTag);
+        for (Class<? extends java.lang.annotation.Annotation> at : annotationCallback.keySet()) {
+            Annotation ann = new Annotation(at.getName(), constPool);
+            Consumer<Annotation> consumer = annotationCallback.get(at);
+            if (consumer != null) {
+                try {
+                    consumer.accept(ann);
+                } catch (Throwable e) {
+                    throw new IllegalStateException(e);
+                }
+            }
+            attr.addAnnotation(ann);
+        }
+        field.getFieldInfo().addAttribute(attr);
+    }
+
+
+    public static Object getValByRV(String exp){
+        if (!exp.contains("|")){
+            return exp;
+        }
+        String valString = exp.substring(exp.lastIndexOf("|") + 1);
+        if (Util.isBool(valString)) {
+            return Boolean.parseBoolean(valString);
+        }
+        if (Util.isInt(valString)){
+            return Integer.parseInt(valString);
+        }
+        if (Util.isDouble(valString)){
+            return Double.parseDouble(valString);
+        }
+        return valString;
+    }
+
+    public static String getRemarkByRV(String exp){
+        if (!exp.contains("|")){
+            return exp;
+        }
+        return exp.substring(0, exp.lastIndexOf("|"));
+    }
+
 
     public static Map<String, CtClass> getPoolCache(){
         try {
@@ -75,7 +121,17 @@ public class Utils {
         List<CtField> list = new ArrayList<>();
         for (String key : json.keySet()) {
             Object value = json.get(key);
-            Class<?> type = value == null ? DEFAULT_FIELD_TYPE : BeanUtil.getPrimordialClass(value);
+            Class<?> type;
+            if (value == null){
+                type = DEFAULT_FIELD_TYPE;
+            }else {
+                if (value instanceof String) {
+                    Object valByRV = getValByRV(value.toString());
+                    type = BeanUtil.getPrimordialClass(valByRV);
+                }else {
+                    type = BeanUtil.getPrimordialClass(value);
+                }
+            }
             try {
                 CtClass fieldClass = simpleFieldType(type);
                 CtField ctField = new CtField(fieldClass, key, ctClass);

@@ -16,13 +16,16 @@ import com.black.core.util.AnnotationUtils;
 import com.black.core.util.Assert;
 import com.black.core.util.SetGetUtils;
 import com.black.core.util.Utils;
+import com.black.utils.ServiceUtils;
 
 import java.lang.reflect.Parameter;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-@GlobalAround
+@GlobalAround @SuppressWarnings("all")
 public class ReplenishMinutesSmallComponent implements GlobalAroundResolver {
 
     private final Map<Parameter, RepairTimeConfig> configCache = new ConcurrentHashMap<>();
@@ -31,13 +34,54 @@ public class ReplenishMinutesSmallComponent implements GlobalAroundResolver {
     public Object[] handlerArgs(Object[] args, HttpMethodWrapper mw) {
         MethodWrapper methodWrapper = mw.getMethodWrapper();
         List<ParameterWrapper> pws = methodWrapper.getParameterByAnnotation(RepairTime.class);
-        if (Utils.isEmpty(pws)){
-            return GlobalAroundResolver.super.handlerArgs(args, mw);
+        if (!Utils.isEmpty(pws)){
+            for (ParameterWrapper pw : pws) {
+                processRepairTime(pw, args, mw);
+            }
         }
-        for (ParameterWrapper pw : pws) {
-            processRepairTime(pw, args, mw);
+        List<ParameterWrapper> timeCompletionPws = methodWrapper.getParameterByAnnotation(TimeCompletion.class);
+        if (!Utils.isEmpty(timeCompletionPws)){
+            for (ParameterWrapper timeCompletionPw : timeCompletionPws) {
+                processTimeCompletion(timeCompletionPw, args, mw);
+            }
         }
         return GlobalAroundResolver.super.handlerArgs(args, mw);
+    }
+
+    public void processTimeCompletion(ParameterWrapper pw, Object[] args, HttpMethodWrapper mw){
+        TimeCompletion annotation = pw.getAnnotation(TimeCompletion.class);
+        String[] value = annotation.value();
+
+        //要修复的参数
+        Object target = args[pw.getIndex()];
+        if (target == null){
+            return;
+        }
+        Set<String> startTimeKeyNames = new HashSet<>();
+        Set<String> endTimeKeyNames = new HashSet<>();
+        for (String s : value) {
+            String[] kv = s.trim().split("->");
+            if (kv.length > 1){
+                startTimeKeyNames.add(kv[0]);
+            }
+            if (kv.length > 2){
+                endTimeKeyNames.add(kv[1]);
+            }
+        }
+        RepairTimeConfig config = new RepairTimeConfig();
+        config.setAppendEndTime(annotation.appendEndTime());
+        config.setAppendStartTime(annotation.appendStartTime());
+        for (String startTimeKeyName : startTimeKeyNames) {
+            Object val = ServiceUtils.getProperty(target, startTimeKeyName);
+            Object after = doProcessorStartTime(pw, args, mw, val, config);
+            ServiceUtils.setProperty(target, startTimeKeyName, after);
+        }
+
+        for (String endTimeKey : endTimeKeyNames) {
+            Object val = ServiceUtils.getProperty(target, endTimeKey);
+            Object after = doProcessorEndTime(pw, args, mw, val, config);
+            ServiceUtils.setProperty(target, endTimeKey, after);
+        }
     }
 
     public void processRepairTime(ParameterWrapper pw, Object[] args, HttpMethodWrapper mw){

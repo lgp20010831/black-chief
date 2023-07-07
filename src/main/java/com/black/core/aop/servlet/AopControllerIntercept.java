@@ -2,6 +2,7 @@ package com.black.core.aop.servlet;
 
 import com.alibaba.fastjson.JSONObject;
 import com.black.GlobalVariablePool;
+import com.black.Servlet;
 import com.black.core.aop.code.AopTaskIntercepet;
 import com.black.core.aop.code.HijackObject;
 import com.black.core.aop.servlet.result.*;
@@ -14,10 +15,7 @@ import com.black.core.query.ClassWrapper;
 import com.black.core.query.MethodWrapper;
 import com.black.core.servlet.HttpRequestUtil;
 import com.black.core.sql.code.util.SQLUtils;
-import com.black.core.util.CentralizedExceptionHandling;
-import com.black.core.util.Convert;
-import com.black.core.util.ExceptionUtil;
-import com.black.core.util.StringUtils;
+import com.black.core.util.*;
 import com.black.holder.SpringHodler;
 import com.black.spring.ChiefSpringHodler;
 import com.github.pagehelper.Page;
@@ -86,6 +84,7 @@ public class AopControllerIntercept implements AopTaskIntercepet, CollectedCilen
         Method method = hijack.getMethod();
         Class<?> hijackClazz = hijack.getClazz();
         Object[] args = hijack.getArgs();
+        Object aThis = hijack.getInvocation().getThis();
         //获取解析的wrapper
         HttpMethodWrapper httpMethodWrapper = processorMethodBeforeEnhance(method, hijackClazz, args);
 
@@ -96,6 +95,7 @@ public class AopControllerIntercept implements AopTaskIntercepet, CollectedCilen
 
         try {
             saveHttpMethodWrapper(httpMethodWrapper);
+            processServletArg(args, httpMethodWrapper, aThis);
             boolean startPage = false;
             if (httpMethodWrapper.isPage()) {
                 startPage = startPage(httpMethodWrapper);
@@ -109,6 +109,46 @@ public class AopControllerIntercept implements AopTaskIntercepet, CollectedCilen
         }finally {
             pageThreadLocal.remove();
             closeHttpManager();
+            endServlet(aThis);
+        }
+    }
+
+    protected void endServlet(Object instance){
+        if(instance instanceof Servlet){
+            ((Servlet) instance).fetchFinishCallback();
+        }
+    }
+
+    protected void processServletArg(Object[] args, HttpMethodWrapper httpMethodWrapper, Object instance){
+        if(!(instance instanceof Servlet)){
+            return;
+        }
+        ((Servlet) instance).setArg(args);
+        AopChiefServletConfiguration configuration = AopChiefServletConfiguration.getInstance();
+        handlerRequestBody(args, httpMethodWrapper.getHttpMethod(), (Servlet) instance);
+        handlerRequestPart(args, httpMethodWrapper.getHttpMethod(), (Servlet) instance);
+    }
+
+    protected void handlerRequestBody(Object[] args, Method method, Servlet servlet){
+        MethodWrapper methodWrapper = MethodWrapper.get(method);
+        ParameterWrapper bodyPw = methodWrapper.getSingleParameterByAnnotation(RequestBody.class);
+        if (bodyPw != null){
+            Object body = args[bodyPw.getIndex()];
+            servlet.setBody(body);
+        }
+    }
+
+    protected void handlerRequestPart(Object[] args, Method method, Servlet servlet){
+        MethodWrapper methodWrapper = MethodWrapper.get(method);
+        List<ParameterWrapper> parts = methodWrapper.getParameterByAnnotation(RequestPart.class);
+        if (!Utils.isEmpty(parts)){
+            Map<String, Object> partMap = new LinkedHashMap<>();
+            for (ParameterWrapper part : parts) {
+                RequestPart annotation = part.getAnnotation(RequestPart.class);
+                String value = annotation.value();
+                partMap.put(value, args[part.getIndex()]);
+            }
+            servlet.setPart(partMap);
         }
     }
 

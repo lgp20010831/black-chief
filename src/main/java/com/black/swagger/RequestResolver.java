@@ -7,6 +7,10 @@ import com.black.api.FormatParser;
 import com.black.blent.Blent;
 import com.black.blent.BlentJavassistManager;
 import com.black.blent.BlentUtils;
+import com.black.javassist.CtAnnotation;
+import com.black.javassist.CtAnnotations;
+import com.black.javassist.PartiallyCtClass;
+import com.black.javassist.Utils;
 import com.black.core.bean.TrustBeanCollector;
 import com.black.core.factory.manager.FactoryManager;
 import com.black.core.log.IoLog;
@@ -89,7 +93,11 @@ public class RequestResolver {
     protected List<CtField> mutateJsonToFields(JSONObject json, PartiallyCtClass partiallyCtClass){
         return Utils.mutateJsonToFields(json, partiallyCtClass.getCtClass(), (field, ctClass, jsonValue) -> {
             String remark = jsonValue == null ? "" : jsonValue.toString();
-            Utils.addAnnotationOnField(field, ctClass, ApiModelProperty.class, "value", remark);
+            remark = Utils.getRemarkByRV(remark);
+            CtAnnotation annotation = new CtAnnotation(ApiModelProperty.class);
+            annotation.addField("value", remark, String.class);
+            CtAnnotations annotations = CtAnnotations.group(annotation);
+            Utils.addFieldAnnotation(field, annotations);
         });
     }
 

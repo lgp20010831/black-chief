@@ -7,8 +7,12 @@ import com.black.core.sql.code.config.StatementValueSetDisplayConfiguration;
 import com.black.datasource.DataSourceBuilderTypeManager;
 import com.black.json.JsonParser;
 import com.black.sql_v2.utils.VarcharIdType;
+import com.black.utils.LocalSet;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.Arrays;
+import java.util.Set;
 
 @Getter @Setter
 public class Environment extends SqlSeqMetadata{
@@ -39,6 +43,12 @@ public class Environment extends SqlSeqMetadata{
 
     private StatementValueSetDisplayConfiguration displayConfiguration;
 
+    private final LocalSet<String> memorySelectTableNames = new LocalSet<>();
+
+    private final ThreadLocal<String> schemaLocal = new ThreadLocal<>();
+
+    private boolean openMemorySelect = false;
+
     public Environment() {
         this.parent = GlobalEnvironment.getInstance();
         seqPackCache.putAll(parent.getSeqPackCache());
@@ -58,5 +68,29 @@ public class Environment extends SqlSeqMetadata{
             dataSourceBuilder = parent.getDataSourceBuilder();
         }
         return dataSourceBuilder;
+    }
+
+    public Set<String> getMemoryTables(){
+        return memorySelectTableNames.current();
+    }
+
+    public void registerMemoryTables(String... tables){
+        memorySelectTableNames.addAll(Arrays.asList(tables));
+    }
+
+    public void clearMemoryTables(){
+        memorySelectTableNames.clear();
+    }
+
+    public String getCurrentSchame(){
+        return schemaLocal.get();
+    }
+
+    public void setSchemaLocal(String schema){
+        schemaLocal.set(schema);
+    }
+
+    public void clearSchema(){
+        schemaLocal.remove();
     }
 }

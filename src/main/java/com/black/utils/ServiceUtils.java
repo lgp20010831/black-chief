@@ -816,6 +816,10 @@ public class ServiceUtils {
         return source;
     }
 
+    public static <K, V> Map<K, V> ofMap(){
+        return new LinkedHashMap<>();
+    }
+
     public static <K, V> Map<K, V> ofMap(K k, V v){
         return Vfu.of(k, v);
     }

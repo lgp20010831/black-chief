@@ -60,7 +60,7 @@ public class AbstractRUPController<T, P extends Panel<T>> {
     @PostMapping("single")
     @ApiOperation("根据条件查询单条数据")
     @V2Swagger("$<getTableName>{}")
-    @ApiJdbcProperty(request = "$<getTableName>{}", response = "$<getTableName>{}", remark = "根据条件查询单条数据")
+    @ApiJdbcProperty(request = "$<getTableName>{}", response = "$<getTableName>{}", remark = "根据条件查询单条数据", hide = true)
     public Object single(@RequestBody @V2Swagger("$<getTableName>{}") JSONObject json){
         return doGetSingle(json);
     }
@@ -105,26 +105,42 @@ public class AbstractRUPController<T, P extends Panel<T>> {
 
     protected Object doGetSingle(JSONObject json){
         P p = find();
-        T t = p.convert(json);
-        return p.singleList(t);
+        if (p.openEntity()){
+            T t = p.convert(json);
+            return p.singleList(t);
+        }else {
+            return p.singleListByMap(json);
+        }
     }
 
     protected Object doGetList(JSONObject json){
         P p = find();
-        T t = p.convert(json);
-        return p.dataList(t);
+        if (p.openEntity()){
+            T t = p.convert(json);
+            return p.dataList(t);
+        }else {
+            return p.dataListByMap(json);
+        }
     }
 
     protected Object doJoinData(JSONObject json){
         P p = find();
-        T t = p.convert(json);
-        return p.join(t);
+        if (p.openEntity()){
+            T t = p.convert(json);
+            return p.join(t);
+        }else {
+            return p.joinByMap(json);
+        }
     }
 
     protected Object doSaveData(JSONObject json){
         P p = find();
-        T t = p.convert(json);
-        return p.dataSave(t);
+        if (p.openEntity()){
+            T t = p.convert(json);
+            return p.dataSave(t);
+        }else {
+            return p.dataSaveByMap(json);
+        }
     }
 
     protected Object doDeleteData(String id){

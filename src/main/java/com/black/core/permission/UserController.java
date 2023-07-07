@@ -5,6 +5,7 @@ import com.black.GlobalVariablePool;
 import com.black.core.aop.servlet.GlobalEnhanceRestController;
 import com.black.core.util.Assert;
 import com.black.pattern.PremiseProxy;
+import com.black.role.SkipVerification;
 import com.black.user.User;
 import com.black.user.UserPanel;
 import io.swagger.annotations.Api;
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Log4j2
 @CrossOrigin
-@RequestMapping("rup/user")
+@RequestMapping("rup/user") @SkipVerification
 @PremiseProxy(EnabledPermissionPremise.class)
 @GlobalEnhanceRestController @Api(tags = "RUP用户管理模块")
 public class UserController extends AbstractRUPController<User, UserPanel<User>> {

@@ -165,7 +165,7 @@ public class Col {
         return jf(new String[]{k1, k2, k3, k4}, new Object[]{v1, v2, v3, v4});
     }
     public static JSONObject jf(String[] ks, Object[] vs){
-        JSONObject json = new JSONObject();
+        JSONObject json = new JSONObject(true);
         int size = ks.length;
         if (size != vs.length){
             throw new RuntimeException("ks.size != vs.size");
@@ -198,7 +198,7 @@ public class Col {
     }
 
     public static <K, V> Map<K, V> as(K[] ks, V[] vs){
-        Map<K, V> map = new HashMap<>();
+        Map<K, V> map = new LinkedHashMap<>();
         int size = ks.length;
         if (size != vs.length){
             throw new RuntimeException("ks.size != vs.size");

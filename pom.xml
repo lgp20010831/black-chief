@@ -26,6 +26,29 @@
 
     </properties>
     <dependencies>
+<!--        <dependency>-->
+<!--            <groupId>org.smartloli</groupId>-->
+<!--            <artifactId>jsql-client</artifactId>-->
+<!--            <version>1.0.0</version>-->
+<!--        </dependency>-->
+
+<!--        <dependency>-->
+<!--            <groupId>org.antlr</groupId>-->
+<!--            <artifactId>antlr4</artifactId>-->
+<!--            <version>4.9.3</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>org.antlr</groupId>-->
+<!--            <artifactId>antlr4-runtime</artifactId>-->
+<!--            <version>4.9.3</version>-->
+<!--        </dependency>-->
+
+        <dependency>
+            <groupId>org.apache.calcite</groupId>
+            <artifactId>calcite-core</artifactId>
+            <version>1.26.0</version>
+            <!--<version>1.11.0</version>-->
+        </dependency>
 
         <dependency>
             <groupId>org.freemarker</groupId>
@@ -513,7 +536,8 @@
                     <exclude>**.png</exclude>
                     <exclude>**.xlsm</exclude>
                     <exclude>**.xls</exclude>
-                    <exclude>**.xlsx</exclude>
+                    <exclude>xml-sql/**</exclude>
+                    <exclude>jquery/**</exclude>
                 </excludes>
             </resource>
         </resources>

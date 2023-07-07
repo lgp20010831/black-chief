@@ -48,7 +48,7 @@ public interface ListResourceHandler {
     }
 
     default List<Integer> intList(){
-        return StreamUtils.mapList(values(), e -> Integer.valueOf(String.valueOf(e)));
+        return StreamUtils.mapList(values(), e -> TypeUtils.castToInt(e));
     }
 
     default String stringValue(){
@@ -89,7 +89,7 @@ public interface ListResourceHandler {
     }
 
     default List<Double> doubleList(){
-        return StreamUtils.mapList(values(), e -> Double.valueOf(String.valueOf(e)));
+        return StreamUtils.mapList(values(), e -> TypeUtils.castToDouble(e));
     }
 
     default boolean booleanVal(){
@@ -106,7 +106,7 @@ public interface ListResourceHandler {
     }
 
     default List<Boolean> booleanList(){
-        return StreamUtils.mapList(values(), e -> Boolean.valueOf(String.valueOf(e)));
+        return StreamUtils.mapList(values(), e -> TypeUtils.castToBoolean(e));
     }
 
     default <T> ObjectInputStream<T> getObjectInputStream(){

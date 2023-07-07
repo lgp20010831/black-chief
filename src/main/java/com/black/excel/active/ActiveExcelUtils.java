@@ -1,5 +1,7 @@
 package com.black.excel.active;
 
+
+
 import com.black.utils.TypeUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
@@ -12,6 +14,44 @@ import java.util.List;
 @SuppressWarnings("all")
 public class ActiveExcelUtils {
 
+    /**
+     * 该方法用来将Excel中的ABCD列转换成具体的数据
+     * @param column:ABCD列名称
+     * @return integer：将字母列名称转换成数字
+     * **/
+    public static int excelColStrToNum(String column) {
+        int num = 0;
+        int result = 0;
+        int length =column.length();
+        for(int i = 0; i < length; i++) {
+            char ch = column.charAt(length - i - 1);
+            num = (int)(ch - 'A' + 1) ;
+            num *= Math.pow(26, i);
+            result += num;
+        }
+        return result;
+    }
+
+    /**
+     * 该方法用来将具体的数据转换成Excel中的ABCD列
+     * @param int：需要转换成字母的数字
+     * @return column:ABCD列名称
+     * **/
+    public static String excelColIndexToStr(int columnIndex) {
+        if (columnIndex <= 0) {
+            return null;
+        }
+        String columnStr = "";
+        columnIndex--;
+        do {
+            if (columnStr.length() > 0) {
+                columnIndex--;
+            }
+            columnStr = ((char) (columnIndex % 26 + (int) 'A')) + columnStr;
+            columnIndex = (int) ((columnIndex - columnIndex % 26) / 26);
+        } while (columnIndex > 0);
+        return columnStr;
+    }
 
     //获取单元格有几列
     public static int getMergeColumNum(Cell cell, Sheet sheet) {
@@ -60,8 +100,8 @@ public class ActiveExcelUtils {
                 Object cellValue = getCellValue(fCell);
                 wrapper.setMerge(true);
                 wrapper.setValue(cellValue);
-                wrapper.setHeight(lastRow - firstRow);
-                wrapper.setWidth(lastColumn - firstColumn);
+                wrapper.setHeight(lastRow - firstRow + 1);
+                wrapper.setWidth(lastColumn - firstColumn + 1);
                 wrapper.setFirstRowIndex(firstRow);
                 wrapper.setLastRowIndex(lastRow);
                 wrapper.setFirstColumnIndex(firstColumn);
@@ -110,7 +150,12 @@ public class ActiveExcelUtils {
                 try {
                     return cell.getNumericCellValue();
                 }catch (IllegalStateException e){
-                    return cell.getStringCellValue();
+
+                    try {
+                        return cell.getStringCellValue();
+                    }catch (IllegalStateException e1){
+                        return cell.getCellFormula();
+                    }
                 }
             default:
                 return cell.getStringCellValue();

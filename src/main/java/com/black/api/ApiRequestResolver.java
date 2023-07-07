@@ -3,9 +3,7 @@ package com.black.api;
 import com.alibaba.fastjson.JSONObject;
 import com.black.blent.Blent;
 import com.black.blent.BlentJavassistManager;
-import com.black.javassist.JdbcEntityCreator;
-import com.black.javassist.PartiallyCtClass;
-import com.black.javassist.Utils;
+import com.black.javassist.*;
 import com.black.core.bean.TrustBeanCollector;
 import com.black.core.util.StringUtils;
 import com.black.swagger.RequestResolver;
@@ -45,8 +43,13 @@ public class ApiRequestResolver extends RequestResolver {
     protected List<CtField> mutateJsonToFields(JSONObject json, PartiallyCtClass partiallyCtClass) {
         return Utils.mutateJsonToFields(json, partiallyCtClass.getCtClass(), (field, ctClass, jsonValue) -> {
             String remark = jsonValue == null ? "" : jsonValue.toString();
-            Utils.addAnnotationOnField(field, ctClass, ApiModelProperty.class, "value", remark);
-            Utils.addAnnotationOnField(field, ctClass, ApiRemark.class, "value", remark);
+            remark = Utils.getRemarkByRV(remark);
+            CtAnnotation annotation = new CtAnnotation(ApiModelProperty.class);
+            annotation.addField("value", remark, String.class);
+            CtAnnotation ctAnnotation = new CtAnnotation(ApiRemark.class);
+            ctAnnotation.addField("value", remark, String.class);
+            CtAnnotations annotations = CtAnnotations.group(annotation, ctAnnotation);
+            Utils.addFieldAnnotation(field, annotations);
         });
     }
 
