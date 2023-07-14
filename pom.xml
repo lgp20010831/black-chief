@@ -536,6 +536,7 @@
                     <exclude>**.png</exclude>
                     <exclude>**.xlsm</exclude>
                     <exclude>**.xls</exclude>
+                    <exclude>**.xlsx</exclude>
                     <exclude>xml-sql/**</exclude>
                     <exclude>jquery/**</exclude>
                 </excludes>

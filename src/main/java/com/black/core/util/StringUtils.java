@@ -1,10 +1,23 @@
 package com.black.core.util;
 
+import org.checkerframework.checker.units.qual.C;
 import org.springframework.lang.Nullable;
 
 import java.util.StringJoiner;
 
 public class StringUtils {
+    public static String trimAndLine(String target){
+        if (target == null) return null;
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < target.length(); i++) {
+            char c = target.charAt(i);
+            if (c == ' ' || c == '\n' || c == '\t'){
+                continue;
+            }
+            builder.append(c);
+        }
+        return builder.toString();
+    }
 
     public static String overallIndent(String str, int size){
         StringBuilder indentBuilder = new StringBuilder();

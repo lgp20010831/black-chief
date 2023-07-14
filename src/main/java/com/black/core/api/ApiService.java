@@ -50,6 +50,10 @@ public class ApiService{
         return stream;
     }
 
+    public void setCache(String cache) {
+        this.cache = cache;
+    }
+
     public ApiConfiguration prepare(){
         ApiConfiguration configuration = ApiConfigurationHolder.getConfiguration();
         Set<Class<? extends Annotation>> annotationTypes = configuration.getSelectedScanAnnotationTypes();

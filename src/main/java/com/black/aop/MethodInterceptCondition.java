@@ -25,4 +25,6 @@ public class MethodInterceptCondition {
 
     boolean annAnd;
 
+    String[] methodNames;
+
 }

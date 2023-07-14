@@ -44,8 +44,7 @@ public class SeqMetadataListener implements SqlListener{
                         Object originValue = ServiceUtils.getProperty(ele, alias);
                         if (originValue == null){
                             v = getValue(v);
-                            String value = MapArgHandler.getString(v);
-                            ServiceUtils.setProperty(ele, alias, value);
+                            ServiceUtils.setProperty(ele, alias, v);
                         }
                     }
                 }else {

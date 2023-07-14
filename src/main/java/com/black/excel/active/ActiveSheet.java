@@ -1,6 +1,7 @@
 package com.black.excel.active;
 
 
+import com.alibaba.fastjson.JSONObject;
 import com.black.core.json.JsonUtils;
 import com.black.core.sql.code.util.SQLUtils;
 import com.black.core.util.StringUtils;
@@ -14,7 +15,6 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 
-import javax.print.ServiceUI;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,6 +31,8 @@ public class ActiveSheet {
     private volatile boolean invokeTitleMethod = false;
 
     private int dataNumberOfrowsOccupied = 1;
+
+    private final MergeCellSupervisor mergeCellSupervisor;
 
     private int titleIndex = 0;
 
@@ -55,6 +57,12 @@ public class ActiveSheet {
     private final Workbook workbook;
 
     private Function<Workbook, Sheet> function;
+
+    private Set<String> titleAutoMerges;
+
+    public static ActiveSheet create(String path, Function<Workbook, Sheet> function){
+        return create(com.black.utils.ServiceUtils.getResource(path), function, 0, 0);
+    }
 
     public static ActiveSheet create(InputStream inputStream, Function<Workbook, Sheet> function){
         return create(inputStream, function, 0, 0);
@@ -87,6 +95,29 @@ public class ActiveSheet {
         this.columnEnd = columnEnd;
         this.workbook = workbook;
         workbook.setForceFormulaRecalculation(true);
+        titleAutoMerges = new HashSet<>();
+        mergeCellSupervisor = new MergeCellSupervisor(this.sheet);
+        mergeCellSupervisor.setSupervises(titleAutoMerges);
+    }
+
+    public void addTitleSupervise(String... ts){
+        titleAutoMerges.addAll(Arrays.asList(ts));
+    }
+
+    public void mergeRow(int row){
+        Row r = getRow(row);
+        mergeRow(row, columnEnd < 0 ? r.getLastCellNum() : columnEnd);
+    }
+
+    public void mergeRow(int row, int colLeght){
+        if (colLeght == 0) return;
+        int columnIndex = getColumnIndex(0);
+        int rowIndex = getRowIndex(row);
+        mergeCellSupervisor.merge(rowIndex, rowIndex, columnIndex, columnIndex + colLeght);
+    }
+
+    public MergeCellSupervisor getMergeCellSupervisor() {
+        return mergeCellSupervisor;
     }
 
     public void setTitleIndex(int titleIndex) {
@@ -98,7 +129,15 @@ public class ActiveSheet {
     }
 
     public void setTitleEscape(Map<String, String> titleEscape) {
-        this.titleEscape = titleEscape;
+        if (isTrimTitle()){
+            this.titleEscape = new LinkedHashMap<>();
+            titleEscape.forEach((k, v) -> {
+                this.titleEscape.put(StringUtils.trimAndLine(k), v);
+            });
+        }else {
+            this.titleEscape = titleEscape;
+        }
+
     }
 
     public void setTitleMergeLenght(int titleMergeLenght) {
@@ -460,6 +499,9 @@ public class ActiveSheet {
     protected String castTitle(String title, int index){
         index = index - getColumnOffset();
         if (titleEscape != null){
+            if (isTrimTitle()){
+                return titleEscape.get(StringUtils.trimAndLine(title));
+            }else
             title = titleEscape.get(title);
         }
 
@@ -512,22 +554,31 @@ public class ActiveSheet {
             int cellIndex = getColumnIndex(0);
             for (int j = 0; j < titleList.size(); j++) {
                 try {
+                    boolean wd = true;
                     String title = titleList.get(j);
                     CellValueWrapper wrapper = titleInfo.get(title);
                     Cell cell = cells.get(cellIndex);
-                    if(wrapper.isMerge()){
-                        cellIndex = cellIndex + wrapper.getWidth() - 1;
-                        int rowNum = row.getRowNum();
-                        int columnIndex = cell.getColumnIndex();
-                        sheet.addMergedRegion(new CellRangeAddress(rowNum, rowNum + dataNumberOfrowsOccupied - 1, columnIndex, columnIndex + wrapper.getWidth() - 1));
-                    }
+                    int rowNum = row.getRowNum();
+                    int columnIndex = cell.getColumnIndex();
                     String key = castTitle(title, cellIndex);
                     Object value = data.get(key);
+                    if(wrapper.isMerge()){
+                        cellIndex = cellIndex + wrapper.getWidth() - 1;
+
+                        wd = mergeCellSupervisor.mergeBySupervise(rowNum, rowNum + dataNumberOfrowsOccupied - 1, columnIndex,
+                                columnIndex + wrapper.getWidth() - 1, title, value);
+                    }else{
+                        wd = mergeCellSupervisor.supervise(rowNum, rowNum, columnIndex, columnIndex, title, value);
+                    }
+
                     CellType cellType = cell.getCellTypeEnum();
+                    processCell(cell);
                     if (value == null && cellType == CellType.FORMULA){
                         continue;
                     }
-                    processCell(cell);
+                    if (!wd){
+                        continue;
+                    }
                     ActiveExcelUtils.setCellValue(cell, value);
                 }finally {
                     cellIndex ++;
@@ -674,6 +725,179 @@ public class ActiveSheet {
 
         }
         return result;
+    }
+
+
+    public void writeEmbeddedData(Object source, int start){
+        List<Object> list = SQLUtils.wrapList(source);
+        checkRowNum(start);
+        int startIndex = getRowIndex(start);
+        Map<String, CellValueWrapper> titleInfo = getTitleInfo();
+        int cellSizeByTitle = getMinCellSizeByTitle(titleInfo);
+        int i = startIndex;
+        for (Object ele : list) {
+            JSONObject eleSource = JsonUtils.letJson(ele);
+            Row row = getRow(i);
+            int sourceMaxRow = findEleSourceMaxRow(eleSource, titleInfo);
+            i = i + sourceMaxRow;
+            List<Cell> cells = getCells(row, cellSizeByTitle);
+            int titleIndex = 0;
+            int cellIndex = getColumnIndex(0);
+            for (String titleKey : titleInfo.keySet()) {
+                try {
+                    CellValueWrapper wrapper = titleInfo.get(titleKey);
+                    String titleAppendKey = getTitleAppendKey(titleKey);
+                    String title = castTitle(titleAppendKey, titleIndex);
+                    title = title == null ? titleAppendKey : title;
+                    Object val = eleSource.get(title);
+                    Cell cell = cells.get(cellIndex);
+
+                    if(val instanceof List){
+                        List<Object> valList = (List<Object>) val;
+                        String titleAppendValue = getTitleAppendValue(titleKey);
+                        Cell target = cell;
+                        int targetRowNum = row.getRowNum();
+                        for (Object valEle : valList) {
+                            JSONObject valEleJson = JsonUtils.letJson(valEle);
+                            String castTitle = castTitle(titleAppendValue, target.getColumnIndex());
+                            castTitle = castTitle == null ? titleAppendValue : castTitle;
+                            Object value = valEleJson.get(castTitle);
+                            writeCell(target, value);
+                            target = getCell(getRow(++targetRowNum), target.getColumnIndex());
+                        }
+                    }else {
+                        boolean wd = true;
+                        int rowNum = row.getRowNum();
+                        int columnIndex = cell.getColumnIndex();
+                        if(wrapper.isMerge()){
+                            cellIndex = cellIndex + wrapper.getWidth() - 1;
+                            wd = mergeCellSupervisor.mergeBySupervise(rowNum, rowNum + sourceMaxRow - 1, columnIndex, columnIndex + wrapper.getWidth() - 1, titleKey, val);
+                        }else {
+                            wd = mergeCellSupervisor.supervise(rowNum, rowNum, columnIndex, columnIndex, titleKey, val);
+                        }
+                        if(wd)
+                            writeCell(cell, val);
+                    }
+                }finally {
+                    cellIndex ++;
+                }
+            }
+        }
+    }
+
+    void writeCell(Cell cell, Object val){
+        CellType cellType = cell.getCellTypeEnum();
+        if (val == null && cellType == CellType.FORMULA){
+            return;
+        }
+        processCell(cell);
+        ActiveExcelUtils.setCellValue(cell, val);
+    }
+
+
+    int findEleSourceMaxRow(JSONObject eleSource, Map<String, CellValueWrapper> titleInfo){
+        int max = 1;
+        for (String key : eleSource.keySet()) {
+            Object obj = eleSource.get(key);
+            if (obj instanceof List){
+                max = Math.max(((List<?>) obj).size(), max);
+            }
+        }
+        return max;
+    }
+
+    String getTitleAppendKey(String title){
+        return title.contains(getAppendMergeTitleFlage()) ?
+                title.substring(0, title.indexOf(getAppendMergeTitleFlage())) : title;
+    }
+
+    String getTitleAppendValue(String title){
+        return title.contains(getAppendMergeTitleFlage()) ?
+                title.substring(title.indexOf(getAppendMergeTitleFlage()) + 1) : title;
+    }
+
+    int getMinCellSizeByTitle(Map<String, CellValueWrapper> titleInfo){
+        int min = 0;
+        for (String k : titleInfo.keySet()) {
+            CellValueWrapper wrapper = titleInfo.get(k);
+            min = min + wrapper.getWidth();
+        }
+        return min;
+    }
+
+
+    public void writeCommonData(Object source, boolean cover, int titleIndex){
+        this.titleIndex = titleIndex;
+        writeCommonData(source, cover ? titleIndex + titleMergeLenght :
+                (rowLimit < 0 ? sheet.getLastRowNum() : rowLimit), titleIndex);
+    }
+
+    public void writeCommonData(Object source, boolean cover){
+        writeCommonData(source, cover ? titleIndex + titleMergeLenght :
+                (rowLimit < 0 ? sheet.getLastRowNum() : rowLimit), titleIndex);
+    }
+
+    public void writeCommonData(Object source, int start, int titleIndex){
+        checkRowNum(start);
+        Map<String, CellValueWrapper> titleInfo = getTitleInfo(titleIndex);
+        List<String> titleList = new ArrayList<>(titleInfo.keySet());
+        List<Object> datas = SQLUtils.wrapList(source);
+        int specification = titleIndex + titleMergeLenght;
+        start = Math.max(specification, start);
+        int rowIndex = getRowIndex(start);
+        List<Row> rows = getRows(rowIndex);
+        int lenght = getCateringTitleLenght(titleInfo);
+        int k = 0;
+        for (int i = 0; i < datas.size(); i++) {
+
+            Map<String, Object> data = JsonUtils.letJson(datas.get(i));
+            Row row = k >= rows.size() ? sheet.createRow(rowIndex + k ) :
+                    rows.get(k);
+            List<Cell> cells = getCells(row, lenght);
+            int cellIndex = getColumnIndex(0);
+            for (int j = 0; j < titleList.size(); j++) {
+                try {
+                    boolean wd = true;
+                    String title = titleList.get(j);
+                    CellValueWrapper wrapper = titleInfo.get(title);
+                    Cell cell = cells.get(cellIndex);
+                    int rowNum = row.getRowNum();
+                    int columnIndex = cell.getColumnIndex();
+                    String key = castTitle(title, cellIndex);
+                    key = key == null ? title : key;
+                    Object value = data.get(key);
+                    if(wrapper.isMerge()){
+                        cellIndex = cellIndex + wrapper.getWidth() - 1;
+                        wd = mergeCellSupervisor.mergeBySupervise(rowNum, rowNum + dataNumberOfrowsOccupied - 1,
+                                columnIndex, columnIndex + wrapper.getWidth() - 1, title, value);
+
+                    }else {
+                        wd = mergeCellSupervisor.supervise(rowNum, rowNum, columnIndex, columnIndex, title, value);
+                    }
+                    processCell(cell);
+                    CellType cellType = cell.getCellTypeEnum();
+                    if (value == null && cellType == CellType.FORMULA){
+                        continue;
+                    }
+                    if (!wd){
+                        continue;
+                    }
+                    ActiveExcelUtils.setCellValue(cell, value);
+                }finally {
+                    cellIndex ++;
+                }
+
+            }
+            k = k + dataNumberOfrowsOccupied - 1;
+            k++;
+        }
+
+    }
+
+    public ActiveSheet copy(String sheetName){
+        Sheet sheet = workbook.createSheet(sheetName);
+        ExcelCellCopy.copySheet(workbook, getSheet(), sheet, true);
+        return new ActiveSheet(wb -> wb.getSheet(sheetName), rowStart, rowLimit, columnStart, columnEnd, workbook);
     }
 
 }

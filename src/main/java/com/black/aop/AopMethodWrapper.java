@@ -16,6 +16,8 @@ import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.PointcutAdvisor;
 import org.springframework.core.Ordered;
+import org.springframework.util.AntPathMatcher;
+import org.springframework.util.PathMatcher;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
@@ -42,6 +44,8 @@ public class AopMethodWrapper implements PointcutAdvisor, Pointcut, MethodInterc
     private final MethodInterceptCondition methodInterceptCondition;
 
     private final String id;
+
+    private PathMatcher methodNameMatcher;
 
     public AopMethodWrapper(Method method, Object target,
                             ClassInterceptCondition classInterceptCondition,
@@ -209,6 +213,22 @@ public class AopMethodWrapper implements PointcutAdvisor, Pointcut, MethodInterc
             public boolean matches(Method method, Class<?> targetClass) {
                 if (!Modifier.isPublic(method.getModifiers()) && methodInterceptCondition.isOpenMethod()){
                     return false;
+                }
+                String[] methodNames = methodInterceptCondition.getMethodNames();
+                if (methodNames != null){
+                    if (methodNameMatcher == null){
+                        methodNameMatcher = new AntPathMatcher();
+                    }
+                    boolean save = false;
+                    for (String methodName : methodNames) {
+                        if (methodNameMatcher.match(methodName, method.getName())) {
+                            save = true;
+                            break;
+                        }
+                    }
+                    if (!save){
+                        return false;
+                    }
                 }
                 Class<?>[] supportReturnType = methodInterceptCondition.getSupportReturnType();
                 if (supportReturnType != null){

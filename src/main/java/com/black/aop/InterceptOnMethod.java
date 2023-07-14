@@ -25,4 +25,6 @@ public @interface InterceptOnMethod {
     boolean openMethod() default false;
 
     boolean annAnd() default false;
+
+    String[] methodNames() default {};
 }

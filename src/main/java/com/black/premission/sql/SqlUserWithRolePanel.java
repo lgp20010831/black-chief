@@ -7,8 +7,10 @@ import com.black.premission.RoleUserPanel;
 import com.black.premission.UserWithRole;
 import com.black.premission.collect.SqlCollector;
 import com.black.sql_v2.Sql;
+import com.black.utils.CollectionUtils;
 import com.black.utils.ServiceUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -32,6 +34,9 @@ public interface SqlUserWithRolePanel<P extends UserWithRole> extends RoleUserPa
         Map<String, String> condition = ServiceUtils.ofMap(GlobalVariablePool.RUP_USER_ID_NAME, userId);
         List<? extends UserWithRole> userWithRoles = Sql.query(GlobalVariablePool.RUP_MS_USER_ROLE_TABLE_NAME, condition).javaList(userWithRoleEntity);
         List<String> roleIds = StreamUtils.mapList(userWithRoles, uwr -> uwr.getString(GlobalVariablePool.RUP_ROLE_ID_NAME));
+        if (CollectionUtils.isEmpty(roleIds)){
+            return new ArrayList<>();
+        }
         Object roles = Sql.queryById(GlobalVariablePool.RUP_MS_ROLE_TABLE_NAME, roleIds).javaList(roleEntity);
         return (List<Role>) roles;
     }

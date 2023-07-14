@@ -4,6 +4,9 @@ public class GlobalServlet {
 
     static boolean eyeCatchingLog = true;
 
+    public static boolean isEyeCatchingLog() {
+        return eyeCatchingLog;
+    }
 
     public static void openEyeLog(){
         eyeCatchingLog = true;
