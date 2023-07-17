@@ -8,12 +8,12 @@ import com.black.core.util.StringUtils;
 import com.black.io.in.JHexByteArrayInputStream;
 import com.black.io.out.JHexByteArrayOutputStream;
 import com.black.throwable.IOSException;
+import com.black.utils.ServiceUtils;
 import com.black.utils.TypeUtils;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.ss.util.CellRangeAddress;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -36,6 +36,8 @@ public class ActiveSheet {
 
     private int titleIndex = 0;
 
+    private String filterNotNullTitle;
+
     private String distinctKey;
 
     private int titleMergeLenght = 0;
@@ -48,7 +50,7 @@ public class ActiveSheet {
 
     private String appendMergeTitleFlage = "-";
 
-    private final int rowStart, rowLimit,  columnStart,  columnEnd;
+    private int rowStart, rowLimit,  columnStart,  columnEnd;
 
     private Map<String, String> titleEscape;
 
@@ -98,10 +100,25 @@ public class ActiveSheet {
         titleAutoMerges = new HashSet<>();
         mergeCellSupervisor = new MergeCellSupervisor(this.sheet);
         mergeCellSupervisor.setSupervises(titleAutoMerges);
+        mergeCellSupervisor.setAutoProcessCell(true);
     }
 
     public void addTitleSupervise(String... ts){
         titleAutoMerges.addAll(Arrays.asList(ts));
+    }
+
+    public void mergeCell(int col, int row){
+        mergeCell(col, 1, row, 1);
+    }
+
+    public void mergeCell(int col, int colSize, int row){
+        mergeCell(col, colSize, row, 1);
+    }
+
+    public void mergeCell(int col, int colSize, int row, int rowSize){
+        Cell cell = getCell(row, col);
+        mergeCellSupervisor.removeInMergeCell(cell);
+        mergeCellSupervisor.merge(row, row + rowSize - 1, col, col + colSize - 1);
     }
 
     public void mergeRow(int row){
@@ -185,6 +202,11 @@ public class ActiveSheet {
         if (configCellStyle != null){
             configCellStyle.accept(cellStyle);
         }
+    }
+
+    public void setConfigCellStyle(Consumer<CellStyle> configCellStyle) {
+        this.configCellStyle = configCellStyle;
+        mergeCellSupervisor.setConfigCellStyle(configCellStyle);
     }
 
     public void writeCellValue(int row, String column, Object value){
@@ -362,6 +384,14 @@ public class ActiveSheet {
     }
 
 
+    protected void filterData(List<Map<String, Object>> datas){
+        if (filterNotNullTitle != null){
+            datas.removeIf(data -> {
+                return !StringUtils.hasText(ServiceUtils.getString(data, filterNotNullTitle));
+            });
+        }
+    }
+
     public List<Map<String, Object>> getDatas(){
         return getDatas(true);
     }
@@ -383,22 +413,26 @@ public class ActiveSheet {
             List<Cell> cells = getCells(row);
             Map<String, Object> data = new LinkedHashMap<>();
             int i = 0;
-            for (int j = 0; j < cells.size(); j++) {
-                Cell cell = cells.get(j);
-                if (i >= titleList.size()){
-                    continue loop;
+            try {
+                for (int j = 0; j < cells.size(); j++) {
+                    Cell cell = cells.get(j);
+                    if (i >= titleList.size()){
+                        continue loop;
+                    }
+                    String title = titleList.get(i++);
+                    CellValueWrapper wrapper = titleInfo.get(title);
+                    if (wrapper.isMerge()){
+                        j = j + wrapper.getWidth() -1;
+                    }
+                    Object cellValue = ActiveExcelUtils.getMergeCellValue(sheet, row.getRowNum(), cell);
+                    title = castTitle(title, cell.getColumnIndex());
+                    data.put(title, cellValue);
                 }
-                String title = titleList.get(i++);
-                CellValueWrapper wrapper = titleInfo.get(title);
-                if (wrapper.isMerge()){
-                    j = j + wrapper.getWidth() -1;
-                }
-                Object cellValue = ActiveExcelUtils.getMergeCellValue(sheet, row.getRowNum(), cell);
-                title = castTitle(title, cell.getColumnIndex());
-                data.put(title, cellValue);
+            }finally {
+                result.add(data);
             }
-            result.add(data);
         }
+        filterData(result);
         return result;
     }
 
@@ -432,67 +466,71 @@ public class ActiveSheet {
             int mergeHandlerHight = 0;
             boolean across = false;
             Map<String, Object> sonBody = null;
-            for (int j = 0; j < cells.size(); j++) {
-                Cell cell = cells.get(j);
-                if (i >= titleList.size()){
-                    continue loop;
-                }
-                String title = titleList.get(i++);
-                CellValueWrapper wrapper = titleInfo.get(title);
-                if (wrapper.isMerge()){
-                    j = j + wrapper.getWidth() -1;
-                    commonTitleHight = Math.max(wrapper.getHeight(), commonTitleHight);
-                }
-                CellValueWrapper mergeCellInfo = ActiveExcelUtils.getMergeCellInfo(sheet, row.getRowNum(), cell);
+            try {
+                for (int j = 0; j < cells.size(); j++) {
+                    Cell cell = cells.get(j);
+                    if (i >= titleList.size()){
+                        continue loop;
+                    }
+                    String title = titleList.get(i++);
+                    CellValueWrapper wrapper = titleInfo.get(title);
+                    if (wrapper.isMerge()){
+                        j = j + wrapper.getWidth() -1;
+                        commonTitleHight = Math.max(wrapper.getHeight(), commonTitleHight);
+                    }
+                    CellValueWrapper mergeCellInfo = ActiveExcelUtils.getMergeCellInfo(sheet, row.getRowNum(), cell);
 
-                int height = mergeCellInfo.getHeight();
-                maxHeight = Math.max(height, maxHeight);
-                if(mergeStartData == null){
-                    mergeStartData = data;
-                }
-                if (wrapper.getHeight() < commonTitleHight){
-                    across = true;
-                    int index = title.lastIndexOf(getAppendMergeTitleFlage());
-                    if (index != -1){
-                        String key = title.substring(0, index);
-                        title = title.substring(index + 1);
-                        List<Map<String, Object>> list = (List<Map<String, Object>>) mergeStartData.computeIfAbsent(key, k -> new ArrayList<>());
-                        if (sonBody == null){
-                            sonBody = new LinkedHashMap<>();
-                            list.add(sonBody);
+                    int height = mergeCellInfo.getHeight();
+                    maxHeight = Math.max(height, maxHeight);
+                    if(mergeStartData == null){
+                        mergeStartData = data;
+                    }
+                    if (wrapper.getHeight() < commonTitleHight){
+                        across = true;
+                        int index = title.lastIndexOf(getAppendMergeTitleFlage());
+                        if (index != -1){
+                            String key = title.substring(0, index);
+                            title = title.substring(index + 1);
+                            List<Map<String, Object>> list = (List<Map<String, Object>>) mergeStartData.computeIfAbsent(key, k -> new ArrayList<>());
+                            if (sonBody == null){
+                                sonBody = new LinkedHashMap<>();
+                                list.add(sonBody);
+                            }
                         }
                     }
-                }
 
-                Object cellValue = mergeCellInfo.getValue();
-                String castTitle = castTitle(title, cell.getColumnIndex());
-                if (sonBody != null){
-                    sonBody.put(castTitle == null ? title : castTitle, cellValue);
-                }else {
-                    data.put(castTitle == null ? title : castTitle, cellValue);
-                }
-                if (sonBody != null){
-                    mergeHandlerHight = Math.max(mergeCellInfo.getHeight(), mergeHandlerHight);
-                }
-            }
-            accumulation += mergeHandlerHight;
-            if (accumulation >= maxHeight){
-                mergeStartData = null;
-                accumulation = 0;
-            }
-            if (!across || mergeStartData == null){
-                boolean save = true;
-                if (getDistinctKey() != null){
-                    Object val = data.get(getDistinctKey());
-                    if (distinctSet.contains(val)){
-                        save = false;
+                    Object cellValue = mergeCellInfo.getValue();
+                    String castTitle = castTitle(title, cell.getColumnIndex());
+                    if (sonBody != null){
+                        sonBody.put(castTitle == null ? title : castTitle, cellValue);
+                    }else {
+                        data.put(castTitle == null ? title : castTitle, cellValue);
                     }
-                    distinctSet.add(val);
+                    if (sonBody != null){
+                        mergeHandlerHight = Math.max(mergeCellInfo.getHeight(), mergeHandlerHight);
+                    }
                 }
-                if (save)
-                    result.add(data);
+                accumulation += mergeHandlerHight;
+                if (accumulation >= maxHeight){
+                    mergeStartData = null;
+                    accumulation = 0;
+                }
+            }finally {
+                if (!across || mergeStartData == null){
+                    boolean save = true;
+                    if (getDistinctKey() != null){
+                        Object val = data.get(getDistinctKey());
+                        if (distinctSet.contains(val)){
+                            save = false;
+                        }
+                        distinctSet.add(val);
+                    }
+                    if (save)
+                        result.add(data);
+                }
             }
         }
+        filterData(result);
         return result;
     }
 
@@ -646,26 +684,27 @@ public class ActiveSheet {
             }
             boolean save = true;
             Map<String, Map<String, Object>> sonBodyMap = new LinkedHashMap<>();
-            //要根据设置的标准获取一条数据的标准
-            for (int k = 0; k < cells.size(); k++) {
-                Cell cell = cells.get(k);
-                if (t >= titleList.size()){
-                    continue loop;
-                }
-                String title = titleList.get(t++);
-                if (standardLine == null){
-                    standardLine = title;
-                }
+            try {
+                //要根据设置的标准获取一条数据的标准
+                for (int k = 0; k < cells.size(); k++) {
+                    Cell cell = cells.get(k);
+                    if (t >= titleList.size()){
+                        continue loop;
+                    }
+                    String title = titleList.get(t++);
+                    if (standardLine == null){
+                        standardLine = title;
+                    }
 
-                CellValueWrapper wrapper = titleInfo.get(title);
-                if (wrapper.isMerge()){
-                    k = k + wrapper.getWidth() -1;
-                }
-                CellValueWrapper cellWrapper = ActiveExcelUtils.getMergeCellInfo(sheet, row.getRowNum(), cell);
-                if(standardHeight == -1){
-                    standardHeight = cellWrapper.getHeight();
-                    standardTitleHeight = wrapper.getHeight();
-                }
+                    CellValueWrapper wrapper = titleInfo.get(title);
+                    if (wrapper.isMerge()){
+                        k = k + wrapper.getWidth() -1;
+                    }
+                    CellValueWrapper cellWrapper = ActiveExcelUtils.getMergeCellInfo(sheet, row.getRowNum(), cell);
+                    if(standardHeight == -1){
+                        standardHeight = cellWrapper.getHeight();
+                        standardTitleHeight = wrapper.getHeight();
+                    }
 
                 /*
                     3   2  read = 1
@@ -673,57 +712,59 @@ public class ActiveSheet {
                         2
                         确保不会重复读
                  */
-                if (cellWrapper.isMerge() && cellWrapper.getFirstRowIndex() != row.getRowNum()){
-                    continue;
-                }
-                String key = null;
-                List<Map<String, Object>> sonArray = null;
-                //获取当前标题高度
-                int currentTitleHeight = wrapper.getHeight();
-                if (currentTitleHeight < standardTitleHeight){
-                    int index = title.lastIndexOf(getAppendMergeTitleFlage());
-                    if (index != -1){
-                        key = title.substring(0, index);
-                        title = title.substring(index + 1);
-                        sonArray = (List<Map<String, Object>>) current.computeIfAbsent(key, ky -> new ArrayList<>());
+                    if (cellWrapper.isMerge() && cellWrapper.getFirstRowIndex() != row.getRowNum()){
+                        continue;
+                    }
+                    String key = null;
+                    List<Map<String, Object>> sonArray = null;
+                    //获取当前标题高度
+                    int currentTitleHeight = wrapper.getHeight();
+                    if (currentTitleHeight < standardTitleHeight){
+                        int index = title.lastIndexOf(getAppendMergeTitleFlage());
+                        if (index != -1){
+                            key = title.substring(0, index);
+                            title = title.substring(index + 1);
+                            sonArray = (List<Map<String, Object>>) current.computeIfAbsent(key, ky -> new ArrayList<>());
+
+                        }
+
+                    }
+                    Object cellValue = cellWrapper.getValue();
+                    if (filterNullStandard && title.equalsIgnoreCase(standardLine)){
+                        if (!StringUtils.hasText(TypeUtils.castToString(cellValue))){
+                            save = false;
+                        }
+                    }
+
+                    String castTitle = castTitle(title, cell.getColumnIndex());
+                    String titleKey = castTitle == null ? title : castTitle;
+                    if (sonArray != null){
+                        Map<String, Object> map = sonBodyMap.computeIfAbsent(key, ky -> new LinkedHashMap<>());
+                        map.put(titleKey, cellValue);
+                        if (!sonArray.contains(map)){
+                            sonArray.add(map);
+                        }
+                    }else {
+                        current.put(titleKey, cellValue);
 
                     }
 
                 }
-                Object cellValue = cellWrapper.getValue();
-                if (filterNullStandard && title.equalsIgnoreCase(standardLine)){
-                    if (!StringUtils.hasText(TypeUtils.castToString(cellValue))){
-                        save = false;
+            }finally {
+                //每次读完单元格, 将 readHeight + 1 表示读完一行
+                readHeight++;
+                if(readHeight >= standardHeight){
+                    if (save){
+                        //表示读完标准行高, 可以将数据收集起来了
+                        result.add(current);
                     }
+                    current = null;
+                    readHeight = 0;
+                    standardHeight = -1;
                 }
-
-                String castTitle = castTitle(title, cell.getColumnIndex());
-                String titleKey = castTitle == null ? title : castTitle;
-                if (sonArray != null){
-                    Map<String, Object> map = sonBodyMap.computeIfAbsent(key, ky -> new LinkedHashMap<>());
-                    map.put(titleKey, cellValue);
-                    if (!sonArray.contains(map)){
-                        sonArray.add(map);
-                    }
-                }else {
-                    current.put(titleKey, cellValue);
-
-                }
-
             }
-            //每次读完单元格, 将 readHeight + 1 表示读完一行
-            readHeight++;
-            if(readHeight >= standardHeight){
-                if (save){
-                    //表示读完标准行高, 可以将数据收集起来了
-                    result.add(current);
-                }
-                current = null;
-                readHeight = 0;
-                standardHeight = -1;
-            }
-
         }
+        filterData(result);
         return result;
     }
 
@@ -897,7 +938,20 @@ public class ActiveSheet {
     public ActiveSheet copy(String sheetName){
         Sheet sheet = workbook.createSheet(sheetName);
         ExcelCellCopy.copySheet(workbook, getSheet(), sheet, true);
-        return new ActiveSheet(wb -> wb.getSheet(sheetName), rowStart, rowLimit, columnStart, columnEnd, workbook);
+        ActiveSheet newSheet = new ActiveSheet(wb -> wb.getSheet(sheetName), rowStart, rowLimit, columnStart, columnEnd, workbook);
+        newSheet.setTitleEscape(titleEscape);
+        newSheet.setTitleIndex(titleIndex);
+        newSheet.setTrimTitle(trimTitle);
+        newSheet.setAppendMergeTitle(appendMergeTitle);
+        newSheet.setAppendMergeTitleFlage(appendMergeTitleFlage);
+        newSheet.setDataNumberOfrowsOccupied(dataNumberOfrowsOccupied);
+        newSheet.setConfigCellStyle(configCellStyle);
+        newSheet.setDistinctKey(distinctKey);
+        newSheet.setFilterNotNullTitle(filterNotNullTitle);
+        newSheet.setInvokeTitleMethod(invokeTitleMethod);
+        newSheet.setStandardLine(standardLine);
+        newSheet.setTitleMergeLenght(titleMergeLenght);
+        return newSheet;
     }
 
 }

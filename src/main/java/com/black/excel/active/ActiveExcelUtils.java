@@ -29,7 +29,7 @@ public class ActiveExcelUtils {
             num *= Math.pow(26, i);
             result += num;
         }
-        return result;
+        return result > 0 ? result - 1 : result;
     }
 
     /**

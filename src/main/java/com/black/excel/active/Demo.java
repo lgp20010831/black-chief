@@ -1,6 +1,7 @@
 package com.black.excel.active;
 
 import com.alibaba.fastjson.JSONObject;
+import com.black.core.query.ClassWrapper;
 import com.black.core.sql.HumpColumnConvertHandler;
 import com.black.core.sql.code.DefaultDataSourceBuilder;
 import com.black.core.util.Av0;
@@ -33,9 +34,15 @@ public class Demo {
         environment.registerKeyAndValue(SqlType.INSERT_SET, "update_time", (Supplier)() -> com.black.utils.ServiceUtils.now());
     }
 
+    static void readStrust(){
+        ClassWrapper<ActiveSheet> classWrapper = ClassWrapper.get(ActiveSheet.class);
+        System.out.println(classWrapper);
+    }
+
     public static void main(String[] args) {
-        prepare();
-        readSheet2();
+//        prepare();
+//        readSheet2();
+        readStrust();
     }
 
 
